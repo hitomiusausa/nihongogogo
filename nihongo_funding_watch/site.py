@@ -318,7 +318,7 @@ def render_site(
 <body>
   <header>
     <div class="top">
-      <h1>日本語教育 資金・政策ウォッチ</h1>
+      <h1>日本語教育<br>資金・政策ウォッチ</h1>
       <p class="meta">最終更新: {escape(now.strftime("%Y-%m-%d %H:%M:%S %Z"))} / 対象期間: 直近{since_days}日</p>
       <div class="stats">
         <div class="stat"><strong>{len(visible_items)}</strong>表示件数</div>

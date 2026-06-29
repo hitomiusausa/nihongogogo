@@ -2,6 +2,8 @@ import unittest
 
 from nihongo_funding_watch.config import PageSource
 from nihongo_funding_watch.fetchers import (
+    parse_kp2mi_gtog_japan,
+    parse_dolab_static,
     parse_japanese_date,
     parse_mext_boshu,
     parse_municipality_focus,
@@ -66,6 +68,60 @@ class FetchersTest(unittest.TestCase):
                 "令和8年度外国人材受入支援補助金",
             ],
         )
+
+    def test_parse_kp2mi_gtog_japan_reads_api_rows_with_country_summary(self):
+        source = PageSource(
+            name="インドネシア KP2MI/BP2MI G to G Japan",
+            url="https://kp2mi.go.id/gtog-data/jepang/Pengumuman?draw=1&start=0&length=20",
+            allow_url_patterns=[],
+            parser="kp2mi_gtog_japan",
+            country="インドネシア",
+        )
+        body = b"""
+        {
+          "data": [{
+            "judul": "<a href=\\"/gtog-detail/jepang/sample\\">PENGUMUMAN UJIAN BAHASA JEPANG DASAR PROGRAM G TO G JEPANG</a>",
+            "gtgjepang": "<p>Calon PMI kandidat nurse dan careworker mengikuti ujian bahasa Jepang.</p>",
+            "tanggal": "22 June 2026",
+            "slug": "sample"
+          }]
+        }
+        """
+
+        items = parse_kp2mi_gtog_japan(body, source)
+
+        self.assertEqual(len(items), 1)
+        self.assertEqual(items[0].country, "インドネシア")
+        self.assertEqual(items[0].published_at.isoformat(), "2026-06-22T00:00:00+00:00")
+        self.assertIn("日本語概要", items[0].summary)
+        self.assertIn("G to G 日本派遣", items[0].summary)
+
+    def test_parse_dolab_static_uses_content_heading_not_header_logo(self):
+        source = PageSource(
+            name="ベトナム DOLAB-JICA 特定技能情報",
+            url="https://vieclamngoainuoc.dolab.gov.vn/loai-hinh/SSW",
+            allow_url_patterns=[],
+            parser="dolab_static",
+            country="ベトナム",
+        )
+        body = """
+        <html><head><title>DOLAB-JICA-Lao động kỹ năng đặc định</title></head>
+        <body>
+        <header><h3>DOLAB-JICA</h3><script>window.dataLayer = [];</script></header>
+        <section>
+          <h3>THÔNG TIN CHO NGƯỜI LAO ĐỘNG ĐI LÀM VIỆC TẠI THỊ TRƯỜNG NHẬT BẢN</h3>
+          <p>Chương trình lao động kỹ năng đặc định, thực tập kỹ năng, điều dưỡng hộ lý.</p>
+          <p>Có chứng chỉ tiếng Nhật N4 JLPT hoặc JFT Basic.</p>
+        </section>
+        </body></html>
+        """.encode()
+
+        items = parse_dolab_static(body, source)
+
+        self.assertEqual(items[0].title, "THÔNG TIN CHO NGƯỜI LAO ĐỘNG ĐI LÀM VIỆC TẠI THỊ TRƯỜNG NHẬT BẢN")
+        self.assertEqual(items[0].country, "ベトナム")
+        self.assertIn("JFT-Basic/JLPT", items[0].summary)
+        self.assertNotIn("window.dataLayer", items[0].summary)
 
 
 if __name__ == "__main__":

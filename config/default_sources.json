@@ -36,45 +36,91 @@
       "query": "Japan specified skilled worker Philippines OR Filipino workers Japan",
       "hl": "en-PH",
       "gl": "PH",
-      "ceid": "PH:en"
+      "ceid": "PH:en",
+      "country": "フィリピン"
     },
     {
       "name": "Philippines: care workers",
       "query": "OFW Japan caregiver OR nursing care Japan Japanese language",
       "hl": "en-PH",
       "gl": "PH",
-      "ceid": "PH:en"
+      "ceid": "PH:en",
+      "country": "フィリピン"
     },
     {
       "name": "Indonesia: Japan workers",
       "query": "pekerja migran Jepang keterampilan khusus OR magang Jepang",
       "hl": "id",
       "gl": "ID",
-      "ceid": "ID:id"
+      "ceid": "ID:id",
+      "country": "インドネシア"
     },
     {
       "name": "Indonesia: Japanese language",
       "query": "bahasa Jepang pekerja Indonesia Jepang perawat caregiver",
       "hl": "id",
       "gl": "ID",
-      "ceid": "ID:id"
+      "ceid": "ID:id",
+      "country": "インドネシア"
     },
     {
       "name": "Vietnam: Japan workers",
       "query": "lao động Việt Nam Nhật Bản kỹ năng đặc định OR thực tập sinh Nhật Bản",
       "hl": "vi",
       "gl": "VN",
-      "ceid": "VN:vi"
+      "ceid": "VN:vi",
+      "country": "ベトナム"
     },
     {
       "name": "Vietnam: Japanese language",
       "query": "tiếng Nhật lao động Nhật Bản điều dưỡng hộ lý",
       "hl": "vi",
       "gl": "VN",
-      "ceid": "VN:vi"
+      "ceid": "VN:vi",
+      "country": "ベトナム"
     }
   ],
   "page_sources": [
+    {
+      "name": "フィリピン DMW/MWO Osaka DMW Issuances",
+      "url": "https://mwo-osaka.dmw.gov.ph/category/dmw-issuances/feed/",
+      "allow_url_patterns": [
+        "^https://mwo-osaka\\.dmw\\.gov\\.ph/.+"
+      ],
+      "max_links": 10,
+      "parser": "wordpress_rss",
+      "country": "フィリピン"
+    },
+    {
+      "name": "フィリピン MWO Osaka Issuances",
+      "url": "https://mwo-osaka.dmw.gov.ph/category/mwo-osaka-issuances/feed/",
+      "allow_url_patterns": [
+        "^https://mwo-osaka\\.dmw\\.gov\\.ph/.+"
+      ],
+      "max_links": 12,
+      "parser": "wordpress_rss",
+      "country": "フィリピン"
+    },
+    {
+      "name": "インドネシア KP2MI/BP2MI G to G Japan",
+      "url": "https://kp2mi.go.id/gtog-data/jepang/Pengumuman?draw=1&start=0&length=20",
+      "allow_url_patterns": [
+        "^https://kp2mi\\.go\\.id/gtog-detail/jepang/.+"
+      ],
+      "max_links": 20,
+      "parser": "kp2mi_gtog_japan",
+      "country": "インドネシア"
+    },
+    {
+      "name": "ベトナム DOLAB-JICA 特定技能情報",
+      "url": "https://vieclamngoainuoc.dolab.gov.vn/loai-hinh/SSW",
+      "allow_url_patterns": [
+        "^https://vieclamngoainuoc\\.dolab\\.gov\\.vn/.+"
+      ],
+      "max_links": 1,
+      "parser": "dolab_static",
+      "country": "ベトナム"
+    },
     {
       "name": "文化庁 公募情報",
       "url": "https://www.bunka.go.jp/shinsei_boshu/kobo/",
@@ -287,11 +333,16 @@
       "nursing care",
       "OFW",
       "migrant worker",
+      "G to G",
+      "EPA",
+      "nurse",
       "Jepang",
       "bahasa Jepang",
+      "ujian bahasa Jepang",
       "pekerja migran",
       "pekerja",
       "pemagangan",
+      "calon PMI",
       "keterampilan khusus",
       "Nhật Bản",
       "tiếng Nhật",
@@ -345,11 +396,16 @@
       "nursing care": 3,
       "OFW": 3,
       "migrant worker": 3,
+      "G to G": 4,
+      "EPA": 3,
+      "nurse": 3,
       "Jepang": 1,
     "bahasa Jepang": 3,
+    "ujian bahasa Jepang": 4,
     "pekerja migran": 4,
     "pekerja": 2,
     "pemagangan": 3,
+    "calon PMI": 3,
     "keterampilan khusus": 4,
     "Nhật Bản": 1,
     "tiếng Nhật": 3,

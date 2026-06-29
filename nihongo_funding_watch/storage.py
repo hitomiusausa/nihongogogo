@@ -33,6 +33,7 @@ class StoredItem:
     score: int
     matched_keywords: list[str]
     deadline_at: str | None = None
+    country: str = ""
 
 
 class WatchStore:
@@ -75,6 +76,8 @@ class WatchStore:
                 db.execute("ALTER TABLE items ADD COLUMN deadline_at TEXT")
             if not column_exists(db, "items", "title_key"):
                 db.execute("ALTER TABLE items ADD COLUMN title_key TEXT")
+            if not column_exists(db, "items", "country"):
+                db.execute("ALTER TABLE items ADD COLUMN country TEXT NOT NULL DEFAULT ''")
             db.execute(
                 "CREATE INDEX IF NOT EXISTS idx_items_deadline_at ON items(deadline_at)"
             )
@@ -114,7 +117,8 @@ class WatchStore:
                         score=MAX(score, ?),
                         matched_keywords_json=?,
                         deadline_at=COALESCE(?, deadline_at),
-                        title_key=?
+                        title_key=?,
+                        country=?
                     WHERE id=?
                     """,
                     (
@@ -130,6 +134,7 @@ class WatchStore:
                         json.dumps(scored.matched_keywords, ensure_ascii=False),
                         scored.deadline_at,
                         item_title_key,
+                        item.country,
                         existing["id"],
                     ),
                 )
@@ -140,9 +145,9 @@ class WatchStore:
                 INSERT INTO items (
                     title, url, source_name, source_type, published_at, fetched_at,
                     summary, primary_category, categories_json, score,
-                    matched_keywords_json, deadline_at, title_key
+                    matched_keywords_json, deadline_at, title_key, country
                 )
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 ON CONFLICT(url) DO UPDATE SET
                     title=excluded.title,
                     source_name=excluded.source_name,
@@ -154,7 +159,8 @@ class WatchStore:
                     score=MAX(items.score, excluded.score),
                     matched_keywords_json=excluded.matched_keywords_json,
                     deadline_at=COALESCE(excluded.deadline_at, items.deadline_at),
-                    title_key=excluded.title_key
+                    title_key=excluded.title_key,
+                    country=excluded.country
                 """,
                 (
                     item.title,
@@ -170,6 +176,7 @@ class WatchStore:
                     json.dumps(scored.matched_keywords, ensure_ascii=False),
                     scored.deadline_at,
                     item_title_key,
+                    item.country,
                 ),
             )
             return True
@@ -231,6 +238,7 @@ def row_to_item(row: sqlite3.Row) -> StoredItem:
         score=int(row["score"]),
         matched_keywords=json.loads(row["matched_keywords_json"]),
         deadline_at=row["deadline_at"],
+        country=str(row["country"]) if "country" in row.keys() else "",
     )
 
 

@@ -18,6 +18,7 @@ class StorageTest(unittest.TestCase):
                     url="https://example.com/a",
                     source_name="test",
                     source_type="test",
+                    country="インドネシア",
                 ),
                 score=9,
                 categories=["公募・補助金・プロポーザル"],
@@ -31,6 +32,7 @@ class StorageTest(unittest.TestCase):
             items = store.all_items()
             self.assertEqual(len(items), 1)
             self.assertEqual(items[0].score, 9)
+            self.assertEqual(items[0].country, "インドネシア")
 
 
 if __name__ == "__main__":

@@ -103,7 +103,7 @@ def render_item(item: StoredItem, config: WatchConfig, *, compact: bool = False)
 
     lines = [
         f"- [{item.title}]({item.url})",
-        f"  - 分類: {item.primary_category} / スコア: {item.score} / 出典: {item.source_name}",
+        f"  - 分類: {item.primary_category} / 国: {item.country or '-'} / スコア: {item.score} / 出典: {item.source_name}",
         f"  - 公開日: {published} / ページ反映日: {reflected} / 締切: {deadline_text} / キーワード: {keywords}",
     ]
     if not compact and item.summary:

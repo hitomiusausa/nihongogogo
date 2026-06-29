@@ -224,6 +224,7 @@ def render_site(
     .badge.cat-education {{ color: #25556a; background: rgba(167, 216, 240, 0.36); border-color: var(--blue); }}
     .badge.cat-visa {{ color: #286337; background: rgba(162, 213, 171, 0.38); border-color: var(--green); }}
     .badge.cat-other {{ color: #6f5a00; background: rgba(252, 231, 124, 0.46); border-color: var(--yellow); }}
+    .badge.country {{ color: #4b3b7a; background: rgba(244, 198, 195, 0.42); border-color: var(--pink); font-weight: 700; }}
     .angle {{ margin: 8px 0 0; font-size: 13px; color: #315b35; border-top: 1px solid var(--line); padding-top: 8px; }}
     .summary {{ color: #3c4043; font-size: 13px; margin: 8px 0 0; }}
     .tag {{
@@ -370,6 +371,7 @@ def render_card(config: WatchConfig, item: StoredItem, *, priority: bool = False
     )
     angle = config.sales_angles.get(item.primary_category, "")
     summary = truncate(item.summary, 180)
+    country_badge = f'<span class="badge country">{escape(item.country)}</span>' if item.country else ""
     deadline = parse_iso_date(item.deadline_at)
     remaining = days_until(deadline)
     is_urgent = remaining is not None and 0 <= remaining <= 30
@@ -390,6 +392,7 @@ def render_card(config: WatchConfig, item: StoredItem, *, priority: bool = False
         [
             item.title,
             item.source_name,
+            item.country,
             item.primary_category,
             item.summary,
             " ".join(item.matched_keywords),
@@ -400,6 +403,7 @@ def render_card(config: WatchConfig, item: StoredItem, *, priority: bool = False
   <p class="title"><a href="{escape(item.url)}" target="_blank" rel="noopener noreferrer">{escape(item.title)}</a></p>
   <div class="row">
     <span class="badge {category_class}">{escape(item.primary_category)}</span>
+    {country_badge}
     <span class="badge">スコア {item.score}</span>
     {deadline_badge}
   </div>

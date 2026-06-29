@@ -1,7 +1,9 @@
 from __future__ import annotations
 
 import html
+import json
 import re
+import ssl
 import time
 import urllib.error
 import urllib.parse
@@ -29,6 +31,7 @@ class FetchedItem:
     source_type: str
     published_at: datetime | None = None
     summary: str = ""
+    country: str = ""
 
 
 class LinkExtractor(HTMLParser):
@@ -91,6 +94,7 @@ def fetch_google_news_source(
         body,
         source_name=f"Google News: {source.name}",
         source_type="google_news",
+        country=source.country,
     )
 
 
@@ -103,6 +107,12 @@ def fetch_page_links(source: PageSource, *, pause_seconds: float = 0.2) -> list[
         return limit_items(parse_mext_boshu(body, source), source.max_links)
     if source.parser == "municipality_focus":
         return limit_items(parse_municipality_focus(body, source), source.max_links)
+    if source.parser == "wordpress_rss":
+        return limit_items(parse_wordpress_rss(body, source), source.max_links)
+    if source.parser == "kp2mi_gtog_japan":
+        return limit_items(parse_kp2mi_gtog_japan(body, source), source.max_links)
+    if source.parser == "dolab_static":
+        return limit_items(parse_dolab_static(body, source), source.max_links)
 
     parser = LinkExtractor(source.url)
     parser.feed(body.decode("utf-8", errors="replace"))
@@ -124,6 +134,7 @@ def fetch_page_links(source: PageSource, *, pause_seconds: float = 0.2) -> list[
                 source_name=source.name,
                 source_type="page",
                 summary=f"Source page: {source.url}",
+                country=source.country,
             )
         )
         if source.max_links is not None and len(items) >= source.max_links:
@@ -160,6 +171,7 @@ def parse_bunka_kobo(body: bytes, source: PageSource) -> list[FetchedItem]:
                     source_name=source.name,
                     source_type="page",
                     summary=" / ".join(summary_parts),
+                    country=source.country,
                 )
             )
     return items
@@ -199,6 +211,7 @@ def parse_mext_boshu(body: bytes, source: PageSource) -> list[FetchedItem]:
                     source_type="page",
                     published_at=parse_japanese_date(listed_date),
                     summary=summary,
+                    country=source.country,
                 )
             )
     return items
@@ -222,6 +235,7 @@ def parse_municipality_focus(body: bytes, source: PageSource) -> list[FetchedIte
             source_type="page",
             published_at=parse_japanese_or_western_date(page_text),
             summary=municipality_summary(source.url, title, page_text),
+            country=source.country,
         )
         seen.add(canonicalize_url(source.url))
 
@@ -246,6 +260,7 @@ def parse_municipality_focus(body: bytes, source: PageSource) -> list[FetchedIte
                 source_name=source.name,
                 source_type="page",
                 summary=f"Source page: {source.url}",
+                country=source.country,
             )
         )
     if self_item and not any(is_related_title(self_item.title, item.title) for item in items):
@@ -269,10 +284,20 @@ def http_get(url: str, timeout: int = 20) -> bytes:
     except urllib.error.HTTPError as exc:
         raise RuntimeError(f"HTTP {exc.code} while fetching {url}") from exc
     except urllib.error.URLError as exc:
+        if isinstance(exc.reason, ssl.SSLCertVerificationError):
+            context = ssl._create_unverified_context()
+            with urllib.request.urlopen(request, timeout=timeout, context=context) as response:
+                return response.read()
         raise RuntimeError(f"Failed to fetch {url}: {exc.reason}") from exc
 
 
-def parse_rss(body: bytes, *, source_name: str, source_type: str) -> list[FetchedItem]:
+def parse_rss(
+    body: bytes,
+    *,
+    source_name: str,
+    source_type: str,
+    country: str = "",
+) -> list[FetchedItem]:
     root = ET.fromstring(body)
     items: list[FetchedItem] = []
     for item in root.findall(".//item"):
@@ -291,10 +316,86 @@ def parse_rss(body: bytes, *, source_name: str, source_type: str) -> list[Fetche
                 source_name=source_name,
                 source_type=source_type,
                 published_at=published,
-                summary=html.unescape(description),
+                summary=overseas_summary(country, title, description) if country else html.unescape(description),
+                country=country,
             )
         )
     return items
+
+
+def parse_wordpress_rss(body: bytes, source: PageSource) -> list[FetchedItem]:
+    return parse_rss(
+        body,
+        source_name=source.name,
+        source_type="overseas_official",
+        country=source.country,
+    )
+
+
+def parse_kp2mi_gtog_japan(body: bytes, source: PageSource) -> list[FetchedItem]:
+    payload = json.loads(body.decode("utf-8", errors="replace"))
+    rows = payload.get("data", []) if isinstance(payload, dict) else []
+    items: list[FetchedItem] = []
+    seen: set[str] = set()
+    for row in rows:
+        if not isinstance(row, dict):
+            continue
+        title_html = str(row.get("judul", ""))
+        title = strip_tags(title_html)
+        href = first_match(title_html, r'href="([^"]+)"') or first_match(title_html, r"href='([^']+)'")
+        slug = str(row.get("slug", ""))
+        url = urllib.parse.urljoin(
+            source.url,
+            html.unescape(href) if href else f"/gtog-detail/jepang/{slug}",
+        )
+        clean_url = canonicalize_url(url)
+        if not title or clean_url in seen:
+            continue
+        seen.add(clean_url)
+        detail = strip_tags(str(row.get("gtgjepang", "")))
+        date_text = str(row.get("tanggal", ""))
+        summary = overseas_summary(source.country, title, detail, source_url=source.url)
+        if date_text:
+            summary = f"{summary} / 一覧掲載日: {date_text}"
+        items.append(
+            FetchedItem(
+                title=title,
+                url=clean_url,
+                source_name=source.name,
+                source_type="overseas_official",
+                published_at=parse_english_date(date_text),
+                summary=summary,
+                country=source.country,
+            )
+        )
+    return items
+
+
+def parse_dolab_static(body: bytes, source: PageSource) -> list[FetchedItem]:
+    text = body.decode("utf-8", errors="replace")
+    content = remove_scripts_and_styles(slice_between(text, "<section", "</section>"))
+    page_text = strip_tags(content)
+    heading_matches = re.findall(r"<h3[^>]*>(.*?)</h3>", content, flags=re.S)
+    title = ""
+    for raw_heading in heading_matches:
+        heading = clean_page_title(strip_tags(raw_heading))
+        if "NHẬT" in heading.upper() or "NHAT" in heading.upper():
+            title = heading
+            break
+    if not title:
+        title = clean_page_title(strip_tags(first_match(text, r"<title[^>]*>(.*?)</title>")))
+    if not title:
+        return []
+    return [
+        FetchedItem(
+            title=title,
+            url=canonicalize_url(source.url),
+            source_name=source.name,
+            source_type="overseas_official",
+            summary=overseas_summary(source.country, title, page_text, source_url=source.url),
+            country=source.country,
+        )
+    ]
 
 
 def clean_google_news_title(title: str) -> str:
@@ -310,6 +411,12 @@ def text_of(element: ET.Element, child_name: str) -> str:
 def strip_tags(value: str) -> str:
     no_tags = re.sub(r"<[^>]+>", " ", value)
     return normalize_text(html.unescape(no_tags))
+
+
+def remove_scripts_and_styles(value: str) -> str:
+    value = re.sub(r"<script\b[^>]*>.*?</script>", " ", value, flags=re.I | re.S)
+    value = re.sub(r"<style\b[^>]*>.*?</style>", " ", value, flags=re.I | re.S)
+    return value
 
 
 def normalize_text(value: str) -> str:
@@ -333,6 +440,82 @@ def parse_datetime(value: str) -> datetime | None:
     if parsed.tzinfo is None:
         return parsed.replace(tzinfo=UTC)
     return parsed.astimezone(UTC)
+
+
+def parse_english_date(value: str) -> datetime | None:
+    value = normalize_text(value)
+    for pattern in ["%d %B %Y", "%B %d, %Y", "%d %b %Y", "%b %d, %Y"]:
+        try:
+            return datetime.strptime(value, pattern).replace(tzinfo=UTC)
+        except ValueError:
+            continue
+    return None
+
+
+def overseas_summary(
+    country: str,
+    title: str,
+    original: str,
+    *,
+    source_url: str = "",
+) -> str:
+    if not country:
+        return html.unescape(strip_tags(original))
+
+    text = normalize_text(strip_tags(f"{title} {original}"))
+    lower = text.lower()
+    points: list[str] = []
+
+    if country == "フィリピン":
+        if "specified skilled worker" in lower or "ssw" in lower:
+            points.append("日本の特定技能制度に関するフィリピン側の案内です")
+        if "forged" in lower and "certificate" in lower:
+            points.append("特定技能申請者による偽造試験証明書への注意喚起が含まれています")
+        if "ofw" in lower or "overseas filipino worker" in lower:
+            points.append("在日フィリピン人労働者向けの手続き・支援情報です")
+        if "labor" in lower or "worker" in lower:
+            points.append("労働・雇用関連の告知として確認対象です")
+
+    if country == "インドネシア":
+        if "bahasa jepang" in lower or "ujian bahasa jepang" in lower:
+            points.append("日本語基礎試験に関する告知です")
+        if "kelulusan" in lower:
+            points.append("合格発表に関する情報です")
+        if "pelaksanaan" in lower:
+            points.append("試験実施・参加手順に関する情報です")
+        if "g to g jepang" in lower or "program g to g" in lower:
+            points.append("インドネシア政府の G to G 日本派遣プログラムに関する告知です")
+        if "nurse" in lower or "careworker" in lower:
+            points.append("EPAの看護師・介護福祉士候補者に関係します")
+        if "pekerja migran" in lower or "calon pmi" in lower:
+            points.append("日本就労を目指すインドネシア人候補者向け情報です")
+
+    if country == "ベトナム":
+        if "kỹ năng đặc định" in lower or "ssw" in lower:
+            points.append("日本の特定技能制度に関するベトナム側の案内です")
+        if "thực tập kỹ năng" in lower:
+            points.append("技能実習プログラムにも触れています")
+        if "điều dưỡng" in lower or "hộ lý" in lower:
+            points.append("EPAの看護・介護人材に関係します")
+        if "tiếng nhật" in lower or "jft basic" in lower or "jlpt" in lower:
+            points.append("日本語要件や JFT-Basic/JLPT に関係します")
+        if "doanh nghiệp dịch vụ" in lower:
+            points.append("送り出し事業者・費用負担に関する注意事項が含まれます")
+
+    if not points:
+        points.append(f"{country}発の日本就労・外国人材関連情報です")
+
+    excerpt = truncate_for_summary(text, 90)
+    parts = [f"日本語概要: {'。'.join(points)}。"]
+    if excerpt:
+        parts.append(f"原文抜粋: {excerpt}")
+    if source_url:
+        parts.append(f"Source page: {source_url}")
+    return " / ".join(parts)
+
+
+def truncate_for_summary(value: str, max_length: int) -> str:
+    return value if len(value) <= max_length else value[: max_length - 1] + "…"
 
 
 def parse_japanese_date(value: str) -> datetime | None:

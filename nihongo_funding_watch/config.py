@@ -13,6 +13,7 @@ class GoogleNewsSource:
     hl: str = "ja"
     gl: str = "JP"
     ceid: str = "JP:ja"
+    country: str = ""
 
 
 @dataclass(frozen=True)
@@ -22,6 +23,7 @@ class PageSource:
     allow_url_patterns: list[str]
     max_links: int | None = None
     parser: str = "links"
+    country: str = ""
 
 
 @dataclass(frozen=True)
@@ -50,6 +52,7 @@ def load_config(path: Path) -> WatchConfig:
                 hl=str(item.get("hl", "ja")),
                 gl=str(item.get("gl", "JP")),
                 ceid=str(item.get("ceid", "JP:ja")),
+                country=str(item.get("country", "")),
             )
             for item in raw.get("google_news_sources", [])
         ],
@@ -66,6 +69,7 @@ def load_config(path: Path) -> WatchConfig:
                     else None
                 ),
                 parser=str(item.get("parser", "links")),
+                country=str(item.get("country", "")),
             )
             for item in raw.get("page_sources", [])
         ],

@@ -223,7 +223,7 @@ def render_site(
     article.cat-education {{ border-top: 4px solid var(--education); }}
     article.cat-visa {{ border-top: 4px solid var(--visa); }}
     article.cat-other {{ border-top: 4px solid var(--other); }}
-    a {{ color: #064f85; text-decoration-thickness: 1px; text-underline-offset: 2px; }}
+    a {{ color: #064f85; text-decoration-thickness: 1px; text-underline-offset: 2px; overflow-wrap: anywhere; word-break: break-word; }}
     .title {{ font-weight: 700; font-size: 15px; margin: 0 0 8px; overflow-wrap: anywhere; }}
     .item-meta {{ color: var(--muted); font-size: 13px; margin: 0 0 8px; }}
     .row {{ display: flex; gap: 6px; flex-wrap: wrap; margin: 0 0 8px; align-items: center; }}
@@ -248,7 +248,7 @@ def render_site(
     .badge.cat-other {{ color: #6f5a00; background: rgba(252, 231, 124, 0.46); border-color: var(--yellow); }}
     .badge.country {{ color: #4b3b7a; background: rgba(244, 198, 195, 0.42); border-color: var(--pink); font-weight: 700; }}
     .angle {{ margin: 8px 0 0; font-size: 13px; color: #315b35; border-top: 1px solid var(--line); padding-top: 8px; }}
-    .summary {{ color: #3c4043; font-size: 13px; margin: 8px 0 0; }}
+    .summary {{ color: #3c4043; font-size: 13px; margin: 8px 0 0; overflow-wrap: anywhere; }}
     .tag {{
       display: inline-block;
       border: 1px solid var(--line);

@@ -7,6 +7,15 @@ from typing import Any
 
 
 @dataclass(frozen=True)
+class GoogleNewsSource:
+    name: str
+    query: str
+    hl: str = "ja"
+    gl: str = "JP"
+    ceid: str = "JP:ja"
+
+
+@dataclass(frozen=True)
 class PageSource:
     name: str
     url: str
@@ -19,6 +28,7 @@ class PageSource:
 class WatchConfig:
     minimum_score: int
     google_news_queries: list[str]
+    google_news_sources: list[GoogleNewsSource]
     page_sources: list[PageSource]
     exclude_urls: list[str]
     exclude_title_patterns: list[str]
@@ -33,6 +43,16 @@ def load_config(path: Path) -> WatchConfig:
     return WatchConfig(
         minimum_score=int(raw.get("minimum_score", 3)),
         google_news_queries=list(raw.get("google_news_queries", [])),
+        google_news_sources=[
+            GoogleNewsSource(
+                name=str(item.get("name", item["query"])),
+                query=str(item["query"]),
+                hl=str(item.get("hl", "ja")),
+                gl=str(item.get("gl", "JP")),
+                ceid=str(item.get("ceid", "JP:ja")),
+            )
+            for item in raw.get("google_news_sources", [])
+        ],
         page_sources=[
             PageSource(
                 name=item["name"],
@@ -75,6 +95,7 @@ def config_to_jsonable(config: WatchConfig) -> dict[str, Any]:
     return {
         "minimum_score": config.minimum_score,
         "google_news_queries": config.google_news_queries,
+        "google_news_sources": [source.__dict__ for source in config.google_news_sources],
         "page_sources": [source.__dict__ for source in config.page_sources],
         "exclude_urls": config.exclude_urls,
         "exclude_title_patterns": config.exclude_title_patterns,

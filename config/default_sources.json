@@ -30,6 +30,50 @@
     "国際交流協会 日本語教室 委託",
     "国際交流協会 多文化共生 委託事業"
   ],
+  "google_news_sources": [
+    {
+      "name": "Philippines: Japan work",
+      "query": "Japan specified skilled worker Philippines OR Filipino workers Japan",
+      "hl": "en-PH",
+      "gl": "PH",
+      "ceid": "PH:en"
+    },
+    {
+      "name": "Philippines: care workers",
+      "query": "OFW Japan caregiver OR nursing care Japan Japanese language",
+      "hl": "en-PH",
+      "gl": "PH",
+      "ceid": "PH:en"
+    },
+    {
+      "name": "Indonesia: Japan workers",
+      "query": "pekerja migran Jepang keterampilan khusus OR magang Jepang",
+      "hl": "id",
+      "gl": "ID",
+      "ceid": "ID:id"
+    },
+    {
+      "name": "Indonesia: Japanese language",
+      "query": "bahasa Jepang pekerja Indonesia Jepang perawat caregiver",
+      "hl": "id",
+      "gl": "ID",
+      "ceid": "ID:id"
+    },
+    {
+      "name": "Vietnam: Japan workers",
+      "query": "lao động Việt Nam Nhật Bản kỹ năng đặc định OR thực tập sinh Nhật Bản",
+      "hl": "vi",
+      "gl": "VN",
+      "ceid": "VN:vi"
+    },
+    {
+      "name": "Vietnam: Japanese language",
+      "query": "tiếng Nhật lao động Nhật Bản điều dưỡng hộ lý",
+      "hl": "vi",
+      "gl": "VN",
+      "ceid": "VN:vi"
+    }
+  ],
   "page_sources": [
     {
       "name": "文化庁 公募情報",
@@ -212,8 +256,7 @@
       "JFT-Basic",
       "Can Do",
       "入学前教育",
-      "留学生"
-      ,
+      "留学生",
       "外国人介護人材",
       "介護人材"
     ],
@@ -231,7 +274,32 @@
       "上陸基準",
       "外国人材",
       "在留外国人",
-      "受入機関"
+      "受入機関",
+      "Japanese language",
+      "specified skilled worker",
+      "tokutei ginou",
+      "technical intern",
+      "foreign workers",
+      "Filipino workers",
+      "Japan-bound",
+      "caregiver",
+      "careworker",
+      "nursing care",
+      "OFW",
+      "migrant worker",
+      "Jepang",
+      "bahasa Jepang",
+      "pekerja migran",
+      "pekerja",
+      "pemagangan",
+      "keterampilan khusus",
+      "Nhật Bản",
+      "tiếng Nhật",
+      "lao động",
+      "thực tập sinh",
+      "kỹ năng đặc định",
+      "điều dưỡng",
+      "hộ lý"
     ],
     "その他": [
       "自治体",
@@ -265,6 +333,31 @@
     "日本語学校": 4,
     "留学生": 3,
     "外国人材": 3,
+    "Japanese language": 3,
+    "specified skilled worker": 4,
+    "tokutei ginou": 4,
+    "technical intern": 4,
+    "foreign workers": 3,
+    "Filipino workers": 3,
+    "Japan-bound": 2,
+    "caregiver": 3,
+    "careworker": 3,
+      "nursing care": 3,
+      "OFW": 3,
+      "migrant worker": 3,
+      "Jepang": 1,
+    "bahasa Jepang": 3,
+    "pekerja migran": 4,
+    "pekerja": 2,
+    "pemagangan": 3,
+    "keterampilan khusus": 4,
+    "Nhật Bản": 1,
+    "tiếng Nhật": 3,
+    "lao động": 3,
+    "thực tập sinh": 4,
+    "kỹ năng đặc định": 4,
+    "điều dưỡng": 3,
+    "hộ lý": 3,
     "外国人介護人材": 4,
     "介護人材": 3,
     "在留資格": 4,
@@ -275,7 +368,8 @@
     "国際交流協会": 4,
     "入学前教育": 5,
     "確認テスト": 3,
-    "Can Do": 3
+    "Can Do": 3,
+    "JFT-Basic": 4
   },
   "sales_angles": {
     "公募・補助金・プロポーザル": "Nihongo Catch! を、来日前・入学前の日本語力底上げ、確認テスト、学習ログ可視化を含む運用パッケージとして提案できる可能性があります。",

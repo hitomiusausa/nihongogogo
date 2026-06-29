@@ -9,6 +9,7 @@ from .deadlines import extract_deadline
 from .fetchers import (
     FetchedItem,
     fetch_google_news,
+    fetch_google_news_source,
     fetch_page_links,
     fetch_page_text,
     title_fingerprint,
@@ -41,6 +42,25 @@ DOMAIN_RELEVANCE_TERMS = (
     "グローバル人材",
     "国際交流協会",
     "受入機関",
+    "japanese",
+    "japanese language",
+    "specified skilled worker",
+    "tokutei ginou",
+    "technical intern",
+    "caregiver",
+    "nursing care",
+    "ofw",
+    "migrant worker",
+    "jepang",
+    "bahasa jepang",
+    "pekerja migran",
+    "pemagangan",
+    "keterampilan khusus",
+    "nhật bản",
+    "tiếng nhật",
+    "lao động",
+    "thực tập sinh",
+    "kỹ năng đặc định",
 )
 OFFICIAL_PUBLIC_SOURCES = {
     "文化庁 公募情報",
@@ -70,6 +90,12 @@ def run_collection(
             items.extend(fetch_google_news(query))
         except Exception as exc:  # noqa: BLE001 - continue collecting other sources.
             errors.append(f"Google News query failed: {query}: {exc}")
+
+    for source in config.google_news_sources:
+        try:
+            items.extend(fetch_google_news_source(source))
+        except Exception as exc:  # noqa: BLE001 - continue collecting other sources.
+            errors.append(f"Google News source failed: {source.name}: {exc}")
 
     for source in config.page_sources:
         try:

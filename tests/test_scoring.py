@@ -10,6 +10,7 @@ class ScoringTest(unittest.TestCase):
         config = WatchConfig(
             minimum_score=3,
             google_news_queries=[],
+            google_news_sources=[],
             page_sources=[PageSource(name="x", url="https://example.com", allow_url_patterns=[])],
             exclude_urls=[],
             exclude_title_patterns=[],

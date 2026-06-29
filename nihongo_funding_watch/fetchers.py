@@ -12,7 +12,7 @@ from datetime import UTC, datetime
 from email.utils import parsedate_to_datetime
 from html.parser import HTMLParser
 
-from .config import PageSource
+from .config import GoogleNewsSource, PageSource
 
 
 USER_AGENT = (
@@ -67,18 +67,31 @@ class LinkExtractor(HTMLParser):
 
 
 def fetch_google_news(query: str, *, pause_seconds: float = 0.2) -> list[FetchedItem]:
+    source = GoogleNewsSource(name=query, query=query)
+    return fetch_google_news_source(source, pause_seconds=pause_seconds)
+
+
+def fetch_google_news_source(
+    source: GoogleNewsSource,
+    *,
+    pause_seconds: float = 0.2,
+) -> list[FetchedItem]:
     params = urllib.parse.urlencode(
         {
-            "q": query,
-            "hl": "ja",
-            "gl": "JP",
-            "ceid": "JP:ja",
+            "q": source.query,
+            "hl": source.hl,
+            "gl": source.gl,
+            "ceid": source.ceid,
         }
     )
     url = f"https://news.google.com/rss/search?{params}"
     body = http_get(url)
     time.sleep(pause_seconds)
-    return parse_rss(body, source_name=f"Google News: {query}", source_type="google_news")
+    return parse_rss(
+        body,
+        source_name=f"Google News: {source.name}",
+        source_type="google_news",
+    )
 
 
 def fetch_page_links(source: PageSource, *, pause_seconds: float = 0.2) -> list[FetchedItem]:

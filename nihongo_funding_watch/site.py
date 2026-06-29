@@ -297,7 +297,9 @@ def render_site(
       }}
       main {{ width: calc(100% - 24px); }}
       .top {{ width: calc(100% - 24px); }}
-      .stats {{ grid-template-columns: 1fr 1fr; gap: 8px; }}
+      .stats {{ grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 12px; }}
+      .stat {{ padding: 7px 6px; font-size: 11px; line-height: 1.25; text-align: center; }}
+      .stat strong {{ font-size: 19px; }}
       .controls {{ grid-template-columns: 1fr; }}
       .search {{ height: 44px; font-size: 16px; }}
       .filters {{ justify-content: flex-start; }}

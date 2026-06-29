@@ -54,7 +54,7 @@ def copy_site_assets(site_dir: Path) -> None:
         return
     target_dir = site_dir / "images"
     target_dir.mkdir(parents=True, exist_ok=True)
-    for name in ["nihongogogogo.png", "nihongogogogo3.png"]:
+    for name in ["nihongogogogo.png", "nihongogogogo3.png", "nihongogogogo4.png"]:
         source = source_dir / name
         if source.exists():
             shutil.copy2(source, target_dir / name)
@@ -144,24 +144,16 @@ def render_site(
       line-height: 1.55;
     }}
     header {{
-      padding: 28px 20px 18px;
+      padding: 56px 20px 40px;
       border-bottom: 1px solid var(--line);
-      background: var(--header);
+      background:
+        linear-gradient(rgba(249, 247, 240, 0.5), rgba(249, 247, 240, 0.62)),
+        url("images/nihongogogogo4.png") center / cover no-repeat,
+        var(--header);
       position: sticky;
       top: 0;
       z-index: 2;
       overflow: hidden;
-    }}
-    header::after {{
-      content: "";
-      position: absolute;
-      right: clamp(8px, 4vw, 44px);
-      bottom: -40px;
-      width: clamp(150px, 26vw, 290px);
-      aspect-ratio: 1;
-      background: url("images/nihongogogogo.png") center / contain no-repeat;
-      opacity: 0.28;
-      pointer-events: none;
     }}
     main {{ width: min(1120px, calc(100% - 32px)); margin: 0 auto 56px; }}
     .top {{ width: min(1120px, calc(100% - 32px)); margin: 0 auto; position: relative; z-index: 1; }}

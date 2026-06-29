@@ -1,0 +1,286 @@
+{
+  "minimum_score": 3,
+  "google_news_queries": [
+    "日本語教育 補助金",
+    "日本語教育 公募",
+    "日本語教育 プロポーザル",
+    "日本語教育 委託 自治体",
+    "日本語教育 委託事業",
+    "地域日本語教育 支援 補助金",
+    "認定日本語教育機関 補助金",
+    "認定日本語教育機関 留学生",
+    "日本語学校 入学前教育",
+    "外国人材 日本語教育 委託",
+    "特定技能 日本語教育 支援",
+    "在留資格 留学生 日本語教育",
+    "出入国在留管理庁 留学生 在留資格",
+    "育成就労 日本語",
+    "技能実習 日本語 試験",
+    "文化庁 日本語教育 公募",
+    "文部科学省 日本語教育 留学生",
+    "自治体 日本語教室 補助金",
+    "自治体 多文化共生 補助金 公募",
+    "東京都 在住外国人 支援事業 助成",
+    "神奈川県 外国人材 補助金 公募",
+    "大阪府 外国人材 日本語教育 プロポーザル",
+    "愛知県 外国人児童生徒 日本語教育 補助金",
+    "福岡県 外国人介護人材 補助金",
+    "岐阜県 日本語教育 補助金 多文化共生",
+    "外国人材 補助金 自治体",
+    "国際交流協会 日本語教室 委託",
+    "国際交流協会 多文化共生 委託事業"
+  ],
+  "page_sources": [
+    {
+      "name": "文化庁 公募情報",
+      "url": "https://www.bunka.go.jp/shinsei_boshu/kobo/",
+      "allow_url_patterns": [
+        "^https://www\\.bunka\\.go\\.jp/shinsei_boshu/kobo/[0-9]+\\.html$"
+      ],
+      "max_links": 15,
+      "parser": "bunka_kobo"
+    },
+    {
+      "name": "文部科学省 公募情報",
+      "url": "https://www.mext.go.jp/b_menu/boshu/index.htm",
+      "allow_url_patterns": [
+        "^https://www\\.mext\\.go\\.jp/b_menu/boshu/(detail/)?(mext_|[0-9])[0-9_]+\\.htm[l]?$",
+        "^https://www\\.mext\\.go\\.jp/a_menu/.+/(mext_|[0-9])[0-9_]+\\.htm[l]?$"
+      ],
+      "max_links": 80,
+      "parser": "mext_boshu"
+    },
+    {
+      "name": "文化庁 日本語教育",
+      "url": "https://www.bunka.go.jp/seisaku/kokugo_nihongo/kyoiku/",
+      "allow_url_patterns": [
+        "^https://www\\.bunka\\.go\\.jp/seisaku/kokugo_nihongo/kyoiku/[0-9]+\\.html$",
+        "^https://www\\.bunka\\.go\\.jp/seisaku/kokugo_nihongo/kyoiku/.+/.+\\.html$"
+      ],
+      "max_links": 10
+    },
+    {
+      "name": "東京都 多文化共生",
+      "url": "https://www.seikatubunka.metro.tokyo.lg.jp/chiiki_tabunka",
+      "allow_url_patterns": [
+        "^https://www\\.seikatubunka\\.metro\\.tokyo\\.lg\\.jp/chiiki_tabunka/tabunka/.+",
+        "^https://www\\.seikatubunka\\.metro\\.tokyo\\.lg\\.jp/chiiki_tabunka/tsunagarisousei/.+"
+      ],
+      "max_links": 20
+    },
+    {
+      "name": "神奈川 外国人材活用支援",
+      "url": "https://www.kipc.or.jp/business-support/productivity/foreign-talent/",
+      "allow_url_patterns": [
+        "^https://www\\.kipc\\.or\\.jp/topics/information/.+",
+        "^https://www\\.pref\\.kanagawa\\.jp/.+"
+      ],
+      "max_links": 12,
+      "parser": "municipality_focus"
+    },
+    {
+      "name": "大阪府 外国人材受入事業",
+      "url": "https://www.pref.osaka.lg.jp/hodo/fumin/o110010/prs_51017.html",
+      "allow_url_patterns": [
+        "^https://www\\.pref\\.osaka\\.lg\\.jp/.+"
+      ],
+      "max_links": 8,
+      "parser": "municipality_focus"
+    },
+    {
+      "name": "愛知県 日本語教育補助金",
+      "url": "https://www.pref.aichi.jp/soshiki/tabunka/nihongo-hojyo.html",
+      "allow_url_patterns": [
+        "^https://www\\.pref\\.aichi\\.jp/.+"
+      ],
+      "max_links": 8,
+      "parser": "municipality_focus"
+    },
+    {
+      "name": "福岡県 外国人介護補助金",
+      "url": "https://www.pref.fukuoka.lg.jp/contents/kakuhokyoka.html",
+      "allow_url_patterns": [
+        "^https://www\\.pref\\.fukuoka\\.lg\\.jp/.+"
+      ],
+      "max_links": 8,
+      "parser": "municipality_focus"
+    },
+    {
+      "name": "岐阜県 日本語教育",
+      "url": "https://www.pref.gifu.lg.jp/page/26439.html",
+      "allow_url_patterns": [
+        "^https://www\\.pref\\.gifu\\.lg\\.jp/.+"
+      ],
+      "max_links": 8,
+      "parser": "municipality_focus"
+    },
+    {
+      "name": "岐阜県 介護人材日本語補助金",
+      "url": "https://www.pref.gifu.lg.jp/page/131091.html",
+      "allow_url_patterns": [
+        "^https://www\\.pref\\.gifu\\.lg\\.jp/.+"
+      ],
+      "max_links": 8,
+      "parser": "municipality_focus"
+    },
+    {
+      "name": "岐阜県 多文化共生補助金",
+      "url": "https://www.pref.gifu.lg.jp/dx-support/437476.html",
+      "allow_url_patterns": [
+        "^https://www\\.pref\\.gifu\\.lg\\.jp/.+"
+      ],
+      "max_links": 8,
+      "parser": "municipality_focus"
+    },
+    {
+      "name": "出入国在留管理庁",
+      "url": "https://www.moj.go.jp/isa/",
+      "allow_url_patterns": [
+        "^https://www\\.moj\\.go\\.jp/isa/[0-9]{2}_[0-9]+\\.html$",
+        "^https://www\\.moj\\.go\\.jp/isa/applications/resources/[0-9]{2}_[0-9]+\\.html$"
+      ],
+      "max_links": 12
+    },
+    {
+      "name": "文部科学省 報道発表",
+      "url": "https://www.mext.go.jp/b_menu/houdou/index.htm",
+      "allow_url_patterns": [
+        "^https://www\\.mext\\.go\\.jp/.+/(mext_|142)[0-9_]+\\.htm[l]?$"
+      ],
+      "max_links": 16
+    },
+    {
+      "name": "JASSO ニュース",
+      "url": "https://www.jasso.go.jp/news/index.html",
+      "allow_url_patterns": [
+        "^https://www\\.jasso\\.go\\.jp/news/.+\\.html$"
+      ],
+      "max_links": 10
+    }
+  ],
+  "exclude_urls": [
+    "https://www.bunka.go.jp/shinsei_boshu/kobo/84377601.html",
+    "https://www.bunka.go.jp/seisaku/joseikin_shien/index.html",
+    "https://www.bunka.go.jp/shinsei_boshu/kobo/index.html"
+  ],
+  "exclude_title_patterns": [
+    "^令和8年度生活文化創造・戦略展開事業 企画・運営業務（企画競争）$",
+    "写真・画像$",
+    "[0-9０-９]+枚目の写真・画像",
+    "自治体DX支援展"
+  ],
+  "generic_link_title_patterns": [
+    "^公募$",
+    "^過去の公募情報$",
+    "一覧$",
+    "トップを見る$",
+    "から探す$",
+    "^トップ$",
+    "^サイトマップ$",
+    "^ホーム$",
+    "^HOME$",
+    "^本文へ$",
+    "^このページの先頭へ$"
+  ],
+  "categories": {
+    "公募・補助金・プロポーザル": [
+      "公募",
+      "募集",
+      "企画競争",
+      "プロポーザル",
+      "委託",
+      "入札",
+      "調達",
+      "補助金",
+      "補助",
+      "助成",
+      "交付金",
+      "補助事業",
+      "実証",
+      "モデル事業",
+      "委託事業"
+    ],
+    "ニュース（日本語教育）": [
+      "日本語教育",
+      "地域日本語教育",
+      "日本語教室",
+      "認定日本語教育機関",
+      "登録日本語教員",
+      "日本語学校",
+      "日本語能力",
+      "JLPT",
+      "JFT-Basic",
+      "Can Do",
+      "入学前教育",
+      "留学生"
+      ,
+      "外国人介護人材",
+      "介護人材"
+    ],
+    "ニュース（外国人・ビザ）": [
+      "在留資格",
+      "入管",
+      "出入国在留管理庁",
+      "留学ビザ",
+      "特定技能",
+      "育成就労",
+      "技能実習",
+      "永住",
+      "資格外活動",
+      "告示",
+      "上陸基準",
+      "外国人材",
+      "在留外国人",
+      "受入機関"
+    ],
+    "その他": [
+      "自治体",
+      "地方公共団体",
+      "教育委員会",
+      "国際交流協会",
+      "学校法人",
+      "専門学校",
+      "大学",
+      "介護",
+      "宿泊",
+      "外食",
+      "製造",
+      "人材",
+      "受入機関"
+    ]
+  },
+  "keyword_weights": {
+    "公募": 4,
+    "プロポーザル": 5,
+    "企画競争": 5,
+    "委託": 4,
+    "委託事業": 5,
+    "補助金": 5,
+    "補助": 3,
+    "助成": 4,
+    "交付金": 4,
+    "日本語教育": 4,
+    "地域日本語教育": 5,
+    "認定日本語教育機関": 6,
+    "日本語学校": 4,
+    "留学生": 3,
+    "外国人材": 3,
+    "外国人介護人材": 4,
+    "介護人材": 3,
+    "在留資格": 4,
+    "特定技能": 4,
+    "育成就労": 4,
+    "技能実習": 3,
+    "自治体": 3,
+    "国際交流協会": 4,
+    "入学前教育": 5,
+    "確認テスト": 3,
+    "Can Do": 3
+  },
+  "sales_angles": {
+    "公募・補助金・プロポーザル": "Nihongo Catch! を、来日前・入学前の日本語力底上げ、確認テスト、学習ログ可視化を含む運用パッケージとして提案できる可能性があります。",
+    "ニュース（日本語教育）": "認定日本語教育機関、登録日本語教員、Can Do型評価などの政策文脈に沿って、教育品質管理と学習継続支援の導入提案に使えます。",
+    "ニュース（外国人・ビザ）": "在留資格や外国人材受入れ要件の変化に合わせ、学校・受入機関向けに来日前学習と日本語力確認の仕組みとして訴求できます。",
+    "その他": "自治体、国際交流協会、学校法人、受入機関へのヒアリング候補として記録し、個別提案や実証導入の打診先にできます。"
+  }
+}

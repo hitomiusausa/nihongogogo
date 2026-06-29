@@ -3,7 +3,6 @@ __pycache__/
 *.pyc
 .venv/
 logs/
-data/*.sqlite3
 data/*.csv
 config/local.env
 public/items.csv

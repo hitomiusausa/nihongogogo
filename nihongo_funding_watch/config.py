@@ -1,9 +1,21 @@
 from __future__ import annotations
 
 import json
-from dataclasses import dataclass
+import re
+from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
+
+
+def compile_patterns(patterns: list[str], *, context: str) -> tuple[re.Pattern[str], ...]:
+    """Compile regex patterns up-front so invalid config fails fast and reuses the compiled form."""
+    compiled: list[re.Pattern[str]] = []
+    for pattern in patterns:
+        try:
+            compiled.append(re.compile(pattern))
+        except re.error as exc:
+            raise ValueError(f"Invalid regex in {context}: {pattern!r} ({exc})") from exc
+    return tuple(compiled)
 
 
 @dataclass(frozen=True)
@@ -24,6 +36,7 @@ class PageSource:
     max_links: int | None = None
     parser: str = "links"
     country: str = ""
+    allow_url_regexes: tuple[re.Pattern[str], ...] = field(default=(), compare=False)
 
 
 @dataclass(frozen=True)
@@ -38,10 +51,34 @@ class WatchConfig:
     categories: dict[str, list[str]]
     keyword_weights: dict[str, int]
     sales_angles: dict[str, str]
+    exclude_title_regexes: tuple[re.Pattern[str], ...] = field(default=(), compare=False)
+    generic_link_title_regexes: tuple[re.Pattern[str], ...] = field(default=(), compare=False)
+
+
+def _build_page_source(item: dict[str, Any]) -> PageSource:
+    allow_url_patterns = [str(pattern) for pattern in item.get("allow_url_patterns", [])]
+    name = item["name"]
+    return PageSource(
+        name=name,
+        url=item["url"],
+        allow_url_patterns=allow_url_patterns,
+        max_links=(int(item["max_links"]) if item.get("max_links") is not None else None),
+        parser=str(item.get("parser", "links")),
+        country=str(item.get("country", "")),
+        allow_url_regexes=compile_patterns(
+            allow_url_patterns, context=f"page_sources[{name}].allow_url_patterns"
+        ),
+    )
 
 
 def load_config(path: Path) -> WatchConfig:
     raw = json.loads(path.read_text(encoding="utf-8"))
+    exclude_title_patterns = [
+        str(pattern) for pattern in raw.get("exclude_title_patterns", [])
+    ]
+    generic_link_title_patterns = [
+        str(pattern) for pattern in raw.get("generic_link_title_patterns", [])
+    ]
     return WatchConfig(
         minimum_score=int(raw.get("minimum_score", 3)),
         google_news_queries=list(raw.get("google_news_queries", [])),
@@ -57,29 +94,17 @@ def load_config(path: Path) -> WatchConfig:
             for item in raw.get("google_news_sources", [])
         ],
         page_sources=[
-            PageSource(
-                name=item["name"],
-                url=item["url"],
-                allow_url_patterns=[
-                    str(pattern) for pattern in item.get("allow_url_patterns", [])
-                ],
-                max_links=(
-                    int(item["max_links"])
-                    if item.get("max_links") is not None
-                    else None
-                ),
-                parser=str(item.get("parser", "links")),
-                country=str(item.get("country", "")),
-            )
-            for item in raw.get("page_sources", [])
+            _build_page_source(item) for item in raw.get("page_sources", [])
         ],
         exclude_urls=[str(url) for url in raw.get("exclude_urls", [])],
-        exclude_title_patterns=[
-            str(pattern) for pattern in raw.get("exclude_title_patterns", [])
-        ],
-        generic_link_title_patterns=[
-            str(pattern) for pattern in raw.get("generic_link_title_patterns", [])
-        ],
+        exclude_title_patterns=exclude_title_patterns,
+        generic_link_title_patterns=generic_link_title_patterns,
+        exclude_title_regexes=compile_patterns(
+            exclude_title_patterns, context="exclude_title_patterns"
+        ),
+        generic_link_title_regexes=compile_patterns(
+            generic_link_title_patterns, context="generic_link_title_patterns"
+        ),
         categories={
             str(name): [str(term) for term in terms]
             for name, terms in raw.get("categories", {}).items()
@@ -95,12 +120,21 @@ def load_config(path: Path) -> WatchConfig:
     )
 
 
+def _jsonable_dict(source: Any) -> dict[str, Any]:
+    """Dataclass __dict__ minus non-serializable compiled-regex fields."""
+    return {
+        key: value
+        for key, value in source.__dict__.items()
+        if not key.endswith("_regexes")
+    }
+
+
 def config_to_jsonable(config: WatchConfig) -> dict[str, Any]:
     return {
         "minimum_score": config.minimum_score,
         "google_news_queries": config.google_news_queries,
-        "google_news_sources": [source.__dict__ for source in config.google_news_sources],
-        "page_sources": [source.__dict__ for source in config.page_sources],
+        "google_news_sources": [_jsonable_dict(source) for source in config.google_news_sources],
+        "page_sources": [_jsonable_dict(source) for source in config.page_sources],
         "exclude_urls": config.exclude_urls,
         "exclude_title_patterns": config.exclude_title_patterns,
         "generic_link_title_patterns": config.generic_link_title_patterns,

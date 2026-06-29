@@ -420,7 +420,7 @@ def render_card(config: WatchConfig, item: StoredItem, *, priority: bool = False
     ).lower()
     return f"""
 <article class="{class_name}" data-category="{escape(item.primary_category)}" data-deadline="{str(bool(deadline)).lower()}" data-urgent="{str(is_urgent).lower()}" data-expired="{str(remaining is not None and remaining < 0).lower()}" data-expired-old="{str(is_old_expired).lower()}" data-text="{escape(text)}"{" hidden" if is_old_expired else ""}>
-  <p class="title"><a href="{escape(item.url)}" target="_blank" rel="noopener noreferrer">{escape(item.title)}</a></p>
+  <p class="title"><a href="{escape(safe_url(item.url))}" target="_blank" rel="noopener noreferrer">{escape(item.title)}</a></p>
   <div class="row">
     <span class="badge {category_class}">{escape(item.primary_category)}</span>
     {country_badge}
@@ -438,6 +438,11 @@ def render_card(config: WatchConfig, item: StoredItem, *, priority: bool = False
 
 def truncate(value: str, max_length: int) -> str:
     return value if len(value) <= max_length else value[: max_length - 1] + "…"
+
+
+def safe_url(url: str) -> str:
+    """Only allow http(s) links in hrefs; neutralize other schemes (javascript:, data:, ...)."""
+    return url if url.lower().startswith(("https://", "http://")) else "#"
 
 
 def linkify_html(value: str) -> str:

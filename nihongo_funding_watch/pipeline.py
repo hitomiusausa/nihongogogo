@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, replace
-from datetime import UTC, datetime, timedelta
+from datetime import datetime, timedelta, timezone
 import re
 
 from .config import WatchConfig
@@ -103,12 +103,11 @@ def run_collection(
         except Exception as exc:  # noqa: BLE001 - continue collecting other sources.
             errors.append(f"Page source failed: {source.name}: {exc}")
 
-    threshold = datetime.now(UTC) - timedelta(days=since_days)
-    matched = 0
-    stored_new = 0
+    threshold = datetime.now(timezone.utc) - timedelta(days=since_days)
     seen_urls: set[str] = set()
     seen_titles: set[str] = set()
     excluded_urls = {normalize_url(url) for url in config.exclude_urls}
+    matched_items: list[ScoredItem] = []
 
     for item in items:
         if should_exclude_item(config, item, excluded_urls):
@@ -131,13 +130,13 @@ def run_collection(
             continue
         if scored.primary_category == "公募・補助金・プロポーザル" and not is_public_item_to_keep(scored):
             continue
-        matched += 1
-        if store.upsert_scored_item(scored):
-            stored_new += 1
+        matched_items.append(scored)
+
+    stored_new = store.upsert_scored_items(matched_items)
 
     return CollectionResult(
         fetched=len(items),
-        matched=matched,
+        matched=len(matched_items),
         stored_new=stored_new,
         errors=errors,
     )
@@ -147,14 +146,6 @@ def with_deadline(scored: ScoredItem) -> ScoredItem:
     text = f"{scored.item.title}\n{scored.item.summary}"
     deadline = extract_deadline(text)
     return replace(scored, deadline_at=deadline.isoformat() if deadline else None)
-
-
-def should_fetch_detail(scored: ScoredItem) -> bool:
-    if scored.deadline_at:
-        return False
-    if scored.item.source_type != "page":
-        return False
-    return scored.primary_category == "公募・補助金・プロポーザル"
 
 
 def prepare_item(config: WatchConfig, item: FetchedItem) -> FetchedItem | None:
@@ -197,27 +188,6 @@ def prepare_item(config: WatchConfig, item: FetchedItem) -> FetchedItem | None:
     return replace(detail_item, summary=detail_summary)
 
 
-def enrich_from_detail_page(scored: ScoredItem) -> ScoredItem:
-    try:
-        detail_text = fetch_page_text(scored.item.url)
-    except Exception:
-        return scored
-
-    deadline = extract_deadline(detail_text)
-    if not deadline:
-        return scored
-
-    summary = scored.item.summary
-    excerpt = deadline_excerpt(detail_text, deadline.isoformat())
-    if excerpt:
-        summary = f"{summary} / {excerpt}" if summary else excerpt
-    return replace(
-        scored,
-        item=replace(scored.item, summary=summary),
-        deadline_at=deadline.isoformat(),
-    )
-
-
 def deadline_excerpt(text: str, iso_date: str) -> str:
     year, month, day = iso_date.split("-")
     patterns = [
@@ -241,17 +211,11 @@ def should_exclude_item(
 ) -> bool:
     if normalize_url(item.url) in excluded_urls:
         return True
-    return any(
-        re.search(pattern, item.title)
-        for pattern in config.exclude_title_patterns
-    )
+    return any(regex.search(item.title) for regex in config.exclude_title_regexes)
 
 
 def is_generic_link_title(config: WatchConfig, title: str) -> bool:
-    return any(
-        re.search(pattern, title)
-        for pattern in config.generic_link_title_patterns
-    )
+    return any(regex.search(title) for regex in config.generic_link_title_regexes)
 
 
 def normalize_url(url: str) -> str:

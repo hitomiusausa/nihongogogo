@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import html
 import json
+import logging
 import re
 import ssl
 import time
@@ -10,12 +11,15 @@ import urllib.parse
 import urllib.request
 import xml.etree.ElementTree as ET
 from dataclasses import dataclass
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 from email.utils import parsedate_to_datetime
 from html.parser import HTMLParser
 
 from .config import GoogleNewsSource, PageSource
+from .deadlines import ERA_START_YEARS
 
+
+logger = logging.getLogger(__name__)
 
 USER_AGENT = (
     "Semiosis-NihongoFundingWatch/0.1 "
@@ -67,6 +71,13 @@ class LinkExtractor(HTMLParser):
             self.links.append((title, self._current_href))
         self._current_href = None
         self._parts = []
+
+
+def url_allowed(source: PageSource, url: str) -> bool:
+    """True if url matches the source's allow patterns (no patterns = allow all)."""
+    if not source.allow_url_regexes:
+        return True
+    return any(regex.search(url) for regex in source.allow_url_regexes)
 
 
 def fetch_google_news(query: str, *, pause_seconds: float = 0.2) -> list[FetchedItem]:
@@ -122,9 +133,7 @@ def fetch_page_links(source: PageSource, *, pause_seconds: float = 0.2) -> list[
         clean_url = canonicalize_url(url)
         if clean_url in seen:
             continue
-        if source.allow_url_patterns and not any(
-            re.search(pattern, clean_url) for pattern in source.allow_url_patterns
-        ):
+        if not url_allowed(source, clean_url):
             continue
         seen.add(clean_url)
         items.append(
@@ -156,9 +165,7 @@ def parse_bunka_kobo(body: bytes, source: PageSource) -> list[FetchedItem]:
             url = canonicalize_url(urllib.parse.urljoin(source.url, html.unescape(href)))
             if not title or url in seen:
                 continue
-            if source.allow_url_patterns and not any(
-                re.search(pattern, url) for pattern in source.allow_url_patterns
-            ):
+            if not url_allowed(source, url):
                 continue
             seen.add(url)
             summary_parts = [f"Source page: {source.url}"]
@@ -196,9 +203,7 @@ def parse_mext_boshu(body: bytes, source: PageSource) -> list[FetchedItem]:
             url = canonicalize_url(urllib.parse.urljoin(source.url, html.unescape(href)))
             if not title or url in seen:
                 continue
-            if source.allow_url_patterns and not any(
-                re.search(pattern, url) for pattern in source.allow_url_patterns
-            ):
+            if not url_allowed(source, url):
                 continue
             seen.add(url)
             listed_date = strip_tags(date_text)
@@ -246,9 +251,7 @@ def parse_municipality_focus(body: bytes, source: PageSource) -> list[FetchedIte
             continue
         if is_attachment_url(clean_url):
             continue
-        if source.allow_url_patterns and not any(
-            re.search(pattern, clean_url) for pattern in source.allow_url_patterns
-        ):
+        if not url_allowed(source, clean_url):
             continue
         if not municipality_relevant(title, ""):
             continue
@@ -276,7 +279,7 @@ def fetch_page_text(url: str, *, max_chars: int = 12000) -> str:
     return text[:max_chars]
 
 
-def http_get(url: str, timeout: int = 20) -> bytes:
+def http_get(url: str, timeout: int = 20, *, allow_insecure_fallback: bool = True) -> bytes:
     request = urllib.request.Request(url, headers={"User-Agent": USER_AGENT})
     try:
         with urllib.request.urlopen(request, timeout=timeout) as response:
@@ -284,7 +287,12 @@ def http_get(url: str, timeout: int = 20) -> bytes:
     except urllib.error.HTTPError as exc:
         raise RuntimeError(f"HTTP {exc.code} while fetching {url}") from exc
     except urllib.error.URLError as exc:
-        if isinstance(exc.reason, ssl.SSLCertVerificationError):
+        if isinstance(exc.reason, ssl.SSLCertVerificationError) and allow_insecure_fallback:
+            logger.warning(
+                "TLS certificate verification failed for %s; retrying without verification. "
+                "This connection is not protected against man-in-the-middle attacks.",
+                url,
+            )
             context = ssl._create_unverified_context()
             with urllib.request.urlopen(request, timeout=timeout, context=context) as response:
                 return response.read()
@@ -438,15 +446,15 @@ def parse_datetime(value: str) -> datetime | None:
     except (TypeError, ValueError):
         return None
     if parsed.tzinfo is None:
-        return parsed.replace(tzinfo=UTC)
-    return parsed.astimezone(UTC)
+        return parsed.replace(tzinfo=timezone.utc)
+    return parsed.astimezone(timezone.utc)
 
 
 def parse_english_date(value: str) -> datetime | None:
     value = normalize_text(value)
     for pattern in ["%d %B %Y", "%B %d, %Y", "%d %b %Y", "%b %d, %Y"]:
         try:
-            return datetime.strptime(value, pattern).replace(tzinfo=UTC)
+            return datetime.strptime(value, pattern).replace(tzinfo=timezone.utc)
         except ValueError:
             continue
     return None
@@ -523,11 +531,11 @@ def parse_japanese_date(value: str) -> datetime | None:
     if not match:
         return None
     era, year_text, month_text, day_text = match.groups()
-    era_start = {"令和": 2018, "平成": 1988}.get(era)
+    era_start = ERA_START_YEARS.get(era)
     if era_start is None:
         return None
     year = era_start + (1 if year_text == "元" else int(year_text))
-    return datetime(year, int(month_text), int(day_text), tzinfo=UTC)
+    return datetime(year, int(month_text), int(day_text), tzinfo=timezone.utc)
 
 
 def parse_japanese_or_western_date(value: str) -> datetime | None:
@@ -538,7 +546,7 @@ def parse_japanese_or_western_date(value: str) -> datetime | None:
     if not match:
         return None
     year, month, day = match.groups()
-    return datetime(int(year), int(month), int(day), tzinfo=UTC)
+    return datetime(int(year), int(month), int(day), tzinfo=timezone.utc)
 
 
 def canonicalize_url(url: str) -> str:

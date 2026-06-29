@@ -2,13 +2,16 @@ from __future__ import annotations
 
 import json
 import sqlite3
+from contextlib import closing
 from dataclasses import dataclass
-from datetime import UTC, datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 from .fetchers import FetchedItem, title_fingerprint
 from .scoring import ScoredItem
 
+
+SCHEMA_VERSION = 1
 
 LEGACY_CATEGORY_MAP = {
     "ビザ・入管・在留資格": "ニュース（外国人・ビザ）",
@@ -47,7 +50,7 @@ class WatchStore:
         return connection
 
     def initialize(self) -> None:
-        with self.connect() as db:
+        with closing(self.connect()) as db, db:
             db.execute(
                 """
                 CREATE TABLE IF NOT EXISTS items (
@@ -84,92 +87,67 @@ class WatchStore:
             db.execute(
                 "CREATE INDEX IF NOT EXISTS idx_items_title_key ON items(title_key)"
             )
-            migrate_legacy_categories(db)
-            migrate_title_keys(db)
-            prune_duplicate_title_keys(db)
+            # Full-table data migrations only need to run once per schema bump,
+            # not on every CLI invocation. Gate them behind PRAGMA user_version.
+            current_version = db.execute("PRAGMA user_version").fetchone()[0]
+            if current_version < SCHEMA_VERSION:
+                migrate_legacy_categories(db)
+                migrate_title_keys(db)
+                prune_duplicate_title_keys(db)
+                db.execute(f"PRAGMA user_version = {SCHEMA_VERSION}")
 
     def upsert_scored_item(self, scored: ScoredItem) -> bool:
-        now = datetime.now(UTC).isoformat()
+        with closing(self.connect()) as db, db:
+            return self._upsert(db, scored)
+
+    def upsert_scored_items(self, scored_items: list[ScoredItem]) -> int:
+        """Upsert many items in a single transaction. Returns the count of new rows."""
+        stored_new = 0
+        with closing(self.connect()) as db, db:
+            for scored in scored_items:
+                if self._upsert(db, scored):
+                    stored_new += 1
+        return stored_new
+
+    def _upsert(self, db: sqlite3.Connection, scored: ScoredItem) -> bool:
+        now = datetime.now(timezone.utc).isoformat()
         item = scored.item
         item_title_key = title_fingerprint(item.title)
-        with self.connect() as db:
-            existing = db.execute(
-                """
-                SELECT id FROM items
-                WHERE url = ? OR (title_key IS NOT NULL AND title_key = ?)
-                ORDER BY CASE WHEN url = ? THEN 0 ELSE 1 END, score DESC, fetched_at DESC
-                LIMIT 1
-                """,
-                (item.url, item_title_key, item.url),
-            ).fetchone()
-            if existing:
-                db.execute(
-                    """
-                    UPDATE items SET
-                        title=?,
-                        source_name=?,
-                        source_type=?,
-                        published_at=COALESCE(?, published_at),
-                        summary=?,
-                        fetched_at=?,
-                        primary_category=?,
-                        categories_json=?,
-                        score=MAX(score, ?),
-                        matched_keywords_json=?,
-                        deadline_at=COALESCE(?, deadline_at),
-                        title_key=?,
-                        country=?
-                    WHERE id=?
-                    """,
-                    (
-                        item.title,
-                        item.source_name,
-                        item.source_type,
-                        item.published_at.isoformat() if item.published_at else None,
-                        item.summary,
-                        now,
-                        scored.primary_category,
-                        json.dumps(scored.categories, ensure_ascii=False),
-                        scored.score,
-                        json.dumps(scored.matched_keywords, ensure_ascii=False),
-                        scored.deadline_at,
-                        item_title_key,
-                        item.country,
-                        existing["id"],
-                    ),
-                )
-                return False
-
+        existing = db.execute(
+            """
+            SELECT id FROM items
+            WHERE url = ? OR (title_key IS NOT NULL AND title_key = ?)
+            ORDER BY CASE WHEN url = ? THEN 0 ELSE 1 END, score DESC, fetched_at DESC
+            LIMIT 1
+            """,
+            (item.url, item_title_key, item.url),
+        ).fetchone()
+        if existing:
             db.execute(
                 """
-                INSERT INTO items (
-                    title, url, source_name, source_type, published_at, fetched_at,
-                    summary, primary_category, categories_json, score,
-                    matched_keywords_json, deadline_at, title_key, country
-                )
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                ON CONFLICT(url) DO UPDATE SET
-                    title=excluded.title,
-                    source_name=excluded.source_name,
-                    source_type=excluded.source_type,
-                    published_at=COALESCE(excluded.published_at, items.published_at),
-                    summary=excluded.summary,
-                    primary_category=excluded.primary_category,
-                    categories_json=excluded.categories_json,
-                    score=MAX(items.score, excluded.score),
-                    matched_keywords_json=excluded.matched_keywords_json,
-                    deadline_at=COALESCE(excluded.deadline_at, items.deadline_at),
-                    title_key=excluded.title_key,
-                    country=excluded.country
+                UPDATE items SET
+                    title=?,
+                    source_name=?,
+                    source_type=?,
+                    published_at=COALESCE(?, published_at),
+                    summary=?,
+                    fetched_at=?,
+                    primary_category=?,
+                    categories_json=?,
+                    score=MAX(score, ?),
+                    matched_keywords_json=?,
+                    deadline_at=COALESCE(?, deadline_at),
+                    title_key=?,
+                    country=?
+                WHERE id=?
                 """,
                 (
                     item.title,
-                    item.url,
                     item.source_name,
                     item.source_type,
                     item.published_at.isoformat() if item.published_at else None,
-                    now,
                     item.summary,
+                    now,
                     scored.primary_category,
                     json.dumps(scored.categories, ensure_ascii=False),
                     scored.score,
@@ -177,13 +155,55 @@ class WatchStore:
                     scored.deadline_at,
                     item_title_key,
                     item.country,
+                    existing["id"],
                 ),
             )
-            return True
+            return False
+
+        db.execute(
+            """
+            INSERT INTO items (
+                title, url, source_name, source_type, published_at, fetched_at,
+                summary, primary_category, categories_json, score,
+                matched_keywords_json, deadline_at, title_key, country
+            )
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ON CONFLICT(url) DO UPDATE SET
+                title=excluded.title,
+                source_name=excluded.source_name,
+                source_type=excluded.source_type,
+                published_at=COALESCE(excluded.published_at, items.published_at),
+                summary=excluded.summary,
+                primary_category=excluded.primary_category,
+                categories_json=excluded.categories_json,
+                score=MAX(items.score, excluded.score),
+                matched_keywords_json=excluded.matched_keywords_json,
+                deadline_at=COALESCE(excluded.deadline_at, items.deadline_at),
+                title_key=excluded.title_key,
+                country=excluded.country
+            """,
+            (
+                item.title,
+                item.url,
+                item.source_name,
+                item.source_type,
+                item.published_at.isoformat() if item.published_at else None,
+                now,
+                item.summary,
+                scored.primary_category,
+                json.dumps(scored.categories, ensure_ascii=False),
+                scored.score,
+                json.dumps(scored.matched_keywords, ensure_ascii=False),
+                scored.deadline_at,
+                item_title_key,
+                item.country,
+            ),
+        )
+        return True
 
     def recent_items(self, *, since_days: int = 10) -> list[StoredItem]:
-        threshold = (datetime.now(UTC) - timedelta(days=since_days)).isoformat()
-        with self.connect() as db:
+        threshold = (datetime.now(timezone.utc) - timedelta(days=since_days)).isoformat()
+        with closing(self.connect()) as db:
             rows = db.execute(
                 """
                 SELECT * FROM items
@@ -195,14 +215,14 @@ class WatchStore:
         return [row_to_item(row) for row in rows]
 
     def all_items(self) -> list[StoredItem]:
-        with self.connect() as db:
+        with closing(self.connect()) as db:
             rows = db.execute(
                 "SELECT * FROM items ORDER BY fetched_at DESC, score DESC"
             ).fetchall()
         return [row_to_item(row) for row in rows]
 
     def duplicate_groups(self) -> list[tuple[str, int, str]]:
-        with self.connect() as db:
+        with closing(self.connect()) as db:
             rows = db.execute(
                 """
                 SELECT title_key, COUNT(*) AS count, MIN(title) AS sample_title

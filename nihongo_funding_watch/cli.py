@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import sys
 from pathlib import Path
 
 from .config import load_config
@@ -59,8 +60,10 @@ def main() -> None:
         report_path = write_report(config, store, args.report_dir, since_days=args.since_days)
         print(
             f"fetched={result.fetched} stored_new={result.stored_new} "
-            f"matched={result.matched} report={report_path}"
+            f"matched={result.matched} errors={len(result.errors)} report={report_path}"
         )
+        for message in result.errors:
+            print(f"  ERROR: {message}", file=sys.stderr)
         return
 
     if args.command == "report":

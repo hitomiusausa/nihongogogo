@@ -4,6 +4,8 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>日本語教育 資金・政策ウォッチ</title>
+  <link rel="icon" type="image/png" href="images/nihongogogogo3.png">
+  <link rel="apple-touch-icon" href="images/nihongogogogo3.png">
   <style>
     :root {
       color-scheme: light;
@@ -47,9 +49,21 @@
       position: sticky;
       top: 0;
       z-index: 2;
+      overflow: hidden;
+    }
+    header::after {
+      content: "";
+      position: absolute;
+      right: clamp(8px, 4vw, 44px);
+      bottom: -40px;
+      width: clamp(150px, 26vw, 290px);
+      aspect-ratio: 1;
+      background: url("images/nihongogogogo.png") center / contain no-repeat;
+      opacity: 0.28;
+      pointer-events: none;
     }
     main { width: min(1120px, calc(100% - 32px)); margin: 0 auto 56px; }
-    .top { width: min(1120px, calc(100% - 32px)); margin: 0 auto; }
+    .top { width: min(1120px, calc(100% - 32px)); margin: 0 auto; position: relative; z-index: 1; }
     h1 { margin: 0 0 6px; font-size: clamp(24px, 3vw, 34px); line-height: 1.18; letter-spacing: 0; }
     h2 { margin: 28px 0 12px; font-size: 20px; letter-spacing: 0; }
     .meta { color: var(--muted); margin: 0; }
@@ -189,7 +203,7 @@
   <header>
     <div class="top">
       <h1>日本語教育 資金・政策ウォッチ</h1>
-      <p class="meta">最終更新: 2026-06-29 18:28:41 JST / 対象期間: 直近14日</p>
+      <p class="meta">最終更新: 2026-06-29 18:37:21 JST / 対象期間: 直近14日</p>
       <div class="stats">
         <div class="stat"><strong>38</strong>表示件数</div>
         <div class="stat"><strong>9</strong>公募・補助金</div>

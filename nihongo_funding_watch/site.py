@@ -5,6 +5,7 @@ from datetime import date, datetime
 from html import escape
 from pathlib import Path
 import re
+import shutil
 from zoneinfo import ZoneInfo
 
 from .config import WatchConfig
@@ -41,9 +42,22 @@ def write_site(
 
     dated_path = reports_dir / f"{today}.html"
     index_path = site_dir / "index.html"
+    copy_site_assets(site_dir)
     dated_path.write_text(html, encoding="utf-8")
     index_path.write_text(html, encoding="utf-8")
     return index_path
+
+
+def copy_site_assets(site_dir: Path) -> None:
+    source_dir = Path(__file__).resolve().parent.parent / "images"
+    if not source_dir.exists():
+        return
+    target_dir = site_dir / "images"
+    target_dir.mkdir(parents=True, exist_ok=True)
+    for name in ["nihongogogogo.png", "nihongogogogo3.png"]:
+        source = source_dir / name
+        if source.exists():
+            shutil.copy2(source, target_dir / name)
 
 
 def render_site(
@@ -91,6 +105,8 @@ def render_site(
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>日本語教育 資金・政策ウォッチ</title>
+  <link rel="icon" type="image/png" href="images/nihongogogogo3.png">
+  <link rel="apple-touch-icon" href="images/nihongogogogo3.png">
   <style>
     :root {{
       color-scheme: light;
@@ -134,9 +150,21 @@ def render_site(
       position: sticky;
       top: 0;
       z-index: 2;
+      overflow: hidden;
+    }}
+    header::after {{
+      content: "";
+      position: absolute;
+      right: clamp(8px, 4vw, 44px);
+      bottom: -40px;
+      width: clamp(150px, 26vw, 290px);
+      aspect-ratio: 1;
+      background: url("images/nihongogogogo.png") center / contain no-repeat;
+      opacity: 0.28;
+      pointer-events: none;
     }}
     main {{ width: min(1120px, calc(100% - 32px)); margin: 0 auto 56px; }}
-    .top {{ width: min(1120px, calc(100% - 32px)); margin: 0 auto; }}
+    .top {{ width: min(1120px, calc(100% - 32px)); margin: 0 auto; position: relative; z-index: 1; }}
     h1 {{ margin: 0 0 6px; font-size: clamp(24px, 3vw, 34px); line-height: 1.18; letter-spacing: 0; }}
     h2 {{ margin: 28px 0 12px; font-size: 20px; letter-spacing: 0; }}
     .meta {{ color: var(--muted); margin: 0; }}

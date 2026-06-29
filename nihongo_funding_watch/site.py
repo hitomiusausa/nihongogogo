@@ -289,7 +289,7 @@ def render_site(
     @media (max-width: 720px) {{
       header {{
         position: static;
-        padding: 24px 16px calc(min(52vw, 240px) + 12px);
+        padding: 24px 16px calc(min(52vw, 240px) + 32px);
         background:
           linear-gradient(rgba(249, 247, 240, 0.30), rgba(249, 247, 240, 0.42)),
           url("images/nihongogogogo4.png") bottom center / contain no-repeat,
@@ -297,9 +297,9 @@ def render_site(
       }}
       main {{ width: calc(100% - 24px); }}
       .top {{ width: calc(100% - 24px); }}
-      .stats {{ grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 12px; }}
-      .stat {{ padding: 7px 6px; font-size: 11px; line-height: 1.25; text-align: center; }}
-      .stat strong {{ font-size: 19px; }}
+      .stats {{ grid-template-columns: repeat(3, 1fr); gap: 6px; margin-top: 10px; }}
+      .stat {{ padding: 6px 4px; font-size: 10px; line-height: 1.2; text-align: center; }}
+      .stat strong {{ font-size: 16px; }}
       .controls {{ grid-template-columns: 1fr; }}
       .search {{ height: 44px; font-size: 16px; }}
       .filters {{ justify-content: flex-start; }}

@@ -165,9 +165,9 @@ def render_site(
     .stats {{ display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin-top: 16px; }}
     .stat {{
       padding: 10px 12px;
-      border: 1px solid var(--line);
-      background: #fffdf6;
-      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.5);
+      background: rgba(255, 253, 246, 0.4);
+      border-radius: 14px;
       box-shadow: inset 0 3px 0 var(--blue);
     }}
     .stat:nth-child(2) {{ box-shadow: inset 0 3px 0 var(--coral); }}

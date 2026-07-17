@@ -62,6 +62,35 @@ class StorageTest(unittest.TestCase):
             )
             self.assertEqual(len(store.all_items()), 1)
 
+    def test_first_seen_at_is_set_on_insert_and_preserved_on_update(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            store = WatchStore(Path(tmp) / "watch.sqlite3")
+            store.initialize()
+            scored = ScoredItem(
+                item=FetchedItem(
+                    title="日本語教育 補助金",
+                    url="https://example.com/a",
+                    source_name="test",
+                    source_type="page",
+                ),
+                score=5,
+                categories=["公募・補助金・プロポーザル"],
+                matched_keywords=["日本語教育"],
+                primary_category="公募・補助金・プロポーザル",
+            )
+            store.upsert_scored_item(scored)
+            first = store.all_items()[0].first_seen_at
+            self.assertIsNotNone(first)
+
+            # 初出日を過去に固定し、再取得(upsert)後も動かないことを確認
+            import sqlite3
+            with sqlite3.connect(store.db_path) as db:
+                db.execute("UPDATE items SET first_seen_at = '2026-07-01T00:00:00+00:00'")
+            store.upsert_scored_item(scored)
+            self.assertEqual(
+                store.all_items()[0].first_seen_at, "2026-07-01T00:00:00+00:00"
+            )
+
     def test_mark_dead_hides_item_from_recent_but_keeps_history(self):
         with tempfile.TemporaryDirectory() as tmp:
             store = WatchStore(Path(tmp) / "watch.sqlite3")

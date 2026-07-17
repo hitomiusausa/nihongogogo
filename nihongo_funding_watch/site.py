@@ -95,9 +95,12 @@ def render_site(
     ]
 
     reflected_today = [
-        item for item in visible_items if format_date(item.fetched_at) == now.date().isoformat()
+        item for item in visible_items if is_first_seen_today(item, now)
     ]
-    sections = [(category, grouped.get(category, [])) for category in CATEGORY_ORDER]
+    sections = [
+        (category, sort_for_display(category, grouped.get(category, [])))
+        for category in CATEGORY_ORDER
+    ]
 
     return f"""<!doctype html>
 <html lang="ja">
@@ -252,6 +255,7 @@ def render_site(
     .badge.cat-visa {{ color: #286337; background: rgba(162, 213, 171, 0.38); border-color: var(--green); }}
     .badge.cat-other {{ color: #6f5a00; background: rgba(252, 231, 124, 0.46); border-color: var(--yellow); }}
     .badge.country {{ color: #4b3b7a; background: rgba(244, 198, 195, 0.42); border-color: var(--pink); font-weight: 700; }}
+    .badge.new {{ color: #8d2f25; background: rgba(248, 175, 166, 0.5); border-color: var(--coral); font-weight: 700; }}
     .angle {{ margin: 8px 0 0; font-size: 13px; color: #315b35; border-top: 1px solid var(--line); padding-top: 8px; }}
     .summary {{ color: #3c4043; font-size: 13px; margin: 8px 0 0; overflow-wrap: anywhere; }}
     .tag {{
@@ -332,6 +336,7 @@ def render_site(
         <input class="search" id="search" type="search" placeholder="キーワード、自治体名、制度名で検索">
         <div class="filters" aria-label="表示フィルター">
           <button class="filter active" data-filter="all">すべて</button>
+          <button class="filter" data-filter="new">本日反映</button>
           <button class="filter" data-filter="deadline">締切あり</button>
           <button class="filter" data-filter="urgent">締切30日以内</button>
           <button class="filter" data-filter="expired">終了案件</button>
@@ -362,6 +367,7 @@ def render_site(
         const filterMatch =
           activeFilter === "all" ||
           card.dataset.category === activeFilter ||
+          (activeFilter === "new" && card.dataset.new === "true") ||
           (activeFilter === "deadline" && card.dataset.deadline === "true") ||
           (activeFilter === "urgent" && card.dataset.urgent === "true") ||
           (activeFilter === "expired" && card.dataset.expired === "true");
@@ -382,6 +388,31 @@ def render_site(
 </body>
 </html>
 """
+
+
+def is_first_seen_today(item: StoredItem, now: datetime) -> bool:
+    """今日初めて収集された案件か（fetched_atは毎日更新されるため初出日で判定する）。"""
+    first_seen = item.first_seen_at or item.fetched_at
+    return format_date(first_seen) == now.date().isoformat()
+
+
+def sort_for_display(category: str, items: list[StoredItem]) -> list[StoredItem]:
+    """公募セクションだけ締切近い順に並べる（締切なし→スコア順、終了→末尾）。
+
+    他カテゴリはニュースなので入力順（スコア順）のまま。
+    """
+    if category != "公募・補助金・プロポーザル":
+        return items
+
+    def key(item: StoredItem) -> tuple[int, int, int]:
+        remaining = days_until(parse_iso_date(item.deadline_at))
+        if remaining is None:
+            return (1, 0, -item.score)
+        if remaining < 0:
+            return (2, -remaining, -item.score)
+        return (0, remaining, -item.score)
+
+    return sorted(items, key=key)
 
 
 def render_section(config: WatchConfig, title: str, items: list[StoredItem]) -> str:
@@ -420,6 +451,7 @@ def render_card(config: WatchConfig, item: StoredItem, *, priority: bool = False
     is_urgent = remaining is not None and 0 <= remaining <= 30
     is_recent_expired = remaining is not None and -RECENTLY_EXPIRED_DAYS <= remaining < 0
     is_old_expired = remaining is not None and remaining < -RECENTLY_EXPIRED_DAYS
+    is_new = is_first_seen_today(item, datetime.now(JST))
     category_class = category_class_for(item.primary_category)
     class_names = [
         category_class,
@@ -442,9 +474,10 @@ def render_card(config: WatchConfig, item: StoredItem, *, priority: bool = False
         ]
     ).lower()
     return f"""
-<article class="{class_name}" data-category="{escape(item.primary_category)}" data-deadline="{str(bool(deadline)).lower()}" data-urgent="{str(is_urgent).lower()}" data-expired="{str(remaining is not None and remaining < 0).lower()}" data-expired-old="{str(is_old_expired).lower()}" data-text="{escape(text)}"{" hidden" if is_old_expired else ""}>
+<article class="{class_name}" data-category="{escape(item.primary_category)}" data-deadline="{str(bool(deadline)).lower()}" data-urgent="{str(is_urgent).lower()}" data-expired="{str(remaining is not None and remaining < 0).lower()}" data-expired-old="{str(is_old_expired).lower()}" data-new="{str(is_new).lower()}" data-text="{escape(text)}"{" hidden" if is_old_expired else ""}>
   <p class="title"><a href="{escape(safe_url(item.url))}" target="_blank" rel="noopener noreferrer">{escape(item.title)}</a></p>
   <div class="row">
+    {'<span class="badge new">本日反映</span>' if is_new else ''}
     <span class="badge {category_class}">{escape(item.primary_category)}</span>
     {country_badge}
     <span class="badge">スコア {item.score}</span>

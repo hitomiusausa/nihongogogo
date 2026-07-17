@@ -12,7 +12,9 @@ from .scoring import ScoredItem
 
 
 # v2: title_fingerprint の正規化強化（NFKC・記号全落とし）に伴い title_key を全行再計算する。
-SCHEMA_VERSION = 2
+# v3: first_seen_at 追加（fetched_at は毎日の再取得で動くため「初出日」が別に要る）。
+#     既存行は published_at || fetched_at で近似バックフィル。
+SCHEMA_VERSION = 3
 
 LEGACY_CATEGORY_MAP = {
     "ビザ・入管・在留資格": "ニュース（外国人・ビザ）",
@@ -39,6 +41,7 @@ class StoredItem:
     deadline_at: str | None = None
     country: str = ""
     dead_at: str | None = None
+    first_seen_at: str | None = None
 
 
 class WatchStore:
@@ -85,6 +88,8 @@ class WatchStore:
                 db.execute("ALTER TABLE items ADD COLUMN country TEXT NOT NULL DEFAULT ''")
             if not column_exists(db, "items", "dead_at"):
                 db.execute("ALTER TABLE items ADD COLUMN dead_at TEXT")
+            if not column_exists(db, "items", "first_seen_at"):
+                db.execute("ALTER TABLE items ADD COLUMN first_seen_at TEXT")
             db.execute(
                 "CREATE INDEX IF NOT EXISTS idx_items_deadline_at ON items(deadline_at)"
             )
@@ -98,6 +103,13 @@ class WatchStore:
                 migrate_legacy_categories(db)
                 migrate_title_keys(db)
                 prune_duplicate_title_keys(db)
+                db.execute(
+                    """
+                    UPDATE items
+                    SET first_seen_at = COALESCE(first_seen_at, published_at, fetched_at)
+                    WHERE first_seen_at IS NULL
+                    """
+                )
                 db.execute(f"PRAGMA user_version = {SCHEMA_VERSION}")
 
     def upsert_scored_item(self, scored: ScoredItem) -> bool:
@@ -169,9 +181,10 @@ class WatchStore:
             INSERT INTO items (
                 title, url, source_name, source_type, published_at, fetched_at,
                 summary, primary_category, categories_json, score,
-                matched_keywords_json, deadline_at, title_key, country
+                matched_keywords_json, deadline_at, title_key, country,
+                first_seen_at
             )
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             ON CONFLICT(url) DO UPDATE SET
                 title=excluded.title,
                 source_name=excluded.source_name,
@@ -201,6 +214,7 @@ class WatchStore:
                 scored.deadline_at,
                 item_title_key,
                 item.country,
+                now,
             ),
         )
         return True
@@ -279,6 +293,7 @@ def row_to_item(row: sqlite3.Row) -> StoredItem:
         deadline_at=row["deadline_at"],
         country=str(row["country"]) if "country" in row.keys() else "",
         dead_at=row["dead_at"] if "dead_at" in row.keys() else None,
+        first_seen_at=row["first_seen_at"] if "first_seen_at" in row.keys() else None,
     )
 
 

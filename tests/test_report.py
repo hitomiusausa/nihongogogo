@@ -4,7 +4,11 @@ from pathlib import Path
 
 from nihongo_funding_watch.config import WatchConfig
 from nihongo_funding_watch.fetchers import FetchedItem
-from nihongo_funding_watch.report import dedupe_items, select_display_items
+from nihongo_funding_watch.report import (
+    dedupe_items,
+    group_items,
+    select_display_items,
+)
 from nihongo_funding_watch.scoring import ScoredItem
 from nihongo_funding_watch.storage import StoredItem, WatchStore
 
@@ -84,6 +88,30 @@ class DedupeItemsTest(unittest.TestCase):
         deduped = dedupe_items(items)
 
         self.assertEqual(len(deduped), 3)
+
+
+class GroupItemsTest(unittest.TestCase):
+    def test_duplicates_are_attached_as_related_not_dropped(self):
+        items = [
+            make_item(
+                1,
+                "明光ネットワークジャパンの子会社、明光キャリアパートナーズ 令和8年度広島県「外国人材日本語学習支援業務」を受託",
+                "https://example.com/a",
+            ),
+            make_item(
+                2,
+                "株式会社明光キャリアパートナーズ 令和8年度広島県「外国人材日本語学習支援業務」を受託",
+                "https://example.com/b",
+            ),
+            make_item(3, "別のニュースです 日本語教育の新制度", "https://example.com/c"),
+        ]
+
+        groups = group_items(items)
+
+        self.assertEqual(len(groups), 2)
+        self.assertEqual(groups[0].item.id, 1)
+        self.assertEqual([related.id for related in groups[0].related], [2])
+        self.assertEqual(groups[1].related, [])
 
 
 class SelectDisplayItemsTest(unittest.TestCase):

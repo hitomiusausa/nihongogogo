@@ -126,6 +126,41 @@ class FetchersTest(unittest.TestCase):
         self.assertNotIn("window.dataLayer", items[0].summary)
 
 
+class ParseRssPublisherTest(unittest.TestCase):
+    def test_google_news_summary_shows_publisher_instead_of_title_echo(self):
+        body = """<?xml version="1.0" encoding="UTF-8"?>
+        <rss version="2.0"><channel>
+        <item>
+          <title>外国人材の日本語教育に補助 香川県 - 四国新聞</title>
+          <link>https://news.google.com/rss/articles/abc?oc=5</link>
+          <pubDate>Wed, 16 Jul 2026 00:00:00 GMT</pubDate>
+          <description>&lt;a href="https://news.google.com/rss/articles/abc?oc=5"&gt;外国人材の日本語教育に補助 香川県&lt;/a&gt;&amp;nbsp;&amp;nbsp;四国新聞</description>
+        </item>
+        </channel></rss>""".encode("utf-8")
+
+        from nihongo_funding_watch.fetchers import parse_rss
+
+        items = parse_rss(body, source_name="Google News: q", source_type="google_news")
+
+        self.assertEqual(items[0].title, "外国人材の日本語教育に補助 香川県")
+        self.assertEqual(items[0].summary, "掲載元: 四国新聞")
+
+    def test_google_news_summary_empty_when_no_publisher_suffix(self):
+        body = """<?xml version="1.0" encoding="UTF-8"?>
+        <rss version="2.0"><channel>
+        <item>
+          <title>タイトルのみの記事</title>
+          <link>https://news.google.com/rss/articles/xyz?oc=5</link>
+        </item>
+        </channel></rss>""".encode("utf-8")
+
+        from nihongo_funding_watch.fetchers import parse_rss
+
+        items = parse_rss(body, source_name="Google News: q", source_type="google_news")
+
+        self.assertEqual(items[0].summary, "")
+
+
 class TitleFingerprintTest(unittest.TestCase):
     def test_wave_dash_variants_share_fingerprint(self):
         # 実データ: 同一プレスリリースが ～/〜/なし の3表記で4カード表示された

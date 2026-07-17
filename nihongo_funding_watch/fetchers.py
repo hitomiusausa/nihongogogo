@@ -325,8 +325,18 @@ def parse_rss(
         published = parse_datetime(text_of(item, "pubDate"))
         if not title or not link:
             continue
+        publisher = ""
         if source_type == "google_news":
+            publisher = google_news_publisher(html.unescape(title))
             title = clean_google_news_title(title)
+        if country:
+            summary = overseas_summary(country, title, description)
+        elif source_type == "google_news":
+            # Google NewsのdescriptionはタイトルとリンクのHTML焼き直しで情報がない。
+            # 唯一の追加情報である媒体名だけを残す。
+            summary = f"掲載元: {publisher}" if publisher else ""
+        else:
+            summary = html.unescape(description)
         items.append(
             FetchedItem(
                 title=html.unescape(title),
@@ -334,7 +344,7 @@ def parse_rss(
                 source_name=source_name,
                 source_type=source_type,
                 published_at=published,
-                summary=overseas_summary(country, title, description) if country else html.unescape(description),
+                summary=summary,
                 country=country,
             )
         )
@@ -419,6 +429,12 @@ def parse_dolab_static(body: bytes, source: PageSource) -> list[FetchedItem]:
 def clean_google_news_title(title: str) -> str:
     title = html.unescape(title)
     return re.sub(r"\s+-\s+[^-]+$", "", title).strip()
+
+
+def google_news_publisher(title: str) -> str:
+    """Google Newsのタイトル末尾「 - 媒体名」から媒体名を取り出す。"""
+    match = re.search(r"\s+-\s+([^-]+)$", title)
+    return match.group(1).strip() if match else ""
 
 
 def text_of(element: ET.Element, child_name: str) -> str:

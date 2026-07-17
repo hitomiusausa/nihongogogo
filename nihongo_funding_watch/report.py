@@ -8,7 +8,7 @@ from zoneinfo import ZoneInfo
 
 from .config import WatchConfig
 from .deadlines import days_until, parse_iso_date
-from .fetchers import title_fingerprint
+from .fetchers import is_duplicate_title_key, title_fingerprint
 from .storage import StoredItem, WatchStore
 
 
@@ -32,9 +32,29 @@ def write_report(
     report_dir.mkdir(parents=True, exist_ok=True)
     today = datetime.now(JST).date().isoformat()
     path = report_dir / f"{today}.md"
-    items = dedupe_items(store.recent_items(since_days=since_days))
+    items = select_display_items(config, store, since_days=since_days)
     path.write_text(render_report(config, items, since_days=since_days), encoding="utf-8")
     return path
+
+
+def select_display_items(
+    config: WatchConfig,
+    store: WatchStore,
+    *,
+    since_days: int = 10,
+) -> list[StoredItem]:
+    """レポート/サイト共通の表示アイテム選定: 除外URLを落とし、重複を束ねる。
+
+    exclude_urls は収集時にも効くが、既に保存済みの行が表示期間に残るため、
+    表示側でも適用して設定変更が即日反映されるようにする。
+    """
+    excluded = {url.rstrip("/") for url in config.exclude_urls}
+    items = [
+        item
+        for item in store.recent_items(since_days=since_days)
+        if item.url.rstrip("/") not in excluded
+    ]
+    return dedupe_items(items)
 
 
 def render_report(
@@ -140,13 +160,17 @@ def format_datetime_date(value: str | None) -> str:
 
 
 def dedupe_items(items: list[StoredItem]) -> list[StoredItem]:
+    """タイトル指紋が同一・包含・高重複のアイテムを1件に束ねる。
+
+    items はスコア降順で渡される前提なので、残るのは各ニュースの最高スコア版。
+    """
     deduped: list[StoredItem] = []
-    seen: set[str] = set()
+    kept_keys: list[str] = []
     for item in items:
         key = title_fingerprint(item.title)
-        if key in seen:
+        if any(is_duplicate_title_key(key, kept) for kept in kept_keys):
             continue
-        seen.add(key)
+        kept_keys.append(key)
         deduped.append(item)
     return deduped
 

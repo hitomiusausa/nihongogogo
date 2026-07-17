@@ -23,6 +23,7 @@ jobs:
       - name: Run collector
         run: |
           python -m nihongo_funding_watch run --since-days 14
+          python -m nihongo_funding_watch check-links --since-days 14
           python -m nihongo_funding_watch check-duplicates
           python -m nihongo_funding_watch site --since-days 14 --site-dir public
           python -m nihongo_funding_watch export-csv public/items.csv

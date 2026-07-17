@@ -35,5 +35,59 @@ class StorageTest(unittest.TestCase):
             self.assertEqual(items[0].country, "インドネシア")
 
 
+    def test_upsert_deduplicates_wave_dash_title_variants(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            store = WatchStore(Path(tmp) / "watch.sqlite3")
+            store.initialize()
+
+            def scored(title: str, url: str) -> ScoredItem:
+                return ScoredItem(
+                    item=FetchedItem(
+                        title=title,
+                        url=url,
+                        source_name="test",
+                        source_type="google_news",
+                    ),
+                    score=5,
+                    categories=["ニュース（日本語教育）"],
+                    matched_keywords=["日本語教育"],
+                    primary_category="ニュース（日本語教育）",
+                )
+
+            self.assertTrue(
+                store.upsert_scored_item(scored("研修の応募開始 ～教師を育成～", "https://example.com/a"))
+            )
+            self.assertFalse(
+                store.upsert_scored_item(scored("研修の応募開始 〜教師を育成〜", "https://example.com/b"))
+            )
+            self.assertEqual(len(store.all_items()), 1)
+
+    def test_mark_dead_hides_item_from_recent_but_keeps_history(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            store = WatchStore(Path(tmp) / "watch.sqlite3")
+            store.initialize()
+            scored = ScoredItem(
+                item=FetchedItem(
+                    title="日本語教育 補助金",
+                    url="https://example.com/a",
+                    source_name="test",
+                    source_type="page",
+                ),
+                score=9,
+                categories=["公募・補助金・プロポーザル"],
+                matched_keywords=["日本語教育"],
+                primary_category="公募・補助金・プロポーザル",
+            )
+            store.upsert_scored_item(scored)
+
+            store.mark_dead("https://example.com/a")
+            self.assertEqual(store.recent_items(since_days=14), [])
+            self.assertEqual(len(store.recent_items(since_days=14, include_dead=True)), 1)
+            self.assertEqual(len(store.all_items()), 1)
+
+            store.clear_dead("https://example.com/a")
+            self.assertEqual(len(store.recent_items(since_days=14)), 1)
+
+
 if __name__ == "__main__":
     unittest.main()

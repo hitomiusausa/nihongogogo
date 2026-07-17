@@ -3,15 +3,19 @@ from __future__ import annotations
 from dataclasses import dataclass, replace
 from datetime import datetime, timedelta, timezone
 import re
+import time
+import urllib.parse
 
 from .config import WatchConfig
 from .deadlines import extract_deadline
 from .fetchers import (
     FetchedItem,
+    HttpStatusError,
     fetch_google_news,
     fetch_google_news_source,
     fetch_page_links,
     fetch_page_text,
+    http_get,
     title_fingerprint,
 )
 from .scoring import ScoredItem, has_strong_public_signal, score_item
@@ -68,12 +72,60 @@ OFFICIAL_PUBLIC_SOURCES = {
 }
 
 
+DEAD_LINK_STATUS_CODES = {404, 410}
+
+
 @dataclass(frozen=True)
 class CollectionResult:
     fetched: int
     matched: int
     stored_new: int
     errors: list[str]
+
+
+@dataclass(frozen=True)
+class LinkCheckResult:
+    checked: int
+    marked_dead: int
+    revived: int
+
+
+def check_links(
+    store: WatchStore,
+    *,
+    since_days: int = 14,
+    pause_seconds: float = 0.1,
+) -> LinkCheckResult:
+    """表示対象期間のリンクを実査し、消えたページを掲載から外す（復活したら戻す）。
+
+    news.google.com はリダイレクタで常に200を返すため検査対象外。
+    404/410 だけを「死んだリンク」とみなし、一時的な障害では掲載を止めない。
+    """
+    checked = 0
+    marked_dead = 0
+    revived = 0
+    for item in store.recent_items(since_days=since_days, include_dead=True):
+        parsed = urllib.parse.urlsplit(item.url)
+        if parsed.scheme not in {"http", "https"}:
+            continue
+        if parsed.netloc.endswith("news.google.com"):
+            continue
+        checked += 1
+        try:
+            http_get(item.url)
+        except HttpStatusError as exc:
+            if exc.code in DEAD_LINK_STATUS_CODES and item.dead_at is None:
+                store.mark_dead(item.url)
+                marked_dead += 1
+            continue
+        except Exception:
+            continue
+        finally:
+            time.sleep(pause_seconds)
+        if item.dead_at is not None:
+            store.clear_dead(item.url)
+            revived += 1
+    return LinkCheckResult(checked=checked, marked_dead=marked_dead, revived=revived)
 
 
 def run_collection(
@@ -162,6 +214,11 @@ def prepare_item(config: WatchConfig, item: FetchedItem) -> FetchedItem | None:
 
     try:
         detail_text = fetch_page_text(item.url)
+    except HttpStatusError as exc:
+        if exc.code in DEAD_LINK_STATUS_CODES:
+            # リンク先が消えたページを掲載し続けない。一時的な障害(5xx等)とは区別する。
+            return None
+        return item
     except Exception:
         return item
 

@@ -251,7 +251,11 @@
   "exclude_urls": [
     "https://www.bunka.go.jp/shinsei_boshu/kobo/84377601.html",
     "https://www.bunka.go.jp/seisaku/joseikin_shien/index.html",
-    "https://www.bunka.go.jp/shinsei_boshu/kobo/index.html"
+    "https://www.bunka.go.jp/shinsei_boshu/kobo/index.html",
+    "https://www.moj.go.jp/isa/08_00045.html",
+    "https://www.moj.go.jp/isa/10_00210.html",
+    "https://www.moj.go.jp/isa/applications/resources/03_00070.html",
+    "https://www.moj.go.jp/isa/applications/resources/10_00015.html"
   ],
   "exclude_title_patterns": [
     "^令和8年度生活文化創造・戦略展開事業 企画・運営業務（企画競争）$",

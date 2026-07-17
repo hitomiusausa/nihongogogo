@@ -7,7 +7,8 @@ Semiosis株式会社の `Nihongo Catch!` 販促と運用資金確保に使うた
 - Google News RSS検索と公式ページ巡回から候補記事を収集
 - 「公募・補助金・プロポーザル」「ニュース（日本語教育）」「ニュース（外国人・ビザ）」「その他」に自動分類
 - `Nihongo Catch!` の営業・提案に使えそうな切り口をレポートに追記
-- 取得済みURLをSQLiteで重複排除
+- 取得済みURLをSQLiteで重複排除（タイトルの表記ゆれ・媒体違いの同一ニュースも表示時に1件へ束ねる）
+- リンク切れ（404/410）のページを検出して掲載から外し、復活したら自動で戻す
 - 締切日とページ反映日を表示
 - 締切後30日以内は「終了直後」として残し、締切後31日以降は通常表示から外して「終了案件」フィルターで確認
 - 締切後180日を超えた案件はHTML/Markdownから外し、SQLite/CSVの履歴として保持
@@ -90,6 +91,9 @@ python3 -m nihongo_funding_watch export-csv data/export.csv
 
 # タイトル正規化ベースの重複チェック
 python3 -m nihongo_funding_watch check-duplicates
+
+# リンク切れ検査（404/410を掲載から外す・復活したら戻す）
+python3 -m nihongo_funding_watch check-links --since-days 14
 
 # テスト
 python3 -m unittest discover -s tests

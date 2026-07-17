@@ -10,7 +10,7 @@ from zoneinfo import ZoneInfo
 
 from .config import WatchConfig
 from .deadlines import days_until, parse_iso_date
-from .report import dedupe_items
+from .report import select_display_items
 from .storage import StoredItem, WatchStore
 
 
@@ -37,7 +37,7 @@ def write_site(
     reports_dir.mkdir(parents=True, exist_ok=True)
 
     today = datetime.now(JST).date().isoformat()
-    items = dedupe_items(store.recent_items(since_days=since_days))
+    items = select_display_items(config, store, since_days=since_days)
     html = render_site(config, items, since_days=since_days)
 
     dated_path = reports_dir / f"{today}.html"

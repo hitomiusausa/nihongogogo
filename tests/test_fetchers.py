@@ -2,11 +2,13 @@ import unittest
 
 from nihongo_funding_watch.config import PageSource
 from nihongo_funding_watch.fetchers import (
+    is_duplicate_title_key,
     parse_kp2mi_gtog_japan,
     parse_dolab_static,
     parse_japanese_date,
     parse_mext_boshu,
     parse_municipality_focus,
+    title_fingerprint,
 )
 
 
@@ -122,6 +124,80 @@ class FetchersTest(unittest.TestCase):
         self.assertEqual(items[0].country, "ベトナム")
         self.assertIn("JFT-Basic/JLPT", items[0].summary)
         self.assertNotIn("window.dataLayer", items[0].summary)
+
+
+class TitleFingerprintTest(unittest.TestCase):
+    def test_wave_dash_variants_share_fingerprint(self):
+        # 実データ: 同一プレスリリースが ～/〜/なし の3表記で4カード表示された
+        base = title_fingerprint(
+            "文部科学省委託「子どものための日本語教育研修」応募受付開始 外国人児童生徒支援に携わる日本語教師を育成"
+        )
+        self.assertEqual(
+            title_fingerprint(
+                "文部科学省委託「子どものための日本語教育研修」応募受付開始 〜外国人児童生徒支援に携わる日本語教師を育成〜"
+            ),
+            base,
+        )
+        self.assertEqual(
+            title_fingerprint(
+                "文部科学省委託「子どものための日本語教育研修」応募受付開始 ～外国人児童生徒支援に携わる日本語教師を育成～"
+            ),
+            base,
+        )
+
+    def test_fullwidth_bracket_and_media_suffix_share_fingerprint(self):
+        # 実データ: ［川崎区役所主催］…（PR TIMES） と 【川崎区役所主催】… が2カード表示された
+        self.assertEqual(
+            title_fingerprint(
+                "［川崎区役所主催］就労分野の認定日本語教育機関による実証事業「就労者のための日本語講座」を実施します（PR TIMES）"
+            ),
+            title_fingerprint(
+                "【川崎区役所主催】就労分野の認定日本語教育機関による実証事業「就労者のための日本語講座」を実施します"
+            ),
+        )
+
+
+class DuplicateTitleKeyTest(unittest.TestCase):
+    def _key(self, title: str) -> str:
+        return title_fingerprint(title)
+
+    def test_truncated_prefix_is_duplicate(self):
+        full = self._key(
+            "文部科学省委託「子どものための日本語教育研修」応募受付開始 ～外国人児童生徒支援に携わる日本語教師を育成～"
+        )
+        truncated = self._key(
+            "文部科学省委託「子どものための日本語教育研修」応募受付開始 ～外国人児童生徒..（認定NPO法人メタノイア プレスリリース）"
+        )
+        self.assertTrue(is_duplicate_title_key(full, truncated))
+
+    def test_company_prefix_variants_are_duplicates(self):
+        left = self._key(
+            "明光ネットワークジャパンの子会社、明光キャリアパートナーズ 令和8年度広島県「外国人材日本語学習支援業務」を受託"
+        )
+        right = self._key(
+            "株式会社明光キャリアパートナーズ 令和8年度広島県「外国人材日本語学習支援業務」を受託"
+        )
+        self.assertTrue(is_duplicate_title_key(left, right))
+
+    def test_different_announcements_with_shared_boilerplate_are_not_duplicates(self):
+        # 実データ: KP2MIの別告示同士は長い定型句を共有するが別物
+        left = self._key(
+            "PENGUMUMAN HASIL PEMERIKSAAN PSIKOLOGI, PEMANGGILAN KANDIDAT WAITING LIST, DAN PELAKSANAAN MEDICAL CHECK UP I CALON KANDIDAT NURSE DAN CAREWORKER PEKERJA MIGRAN INDONESIA PROGRAM G TO G JEPANG BATCH XX TAHUN PENEMPATAN 2027"
+        )
+        right = self._key(
+            "PENGUMUMAN HASIL PEMERIKSAAN PSIKOLOGI KANDIDAT WAITING LIST DAN DAFTAR KETERLAMBATAN HASIL PEMERIKSAAN PSIKOLOGI CALON KANDIDAT NURSE DAN CAREWORKER PEKERJA MIGRAN INDONESIA PROGRAM G TO G JEPANG BATCH XX TAHUN PENEMPATAN 2027"
+        )
+        self.assertFalse(is_duplicate_title_key(left, right))
+
+    def test_different_fiscal_years_are_not_duplicates(self):
+        left = self._key("令和7年度外国人材受入加速化支援事業に係る受託事業者の募集について")
+        right = self._key("令和8年度外国人材受入加速化支援事業に係る受託事業者の募集について")
+        self.assertFalse(is_duplicate_title_key(left, right))
+
+    def test_short_keys_never_merge_by_containment(self):
+        self.assertFalse(
+            is_duplicate_title_key(self._key("監理措置制度"), self._key("監理措置制度の改正が入管法に与える影響"))
+        )
 
 
 if __name__ == "__main__":

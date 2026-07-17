@@ -6,7 +6,7 @@ from pathlib import Path
 
 from .config import load_config
 from .export import export_csv
-from .pipeline import run_collection
+from .pipeline import check_links, run_collection
 from .report import write_report
 from .site import write_site
 from .storage import WatchStore
@@ -46,6 +46,12 @@ def build_parser() -> argparse.ArgumentParser:
 
     sub.add_parser("check-duplicates", help="Check title-based duplicate groups.")
 
+    links = sub.add_parser(
+        "check-links",
+        help="Verify item links; hide 404/410 pages from reports and revive recovered ones.",
+    )
+    links.add_argument("--since-days", type=int, default=14)
+
     return parser
 
 
@@ -79,6 +85,14 @@ def main() -> None:
     if args.command == "export-csv":
         export_csv(store, args.output)
         print(f"csv={args.output}")
+        return
+
+    if args.command == "check-links":
+        result = check_links(store, since_days=args.since_days)
+        print(
+            f"checked={result.checked} marked_dead={result.marked_dead} "
+            f"revived={result.revived}"
+        )
         return
 
     if args.command == "check-duplicates":

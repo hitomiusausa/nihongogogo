@@ -6,6 +6,7 @@ import logging
 import re
 import ssl
 import time
+import unicodedata
 import urllib.error
 import urllib.parse
 import urllib.request
@@ -25,6 +26,15 @@ USER_AGENT = (
     "Semiosis-NihongoFundingWatch/0.1 "
     "(https://fingerboard-app.com/nihongo_catch/)"
 )
+
+
+class HttpStatusError(RuntimeError):
+    """HTTP error with the status code preserved so callers can tell 404 from 5xx."""
+
+    def __init__(self, code: int, url: str) -> None:
+        super().__init__(f"HTTP {code} while fetching {url}")
+        self.code = code
+        self.url = url
 
 
 @dataclass(frozen=True)
@@ -285,7 +295,7 @@ def http_get(url: str, timeout: int = 20, *, allow_insecure_fallback: bool = Tru
         with urllib.request.urlopen(request, timeout=timeout) as response:
             return response.read()
     except urllib.error.HTTPError as exc:
-        raise RuntimeError(f"HTTP {exc.code} while fetching {url}") from exc
+        raise HttpStatusError(exc.code, url) from exc
     except urllib.error.URLError as exc:
         if isinstance(exc.reason, ssl.SSLCertVerificationError) and allow_insecure_fallback:
             logger.warning(
@@ -432,10 +442,59 @@ def normalize_text(value: str) -> str:
 
 
 def title_fingerprint(title: str) -> str:
-    value = clean_google_news_title(title)
-    value = re.sub(r"（[^）]{1,30}）|\([^)]{1,30}\)", "", value)
-    value = re.sub(r"[\s　、。，．・:：;；!！?？「」『』【】\[\]（）()]", "", value)
+    # NFKC で全角英数・全角記号の揺れを畳む（（）→()、８→8 など）ため、括弧除去はNFKC後に行う。
+    value = unicodedata.normalize("NFKC", clean_google_news_title(title))
+    value = re.sub(r"\([^)]{1,30}\)", "", value)
+    # 記号は媒体ごとの飾り（～/〜・［］/【】・「..」等）で揺れるので、単語文字以外を全て落とす。
+    value = re.sub(r"[\W_]+", "", value)
     return value.lower()
+
+
+MIN_DUPLICATE_KEY_LENGTH = 12
+DUPLICATE_OVERLAP_RATIO = 0.8
+
+
+def is_duplicate_title_key(left: str, right: str) -> bool:
+    """True if two title fingerprints describe the same news.
+
+    完全一致のほか、切り詰め（片方がもう片方に含まれる）と、媒体による
+    言い換え（最長共通部分文字列が短い方の8割以上）を同一ニュースとみなす。
+    年度違いの定例案件（令和7年度/令和8年度）は別案件として保護する。
+    """
+    if not left or not right:
+        return False
+    if left == right:
+        return True
+    if year_tokens(left) != year_tokens(right):
+        return False
+    shorter, longer = sorted((left, right), key=len)
+    if len(shorter) < MIN_DUPLICATE_KEY_LENGTH:
+        return False
+    if shorter in longer:
+        return True
+    overlap = longest_common_substring_length(shorter, longer)
+    return overlap >= DUPLICATE_OVERLAP_RATIO * len(shorter)
+
+
+def year_tokens(key: str) -> frozenset[str]:
+    return frozenset(re.findall(r"(?:令和|平成)\d{1,2}|(?:19|20)\d{2}", key))
+
+
+def longest_common_substring_length(left: str, right: str) -> int:
+    if not left or not right:
+        return 0
+    previous = [0] * (len(right) + 1)
+    best = 0
+    for i in range(1, len(left) + 1):
+        current = [0] * (len(right) + 1)
+        left_char = left[i - 1]
+        for j in range(1, len(right) + 1):
+            if left_char == right[j - 1]:
+                current[j] = previous[j - 1] + 1
+                if current[j] > best:
+                    best = current[j]
+        previous = current
+    return best
 
 
 def parse_datetime(value: str) -> datetime | None:

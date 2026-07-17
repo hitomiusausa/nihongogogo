@@ -11,7 +11,8 @@ from .fetchers import FetchedItem, title_fingerprint
 from .scoring import ScoredItem
 
 
-SCHEMA_VERSION = 1
+# v2: title_fingerprint の正規化強化（NFKC・記号全落とし）に伴い title_key を全行再計算する。
+SCHEMA_VERSION = 2
 
 LEGACY_CATEGORY_MAP = {
     "ビザ・入管・在留資格": "ニュース（外国人・ビザ）",
@@ -37,6 +38,7 @@ class StoredItem:
     matched_keywords: list[str]
     deadline_at: str | None = None
     country: str = ""
+    dead_at: str | None = None
 
 
 class WatchStore:
@@ -81,6 +83,8 @@ class WatchStore:
                 db.execute("ALTER TABLE items ADD COLUMN title_key TEXT")
             if not column_exists(db, "items", "country"):
                 db.execute("ALTER TABLE items ADD COLUMN country TEXT NOT NULL DEFAULT ''")
+            if not column_exists(db, "items", "dead_at"):
+                db.execute("ALTER TABLE items ADD COLUMN dead_at TEXT")
             db.execute(
                 "CREATE INDEX IF NOT EXISTS idx_items_deadline_at ON items(deadline_at)"
             )
@@ -201,18 +205,33 @@ class WatchStore:
         )
         return True
 
-    def recent_items(self, *, since_days: int = 10) -> list[StoredItem]:
+    def recent_items(
+        self, *, since_days: int = 10, include_dead: bool = False
+    ) -> list[StoredItem]:
         threshold = (datetime.now(timezone.utc) - timedelta(days=since_days)).isoformat()
+        dead_filter = "" if include_dead else "AND dead_at IS NULL"
         with closing(self.connect()) as db:
             rows = db.execute(
-                """
+                f"""
                 SELECT * FROM items
-                WHERE fetched_at >= ? OR published_at >= ?
+                WHERE (fetched_at >= ? OR published_at >= ?) {dead_filter}
                 ORDER BY score DESC, COALESCE(published_at, fetched_at) DESC
                 """,
                 (threshold, threshold),
             ).fetchall()
         return [row_to_item(row) for row in rows]
+
+    def mark_dead(self, url: str) -> None:
+        now = datetime.now(timezone.utc).isoformat()
+        with closing(self.connect()) as db, db:
+            db.execute(
+                "UPDATE items SET dead_at = COALESCE(dead_at, ?) WHERE url = ?",
+                (now, url),
+            )
+
+    def clear_dead(self, url: str) -> None:
+        with closing(self.connect()) as db, db:
+            db.execute("UPDATE items SET dead_at = NULL WHERE url = ?", (url,))
 
     def all_items(self) -> list[StoredItem]:
         with closing(self.connect()) as db:
@@ -259,6 +278,7 @@ def row_to_item(row: sqlite3.Row) -> StoredItem:
         matched_keywords=json.loads(row["matched_keywords_json"]),
         deadline_at=row["deadline_at"],
         country=str(row["country"]) if "country" in row.keys() else "",
+        dead_at=row["dead_at"] if "dead_at" in row.keys() else None,
     )
 
 
@@ -293,9 +313,11 @@ def migrate_legacy_categories(db: sqlite3.Connection) -> None:
 
 
 def migrate_title_keys(db: sqlite3.Connection) -> None:
+    # title_key は常に title_fingerprint(title) と一致させる。指紋の定義が変わった
+    # スキーマ更新時にも全行を現行定義で再計算する（残すと旧定義のキーで重複が漏れる）。
     rows = db.execute("SELECT id, title, title_key FROM items").fetchall()
     for row in rows:
-        key = row["title_key"] or title_fingerprint(str(row["title"]))
+        key = title_fingerprint(str(row["title"]))
         if key != row["title_key"]:
             db.execute(
                 "UPDATE items SET title_key = ? WHERE id = ?",

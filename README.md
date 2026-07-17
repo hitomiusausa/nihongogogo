@@ -39,14 +39,11 @@ HTMLとCSVまでまとめて更新する通常運用コマンド:
 ./scripts/run_daily.sh
 ```
 
-## 毎朝8時に自動実行する
+## 毎朝の自動実行
 
-```bash
-cd /Users/usausagi/Documents/Playground/日本語資金
-./scripts/install_launchd.sh
-```
+本番の日次実行は GitHub Actions（`.github/workflows/daily-update.yml`、毎日23:00 UTC＝朝8時JST）で行い、結果は GitHub Pages（`docs/`）に公開されます。ローカルでの自動実行は不要です。
 
-ログは `logs/launchd.out.log` と `logs/launchd.err.log` に出ます。
+ローカルのlaunchd実行（`./scripts/install_launchd.sh`）は2026-07-17に撤去しました。macOSのフルディスクアクセス制限で失敗し続けていた経緯があり、再導入する場合は権限付与が必要です。
 
 ## グループメンバーで閲覧する
 

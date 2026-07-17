@@ -6,6 +6,7 @@ import re
 import time
 import urllib.parse
 
+from .amounts import extract_amount
 from .config import WatchConfig
 from .deadlines import extract_deadline
 from .fetchers import (
@@ -242,6 +243,9 @@ def prepare_item(config: WatchConfig, item: FetchedItem) -> FetchedItem | None:
         excerpt = deadline_excerpt(detail_text, deadline.isoformat())
         if excerpt and excerpt not in detail_summary:
             detail_summary = f"{detail_summary} / {excerpt}"
+    amount = extract_amount(detail_text)
+    if amount:
+        detail_summary = f"{detail_summary} / 金額: {amount}"
     return replace(detail_item, summary=detail_summary)
 
 

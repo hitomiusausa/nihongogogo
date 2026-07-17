@@ -252,6 +252,7 @@ def render_site(
     .badge.cat-visa {{ color: #286337; background: rgba(162, 213, 171, 0.38); border-color: var(--green); }}
     .badge.cat-other {{ color: #6f5a00; background: rgba(252, 231, 124, 0.46); border-color: var(--yellow); }}
     .badge.country {{ color: #4b3b7a; background: rgba(244, 198, 195, 0.42); border-color: var(--pink); font-weight: 700; }}
+    .badge.amount {{ color: #236d3a; background: rgba(162, 213, 171, 0.38); border-color: var(--green); font-weight: 700; }}
     .angle {{ margin: 8px 0 0; font-size: 13px; color: #315b35; border-top: 1px solid var(--line); padding-top: 8px; }}
     .summary {{ color: #3c4043; font-size: 13px; margin: 8px 0 0; overflow-wrap: anywhere; }}
     .tag {{
@@ -413,7 +414,9 @@ def render_card(config: WatchConfig, item: StoredItem, *, priority: bool = False
         for keyword in item.matched_keywords[:8]
     )
     angle = config.sales_angles.get(item.primary_category, "")
-    summary = truncate(item.summary, 180)
+    raw_summary, amount = split_amount(item.summary)
+    amount_badge = f'<span class="badge amount">{escape(amount)}</span>' if amount else ""
+    summary = truncate(raw_summary, 180)
     country_badge = f'<span class="badge country">{escape(item.country)}</span>' if item.country else ""
     deadline = parse_iso_date(item.deadline_at)
     remaining = days_until(deadline)
@@ -449,6 +452,7 @@ def render_card(config: WatchConfig, item: StoredItem, *, priority: bool = False
     {country_badge}
     <span class="badge">スコア {item.score}</span>
     {deadline_badge}
+    {amount_badge}
   </div>
   <p class="item-meta">出典: {escape(item.source_name)} / 公開日: {escape(format_date(item.published_at))} / ページ反映日: {escape(format_date(item.fetched_at))}</p>
   <div>{keywords}</div>
@@ -461,6 +465,15 @@ def render_card(config: WatchConfig, item: StoredItem, *, priority: bool = False
 
 def truncate(value: str, max_length: int) -> str:
     return value if len(value) <= max_length else value[: max_length - 1] + "…"
+
+
+def split_amount(summary: str) -> tuple[str, str]:
+    """summaryに埋め込まれた「金額: …」をバッジ用に取り出し、本文からは取り除く。"""
+    match = re.search(r"\s*/\s*金額:\s*([^/]+?)(?=\s*/|\s*$)", summary)
+    if not match:
+        return summary, ""
+    cleaned = (summary[: match.start()] + summary[match.end():]).strip()
+    return cleaned, match.group(1)
 
 
 def safe_url(url: str) -> str:

@@ -82,9 +82,10 @@ def select_display_groups(
     表示側でも適用して設定変更が即日反映されるようにする。
     """
     excluded = {url.rstrip("/") for url in config.exclude_urls}
+    # リンク切れ(dead_at)の案件も記録として一覧に残す（表示側でリンク切れ表記が付く）。
     items = [
         item
-        for item in store.recent_items(since_days=since_days)
+        for item in store.recent_items(since_days=since_days, include_dead=True)
         if item.url.rstrip("/") not in excluded
     ]
     return group_items(items)
@@ -189,8 +190,11 @@ def render_item(
     deadline_text = format_deadline(deadline, remaining)
     reflected = format_datetime_date(item.fetched_at)
 
+    dead_note = (
+        f" / リンク切れ（{format_datetime_date(item.dead_at)}確認）" if item.dead_at else ""
+    )
     lines = [
-        f"- [{item.title}]({item.url})",
+        f"- [{item.title}]({item.url}){dead_note}",
         f"  - 分類: {item.primary_category} / 国: {item.country or '-'} / スコア: {item.score} / 出典: {item.source_name}",
         f"  - 公開日: {published} / ページ反映日: {reflected} / 締切: {deadline_text} / キーワード: {keywords}",
     ]

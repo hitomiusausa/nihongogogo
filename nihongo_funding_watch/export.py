@@ -25,6 +25,7 @@ def export_csv(store: WatchStore, output: Path) -> None:
                 "score",
                 "matched_keywords",
                 "deadline_at",
+                "dead_at",
                 "summary",
             ]
         )
@@ -44,6 +45,7 @@ def export_csv(store: WatchStore, output: Path) -> None:
                     item.score,
                     ";".join(item.matched_keywords),
                     item.deadline_at,
+                    item.dead_at,
                     item.summary,
                 ]
             )

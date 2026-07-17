@@ -114,6 +114,46 @@ class GroupItemsTest(unittest.TestCase):
         self.assertEqual(groups[1].related, [])
 
 
+class DeadItemsRemainListedTest(unittest.TestCase):
+    def test_dead_marked_items_stay_in_display_as_record(self):
+        config = WatchConfig(
+            minimum_score=3,
+            google_news_queries=[],
+            google_news_sources=[],
+            page_sources=[],
+            exclude_urls=[],
+            exclude_title_patterns=[],
+            generic_link_title_patterns=[],
+            categories={"公募・補助金・プロポーザル": ["補助金"]},
+            keyword_weights={"補助金": 4},
+            sales_angles={},
+        )
+        with tempfile.TemporaryDirectory() as tmp:
+            store = WatchStore(Path(tmp) / "w.sqlite3")
+            store.initialize()
+            store.upsert_scored_item(
+                ScoredItem(
+                    item=FetchedItem(
+                        title="日本語教育支援補助金",
+                        url="https://example.com/removed.html",
+                        source_name="県",
+                        source_type="page",
+                    ),
+                    score=5,
+                    categories=["公募・補助金・プロポーザル"],
+                    matched_keywords=["補助金"],
+                    primary_category="公募・補助金・プロポーザル",
+                )
+            )
+            store.mark_dead("https://example.com/removed.html")
+
+            items = select_display_items(config, store, since_days=14)
+
+            # リンク切れでも記録として一覧に残る（表示側でリンク切れ表記が付く）
+            self.assertEqual(len(items), 1)
+            self.assertIsNotNone(items[0].dead_at)
+
+
 class SelectDisplayItemsTest(unittest.TestCase):
     def test_excluded_urls_are_hidden_even_if_already_stored(self):
         config = WatchConfig(

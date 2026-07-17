@@ -23,6 +23,7 @@ def make_stored_item(
     score: int = 5,
     fetched_at: str | None = None,
     first_seen_at: str | None = None,
+    dead_at: str | None = None,
 ) -> StoredItem:
     return StoredItem(
         id=item_id,
@@ -39,6 +40,7 @@ def make_stored_item(
         matched_keywords=[],
         deadline_at=deadline_at,
         first_seen_at=first_seen_at,
+        dead_at=dead_at,
     )
 
 
@@ -135,6 +137,21 @@ class SortForDisplayTest(unittest.TestCase):
         ordered = sort_for_display("ニュース（日本語教育）", items)
 
         self.assertEqual([item.id for item in ordered], [1, 2])
+
+
+class DeadLinkBadgeTest(unittest.TestCase):
+    def test_dead_item_shows_link_broken_badge_with_checked_date(self):
+        card = render_card(
+            make_config(),
+            make_stored_item(1, dead_at="2026-07-17T05:00:00+00:00"),
+        )
+        self.assertIn("リンク切れ（2026-07-17確認）", card)
+        self.assertIn('data-dead="true"', card)
+
+    def test_live_item_has_no_dead_badge(self):
+        card = render_card(make_config(), make_stored_item(1))
+        self.assertNotIn("リンク切れ", card)
+        self.assertIn('data-dead="false"', card)
 
 
 class NewBadgeTest(unittest.TestCase):

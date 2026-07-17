@@ -214,15 +214,6 @@
       "parser": "municipality_focus"
     },
     {
-      "name": "岐阜県 多文化共生補助金",
-      "url": "https://www.pref.gifu.lg.jp/dx-support/437476.html",
-      "allow_url_patterns": [
-        "^https://www\\.pref\\.gifu\\.lg\\.jp/.+"
-      ],
-      "max_links": 8,
-      "parser": "municipality_focus"
-    },
-    {
       "name": "出入国在留管理庁",
       "url": "https://www.moj.go.jp/isa/",
       "allow_url_patterns": [

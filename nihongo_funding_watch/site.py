@@ -266,6 +266,7 @@ def render_site(
     .badge.country {{ color: #4b3b7a; background: rgba(244, 198, 195, 0.42); border-color: var(--pink); font-weight: 700; }}
     .badge.new {{ color: #8d2f25; background: rgba(248, 175, 166, 0.5); border-color: var(--coral); font-weight: 700; }}
     .badge.amount {{ color: #236d3a; background: rgba(162, 213, 171, 0.38); border-color: var(--green); font-weight: 700; }}
+    .badge.dead {{ color: var(--danger); background: rgba(184, 57, 47, 0.08); border-color: var(--danger); font-weight: 700; }}
     .angle {{ margin: 8px 0 0; font-size: 13px; color: #315b35; border-top: 1px solid var(--line); padding-top: 8px; }}
     .summary {{ color: #3c4043; font-size: 13px; margin: 8px 0 0; overflow-wrap: anywhere; }}
     .related {{ color: var(--muted); font-size: 12px; margin: 8px 0 0; overflow-wrap: anywhere; }}
@@ -488,6 +489,12 @@ def render_card(
     is_recent_expired = remaining is not None and -RECENTLY_EXPIRED_DAYS <= remaining < 0
     is_old_expired = remaining is not None and remaining < -RECENTLY_EXPIRED_DAYS
     is_new = is_first_seen_today(item, datetime.now(JST))
+    is_dead = item.dead_at is not None
+    dead_badge = (
+        f'<span class="badge dead">リンク切れ（{escape(format_date(item.dead_at))}確認）</span>'
+        if is_dead
+        else ""
+    )
     category_class = category_class_for(item.primary_category)
     class_names = [
         category_class,
@@ -495,7 +502,7 @@ def render_card(
         "expired-recent" if is_recent_expired else "",
         "expired-old" if is_old_expired else "",
     ]
-    if remaining is not None and remaining < 0:
+    if remaining is not None and remaining < 0 or is_dead:
         class_names.append("expired")
     class_name = " ".join(name for name in class_names if name)
     deadline_badge = render_deadline_badge(deadline, remaining)
@@ -507,12 +514,14 @@ def render_card(
             item.primary_category,
             item.summary,
             " ".join(item.matched_keywords),
+            "リンク切れ" if is_dead else "",
         ]
     ).lower()
     return f"""
-<article class="{class_name}" data-category="{escape(item.primary_category)}" data-deadline="{str(bool(deadline)).lower()}" data-urgent="{str(is_urgent).lower()}" data-expired="{str(remaining is not None and remaining < 0).lower()}" data-expired-old="{str(is_old_expired).lower()}" data-new="{str(is_new).lower()}" data-text="{escape(text)}"{" hidden" if is_old_expired else ""}>
+<article class="{class_name}" data-category="{escape(item.primary_category)}" data-deadline="{str(bool(deadline)).lower()}" data-urgent="{str(is_urgent).lower()}" data-expired="{str(remaining is not None and remaining < 0).lower()}" data-expired-old="{str(is_old_expired).lower()}" data-new="{str(is_new).lower()}" data-dead="{str(is_dead).lower()}" data-text="{escape(text)}"{" hidden" if is_old_expired else ""}>
   <p class="title"><a href="{escape(safe_url(item.url))}" target="_blank" rel="noopener noreferrer">{escape(item.title)}</a></p>
   <div class="row">
+    {dead_badge}
     {'<span class="badge new">本日反映</span>' if is_new else ''}
     <span class="badge {category_class}">{escape(item.primary_category)}</span>
     {country_badge}

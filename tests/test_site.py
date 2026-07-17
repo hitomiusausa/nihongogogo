@@ -158,7 +158,7 @@ class NewBadgeTest(unittest.TestCase):
     def test_item_first_seen_today_gets_new_badge(self):
         now_iso = datetime.now(timezone.utc).isoformat()
         card = render_card(make_config(), make_stored_item(1, first_seen_at=now_iso))
-        self.assertIn("本日反映", card)
+        self.assertIn("新鮮ニュース", card)
         self.assertIn('data-new="true"', card)
 
     def test_item_refetched_today_but_seen_earlier_has_no_new_badge(self):
@@ -170,7 +170,7 @@ class NewBadgeTest(unittest.TestCase):
                 1, fetched_at=now_iso, first_seen_at="2026-07-01T00:00:00+00:00"
             ),
         )
-        self.assertNotIn("本日反映", card)
+        self.assertNotIn("新鮮ニュース", card)
         self.assertIn('data-new="false"', card)
 
 

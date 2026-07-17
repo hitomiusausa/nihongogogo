@@ -222,6 +222,19 @@ def render_site(
       font-size: 13px;
     }}
     .filter.active {{ background: var(--coral); color: #8d2f25; border-color: var(--coral); font-weight: 700; }}
+    .reload {{
+      border: 1px solid var(--line);
+      background: var(--paper);
+      color: var(--accent);
+      border-radius: 999px;
+      padding: 4px 12px;
+      margin-left: 8px;
+      cursor: pointer;
+      font: inherit;
+      font-size: 13px;
+      font-weight: 700;
+    }}
+    .reload:active {{ transform: translateY(1px); }}
     .grid {{ display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px; }}
     .list {{ display: grid; gap: 10px; }}
     article {{
@@ -336,11 +349,13 @@ def render_site(
   <header>
     <div class="top">
       <h1>日本語教育<br>資金・政策ウォッチ</h1>
-      <p class="meta">最終更新: {escape(now.strftime("%Y-%m-%d %H:%M:%S %Z"))} / 対象期間: 直近{since_days}日</p>
+      <p class="meta">最終更新: {escape(now.strftime("%Y-%m-%d %H:%M:%S %Z"))} / 対象期間: 直近{since_days}日
+        <button class="reload" id="reload" type="button" title="最新の公開データを読み込み直します">🔄 最新に更新</button>
+      </p>
       <div class="stats">
         <div class="stat"><strong>{len(visible_items)}</strong>表示件数</div>
         <div class="stat"><strong>{len(grouped.get("公募・補助金・プロポーザル", []))}</strong>公募・補助金</div>
-        <div class="stat"><strong>{len(reflected_today)}</strong>本日反映</div>
+        <div class="stat"><strong>{len(reflected_today)}</strong>新鮮ニュース</div>
         <div class="stat"><strong>{len(with_deadlines)}</strong>締切検出</div>
         <div class="stat"><strong>{len(urgent_items)}</strong>締切30日以内</div>
         <div class="stat"><strong>{len(recently_expired_items)}</strong>終了直後</div>
@@ -349,7 +364,7 @@ def render_site(
         <input class="search" id="search" type="search" placeholder="キーワード、自治体名、制度名で検索">
         <div class="filters" aria-label="表示フィルター">
           <button class="filter active" data-filter="all">すべて</button>
-          <button class="filter" data-filter="new">本日反映</button>
+          <button class="filter" data-filter="new">新鮮ニュース</button>
           <button class="filter" data-filter="deadline">締切あり</button>
           <button class="filter" data-filter="urgent">締切30日以内</button>
           <button class="filter" data-filter="expired">終了案件</button>
@@ -365,6 +380,9 @@ def render_site(
     {''.join(render_section(config, title, section_items, related_map) for title, section_items in sections if section_items)}
     <footer>
       {render_health(health)}
+      <p>収集は毎朝8時に自動実行。今すぐ収集し直したい場合は
+        <a href="https://github.com/hitomiusausa/nihongogogo/actions/workflows/daily-update.yml" target="_blank" rel="noopener noreferrer">GitHub Actionsのページ</a>
+        から「Run workflow」を実行してください（リポジトリ権限が必要）。</p>
       <p>Semiosis株式会社 / Nihongo Catch! の販促・運用資金探索用に自動生成。</p>
     </footer>
   </main>
@@ -389,6 +407,13 @@ def render_site(
         card.hidden = !(textMatch && filterMatch) || defaultHidden;
       }}
     }}
+
+    // 手動更新: キャッシュを避けて最新の公開データを読み込み直す
+    document.querySelector("#reload").addEventListener("click", () => {{
+      const url = new URL(location.href);
+      url.searchParams.set("refresh", Date.now().toString());
+      location.replace(url.toString());
+    }});
 
     search.addEventListener("input", applyFilters);
     for (const button of filters) {{
@@ -522,7 +547,7 @@ def render_card(
   <p class="title"><a href="{escape(safe_url(item.url))}" target="_blank" rel="noopener noreferrer">{escape(item.title)}</a></p>
   <div class="row">
     {dead_badge}
-    {'<span class="badge new">本日反映</span>' if is_new else ''}
+    {'<span class="badge new">新鮮ニュース</span>' if is_new else ''}
     <span class="badge {category_class}">{escape(item.primary_category)}</span>
     {country_badge}
     <span class="badge">スコア {item.score}</span>

@@ -6,7 +6,7 @@ from pathlib import Path
 
 from .config import load_config
 from .export import export_csv
-from .pipeline import check_links, run_collection
+from .pipeline import check_links, run_collection, write_health
 from .report import write_report
 from .site import write_site
 from .storage import WatchStore
@@ -63,6 +63,7 @@ def main() -> None:
 
     if args.command == "run":
         result = run_collection(config, store, since_days=args.since_days)
+        write_health(result, args.db.parent / "health.json")
         report_path = write_report(config, store, args.report_dir, since_days=args.since_days)
         print(
             f"fetched={result.fetched} stored_new={result.stored_new} "

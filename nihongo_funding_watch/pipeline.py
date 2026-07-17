@@ -1,7 +1,9 @@
 from __future__ import annotations
 
-from dataclasses import dataclass, replace
+from dataclasses import dataclass, field, replace
 from datetime import datetime, timedelta, timezone
+import json
+from pathlib import Path
 import re
 import time
 import urllib.parse
@@ -82,6 +84,32 @@ class CollectionResult:
     matched: int
     stored_new: int
     errors: list[str]
+    source_counts: dict[str, int] = field(default_factory=dict)
+    zero_page_sources: list[str] = field(default_factory=list)
+
+
+def write_health(result: CollectionResult, path: Path) -> None:
+    """収集の健康状態を保存する。site/reportが読んで人間に見える場所へ出す。"""
+    payload = {
+        "checked_at": datetime.now(timezone.utc).isoformat(),
+        "fetched": result.fetched,
+        "matched": result.matched,
+        "stored_new": result.stored_new,
+        "errors": result.errors,
+        "source_counts": result.source_counts,
+        "zero_page_sources": result.zero_page_sources,
+    }
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(payload, ensure_ascii=False, indent=1), encoding="utf-8")
+
+
+def load_health(path: Path) -> dict | None:
+    if not path.exists():
+        return None
+    try:
+        return json.loads(path.read_text(encoding="utf-8"))
+    except (json.JSONDecodeError, OSError):
+        return None
 
 
 @dataclass(frozen=True)
@@ -137,24 +165,37 @@ def run_collection(
 ) -> CollectionResult:
     items: list[FetchedItem] = []
     errors: list[str] = []
+    source_counts: dict[str, int] = {}
 
     for query in config.google_news_queries:
         try:
-            items.extend(fetch_google_news(query))
+            batch = fetch_google_news(query)
+            items.extend(batch)
+            source_counts[f"Google News: {query}"] = len(batch)
         except Exception as exc:  # noqa: BLE001 - continue collecting other sources.
             errors.append(f"Google News query failed: {query}: {exc}")
 
     for source in config.google_news_sources:
         try:
-            items.extend(fetch_google_news_source(source))
+            batch = fetch_google_news_source(source)
+            items.extend(batch)
+            source_counts[f"Google News: {source.name}"] = len(batch)
         except Exception as exc:  # noqa: BLE001 - continue collecting other sources.
             errors.append(f"Google News source failed: {source.name}: {exc}")
 
     for source in config.page_sources:
         try:
-            items.extend(fetch_page_links(source))
+            batch = fetch_page_links(source)
+            items.extend(batch)
+            source_counts[source.name] = len(batch)
         except Exception as exc:  # noqa: BLE001 - continue collecting other sources.
             errors.append(f"Page source failed: {source.name}: {exc}")
+
+    zero_page_sources = [
+        source.name
+        for source in config.page_sources
+        if source_counts.get(source.name, 0) == 0
+    ]
 
     threshold = datetime.now(timezone.utc) - timedelta(days=since_days)
     seen_urls: set[str] = set()
@@ -192,6 +233,8 @@ def run_collection(
         matched=len(matched_items),
         stored_new=stored_new,
         errors=errors,
+        source_counts=source_counts,
+        zero_page_sources=zero_page_sources,
     )
 
 

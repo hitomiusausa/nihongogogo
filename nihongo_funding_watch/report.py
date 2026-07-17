@@ -9,6 +9,7 @@ from zoneinfo import ZoneInfo
 from .config import WatchConfig
 from .deadlines import days_until, parse_iso_date
 from .fetchers import is_duplicate_title_key, title_fingerprint
+from .pipeline import load_health
 from .storage import StoredItem, WatchStore
 
 
@@ -33,8 +34,28 @@ def write_report(
     today = datetime.now(JST).date().isoformat()
     path = report_dir / f"{today}.md"
     items = select_display_items(config, store, since_days=since_days)
-    path.write_text(render_report(config, items, since_days=since_days), encoding="utf-8")
+    content = render_report(config, items, since_days=since_days)
+    content += render_health_markdown(load_health(store.db_path.parent / "health.json"))
+    path.write_text(content, encoding="utf-8")
     return path
+
+
+def render_health_markdown(health: dict | None) -> str:
+    if not health:
+        return ""
+    errors = health.get("errors", [])
+    zero_sources = health.get("zero_page_sources", [])
+    lines = [
+        "",
+        "## 収集ヘルス",
+        "",
+        f"- 取得: {health.get('fetched', 0)}件 / エラー: {len(errors)}件 / 取得0件の巡回ページ: {len(zero_sources)}件",
+    ]
+    lines.extend(f"- エラー: {error}" for error in errors)
+    lines.extend(
+        f"- 取得0件: {name}（ページ構造変化・移転の可能性）" for name in zero_sources
+    )
+    return "\n".join(lines) + "\n"
 
 
 def select_display_items(

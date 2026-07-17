@@ -1,6 +1,6 @@
 import unittest
 
-from nihongo_funding_watch.site import linkify_html, safe_url, truncate
+from nihongo_funding_watch.site import linkify_html, render_health, safe_url, truncate
 
 
 class SiteTest(unittest.TestCase):
@@ -22,6 +22,22 @@ class SiteTest(unittest.TestCase):
     def test_truncate(self):
         self.assertEqual(truncate("abc", 5), "abc")
         self.assertEqual(truncate("abcdef", 4), "abc…")
+
+    def test_render_health_lists_errors_and_silent_sources(self):
+        html = render_health(
+            {
+                "checked_at": "2026-07-17T00:00:00+00:00",
+                "fetched": 2245,
+                "errors": ["Page source failed: 岐阜県 多文化共生補助金: HTTP 404 ..."],
+                "zero_page_sources": ["文化庁 公募情報"],
+            }
+        )
+        self.assertIn("収集ヘルス", html)
+        self.assertIn("岐阜県 多文化共生補助金", html)
+        self.assertIn("取得0件: 文化庁 公募情報", html)
+
+    def test_render_health_empty_when_missing(self):
+        self.assertEqual(render_health(None), "")
 
 
 if __name__ == "__main__":

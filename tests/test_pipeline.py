@@ -4,15 +4,17 @@ from pathlib import Path
 from unittest import mock
 
 from nihongo_funding_watch import pipeline
-from nihongo_funding_watch.config import WatchConfig
+from nihongo_funding_watch.config import PageSource, WatchConfig
 from nihongo_funding_watch.fetchers import FetchedItem, HttpStatusError
 from nihongo_funding_watch.pipeline import (
     check_links,
     has_domain_relevance,
+    load_health,
     normalize_url,
     prepare_item,
     run_collection,
     source_page_url,
+    write_health,
 )
 from nihongo_funding_watch.storage import WatchStore
 
@@ -173,6 +175,44 @@ class RunCollectionTest(unittest.TestCase):
             # Same URL on the second run must not create a new row.
             self.assertEqual(second.stored_new, 0)
             self.assertEqual(len(store.all_items()), 1)
+
+    def test_records_source_counts_and_zero_page_sources(self):
+        from dataclasses import replace
+
+        config = replace(
+            make_config(),
+            page_sources=[
+                PageSource(name="沈黙ソース", url="https://example.com/list", allow_url_patterns=[]),
+            ],
+        )
+        with tempfile.TemporaryDirectory() as tmp:
+            store = WatchStore(Path(tmp) / "w.sqlite3")
+            store.initialize()
+            with mock.patch.object(
+                pipeline, "fetch_google_news", return_value=[make_item("https://e.com/a")]
+            ), mock.patch.object(pipeline, "fetch_page_links", return_value=[]):
+                result = run_collection(config, store, since_days=14)
+
+        self.assertEqual(result.source_counts.get("Google News: q"), 1)
+        self.assertEqual(result.source_counts.get("沈黙ソース"), 0)
+        # 0件のpage_sourceはパーサ死亡・ページ構造変化のシグナルとして警告リストに載る
+        self.assertEqual(result.zero_page_sources, ["沈黙ソース"])
+
+    def test_health_write_and_load_round_trip(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            store = WatchStore(Path(tmp) / "w.sqlite3")
+            store.initialize()
+            with mock.patch.object(
+                pipeline, "fetch_google_news", side_effect=RuntimeError("boom")
+            ):
+                result = run_collection(make_config(), store, since_days=14)
+            path = Path(tmp) / "health.json"
+            write_health(result, path)
+            health = load_health(path)
+
+        self.assertEqual(health["errors"], result.errors)
+        self.assertIn("checked_at", health)
+        self.assertEqual(load_health(Path(tmp) / "missing.json"), None)
 
     def test_fetch_errors_are_captured_not_raised(self):
         with tempfile.TemporaryDirectory() as tmp:

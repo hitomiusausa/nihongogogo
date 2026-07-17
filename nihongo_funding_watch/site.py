@@ -10,6 +10,7 @@ from zoneinfo import ZoneInfo
 
 from .config import WatchConfig
 from .deadlines import days_until, parse_iso_date
+from .pipeline import load_health
 from .report import select_display_items
 from .storage import StoredItem, WatchStore
 
@@ -38,7 +39,8 @@ def write_site(
 
     today = datetime.now(JST).date().isoformat()
     items = select_display_items(config, store, since_days=since_days)
-    html = render_site(config, items, since_days=since_days)
+    health = load_health(store.db_path.parent / "health.json")
+    html = render_site(config, items, since_days=since_days, health=health)
 
     dated_path = reports_dir / f"{today}.html"
     index_path = site_dir / "index.html"
@@ -65,6 +67,7 @@ def render_site(
     items: list[StoredItem],
     *,
     since_days: int = 10,
+    health: dict | None = None,
 ) -> str:
     now = datetime.now(JST)
     today = now.date()
@@ -291,6 +294,7 @@ def render_site(
     .count {{ color: var(--muted); font-size: 13px; }}
     .empty {{ color: var(--muted); background: var(--paper); border: 1px solid var(--line); border-radius: 8px; padding: 18px; }}
     footer {{ color: var(--muted); font-size: 13px; margin-top: 34px; }}
+    .health-problems {{ color: var(--warning); font-size: 12px; margin: 4px 0 10px; padding-left: 18px; }}
     @media (max-width: 720px) {{
       header {{
         position: static;
@@ -346,6 +350,7 @@ def render_site(
   <main>
     {''.join(render_section(config, title, section_items) for title, section_items in sections if section_items)}
     <footer>
+      {render_health(health)}
       <p>Semiosis株式会社 / Nihongo Catch! の販促・運用資金探索用に自動生成。</p>
     </footer>
   </main>
@@ -475,6 +480,33 @@ def linkify_html(value: str) -> str:
         r'<a href="\1" target="_blank" rel="noopener noreferrer">\1</a>',
         escaped,
     )
+
+
+def render_health(health: dict | None) -> str:
+    """収集ヘルスをフッターに出す。異常（エラー・0件ソース）は具体名まで見せる。"""
+    if not health:
+        return ""
+    errors = health.get("errors", [])
+    zero_sources = health.get("zero_page_sources", [])
+    checked_at = format_datetime_jst(health.get("checked_at", ""))
+    lines = [
+        f'<p>収集ヘルス（{escape(checked_at)}）: '
+        f'取得{health.get("fetched", 0)}件 / 収集エラー{len(errors)}件 / '
+        f'取得0件の巡回ページ{len(zero_sources)}件</p>'
+    ]
+    problems = [f"エラー: {error}" for error in errors]
+    problems.extend(f"取得0件: {name}（ページ構造変化・移転の可能性）" for name in zero_sources)
+    if problems:
+        items = "".join(f"<li>{escape(problem)}</li>" for problem in problems)
+        lines.append(f'<ul class="health-problems">{items}</ul>')
+    return "\n".join(lines)
+
+
+def format_datetime_jst(value: str) -> str:
+    try:
+        return datetime.fromisoformat(value).astimezone(JST).strftime("%Y-%m-%d %H:%M")
+    except ValueError:
+        return value
 
 
 def render_deadline_badge(deadline: date | None, remaining: int | None) -> str:

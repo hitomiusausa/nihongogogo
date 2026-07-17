@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from collections import defaultdict
+from dataclasses import dataclass, field
 from datetime import date, datetime
 from pathlib import Path
 import re
@@ -32,17 +33,31 @@ def write_report(
     report_dir.mkdir(parents=True, exist_ok=True)
     today = datetime.now(JST).date().isoformat()
     path = report_dir / f"{today}.md"
-    items = select_display_items(config, store, since_days=since_days)
-    path.write_text(render_report(config, items, since_days=since_days), encoding="utf-8")
+    groups = select_display_groups(config, store, since_days=since_days)
+    items = [group.item for group in groups]
+    related_map = {group.item.id: group.related for group in groups if group.related}
+    path.write_text(
+        render_report(config, items, since_days=since_days, related_map=related_map),
+        encoding="utf-8",
+    )
     return path
 
 
-def select_display_items(
+@dataclass
+class DisplayGroup:
+    """表示上は1カードに束ねる同一ニュースの集合。itemが代表、relatedは他媒体の報道。"""
+
+    item: StoredItem
+    key: str
+    related: list[StoredItem] = field(default_factory=list)
+
+
+def select_display_groups(
     config: WatchConfig,
     store: WatchStore,
     *,
     since_days: int = 10,
-) -> list[StoredItem]:
+) -> list[DisplayGroup]:
     """レポート/サイト共通の表示アイテム選定: 除外URLを落とし、重複を束ねる。
 
     exclude_urls は収集時にも効くが、既に保存済みの行が表示期間に残るため、
@@ -54,7 +69,34 @@ def select_display_items(
         for item in store.recent_items(since_days=since_days)
         if item.url.rstrip("/") not in excluded
     ]
-    return dedupe_items(items)
+    return group_items(items)
+
+
+def select_display_items(
+    config: WatchConfig,
+    store: WatchStore,
+    *,
+    since_days: int = 10,
+) -> list[StoredItem]:
+    return [group.item for group in select_display_groups(config, store, since_days=since_days)]
+
+
+def group_items(items: list[StoredItem]) -> list[DisplayGroup]:
+    """タイトル指紋が同一・包含・高重複のアイテムを1グループに束ねる。
+
+    items はスコア降順で渡される前提なので、代表は各ニュースの最高スコア版。
+    重複は捨てずに related として残す（他媒体の報道への参照）。
+    """
+    groups: list[DisplayGroup] = []
+    for item in items:
+        key = title_fingerprint(item.title)
+        for group in groups:
+            if is_duplicate_title_key(key, group.key):
+                group.related.append(item)
+                break
+        else:
+            groups.append(DisplayGroup(item=item, key=key))
+    return groups
 
 
 def render_report(
@@ -62,7 +104,9 @@ def render_report(
     items: list[StoredItem],
     *,
     since_days: int = 10,
+    related_map: dict[int, list[StoredItem]] | None = None,
 ) -> str:
+    related_map = related_map or {}
     now = datetime.now(JST)
     today = now.date()
     visible_items = [
@@ -100,19 +144,25 @@ def render_report(
             continue
         lines.extend([f"## {category}", ""])
         for item in category_items[:25]:
-            lines.extend(render_item(item, config))
+            lines.extend(render_item(item, config, related=related_map.get(item.id)))
         lines.append("")
 
     if expired_items:
         lines.extend(["## 終了案件", ""])
         for item in sorted(expired_items, key=expired_sort_key)[:30]:
-            lines.extend(render_item(item, config))
+            lines.extend(render_item(item, config, related=related_map.get(item.id)))
         lines.append("")
 
     return "\n".join(lines).rstrip() + "\n"
 
 
-def render_item(item: StoredItem, config: WatchConfig, *, compact: bool = False) -> list[str]:
+def render_item(
+    item: StoredItem,
+    config: WatchConfig,
+    *,
+    compact: bool = False,
+    related: list[StoredItem] | None = None,
+) -> list[str]:
     keywords = ", ".join(item.matched_keywords[:8]) if item.matched_keywords else "-"
     angle = config.sales_angles.get(item.primary_category, "")
     published = item.published_at or "日付不明"
@@ -128,6 +178,8 @@ def render_item(item: StoredItem, config: WatchConfig, *, compact: bool = False)
     ]
     if not compact and item.summary:
         lines.append(f"  - 概要: {linkify_markdown(truncate(item.summary, 180))}")
+    for related_item in (related or [])[:3]:
+        lines.append(f"  - 関連報道: [{related_item.title}]({related_item.url})")
     if angle:
         lines.append(f"  - Nihongo Catch! 提案切り口: {angle}")
     return lines
@@ -160,19 +212,7 @@ def format_datetime_date(value: str | None) -> str:
 
 
 def dedupe_items(items: list[StoredItem]) -> list[StoredItem]:
-    """タイトル指紋が同一・包含・高重複のアイテムを1件に束ねる。
-
-    items はスコア降順で渡される前提なので、残るのは各ニュースの最高スコア版。
-    """
-    deduped: list[StoredItem] = []
-    kept_keys: list[str] = []
-    for item in items:
-        key = title_fingerprint(item.title)
-        if any(is_duplicate_title_key(key, kept) for kept in kept_keys):
-            continue
-        kept_keys.append(key)
-        deduped.append(item)
-    return deduped
+    return [group.item for group in group_items(items)]
 
 
 def is_expired(item: StoredItem, *, today: date) -> bool:

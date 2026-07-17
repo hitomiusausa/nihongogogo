@@ -10,7 +10,7 @@ from zoneinfo import ZoneInfo
 
 from .config import WatchConfig
 from .deadlines import days_until, parse_iso_date
-from .report import select_display_items
+from .report import select_display_groups
 from .storage import StoredItem, WatchStore
 
 
@@ -37,8 +37,10 @@ def write_site(
     reports_dir.mkdir(parents=True, exist_ok=True)
 
     today = datetime.now(JST).date().isoformat()
-    items = select_display_items(config, store, since_days=since_days)
-    html = render_site(config, items, since_days=since_days)
+    groups = select_display_groups(config, store, since_days=since_days)
+    items = [group.item for group in groups]
+    related_map = {group.item.id: group.related for group in groups if group.related}
+    html = render_site(config, items, since_days=since_days, related_map=related_map)
 
     dated_path = reports_dir / f"{today}.html"
     index_path = site_dir / "index.html"
@@ -65,6 +67,7 @@ def render_site(
     items: list[StoredItem],
     *,
     since_days: int = 10,
+    related_map: dict[int, list[StoredItem]] | None = None,
 ) -> str:
     now = datetime.now(JST)
     today = now.date()
@@ -98,6 +101,7 @@ def render_site(
         item for item in visible_items if format_date(item.fetched_at) == now.date().isoformat()
     ]
     sections = [(category, grouped.get(category, [])) for category in CATEGORY_ORDER]
+    related_map = related_map or {}
 
     return f"""<!doctype html>
 <html lang="ja">
@@ -254,6 +258,7 @@ def render_site(
     .badge.country {{ color: #4b3b7a; background: rgba(244, 198, 195, 0.42); border-color: var(--pink); font-weight: 700; }}
     .angle {{ margin: 8px 0 0; font-size: 13px; color: #315b35; border-top: 1px solid var(--line); padding-top: 8px; }}
     .summary {{ color: #3c4043; font-size: 13px; margin: 8px 0 0; overflow-wrap: anywhere; }}
+    .related {{ color: var(--muted); font-size: 12px; margin: 8px 0 0; overflow-wrap: anywhere; }}
     .tag {{
       display: inline-block;
       border: 1px solid var(--line);
@@ -344,7 +349,7 @@ def render_site(
     </div>
   </header>
   <main>
-    {''.join(render_section(config, title, section_items) for title, section_items in sections if section_items)}
+    {''.join(render_section(config, title, section_items, related_map) for title, section_items in sections if section_items)}
     <footer>
       <p>Semiosis株式会社 / Nihongo Catch! の販促・運用資金探索用に自動生成。</p>
     </footer>
@@ -384,13 +389,18 @@ def render_site(
 """
 
 
-def render_section(config: WatchConfig, title: str, items: list[StoredItem]) -> str:
+def render_section(
+    config: WatchConfig,
+    title: str,
+    items: list[StoredItem],
+    related_map: dict[int, list[StoredItem]] | None = None,
+) -> str:
     category_class = category_class_for(title)
     return (
         f'<div class="section-head"><h2 class="section-title">'
         f'<span class="section-dot {category_class}"></span>{escape(title)}</h2>'
         f'<span class="count">{len(items)}件</span></div>\n'
-        f"{render_cards(config, items[:30])}"
+        f"{render_cards(config, items[:30], related_map=related_map)}"
     )
 
 
@@ -399,21 +409,38 @@ def render_cards(
     items: list[StoredItem],
     *,
     priority: bool = False,
+    related_map: dict[int, list[StoredItem]] | None = None,
 ) -> str:
     if not items:
         return '<div class="empty">該当候補はまだありません。</div>'
-    cards = "\n".join(render_card(config, item, priority=priority) for item in items)
+    related_map = related_map or {}
+    cards = "\n".join(
+        render_card(config, item, priority=priority, related=related_map.get(item.id, []))
+        for item in items
+    )
     class_name = "grid" if priority else "list"
     return f'<div class="{class_name}">{cards}</div>'
 
 
-def render_card(config: WatchConfig, item: StoredItem, *, priority: bool = False) -> str:
+def render_card(
+    config: WatchConfig,
+    item: StoredItem,
+    *,
+    priority: bool = False,
+    related: list[StoredItem] | None = None,
+) -> str:
     keywords = "".join(
         f'<span class="tag">{escape(keyword)}</span>'
         for keyword in item.matched_keywords[:8]
     )
     angle = config.sales_angles.get(item.primary_category, "")
-    summary = truncate(item.summary, 180)
+    raw_summary = item.summary
+    # 旧データはGoogle Newsのdescription（タイトルの焼き直し）がsummaryに入っている。
+    # 情報ゼロの繰り返しは表示しない。
+    if raw_summary and item.title[:24] and raw_summary.startswith(item.title[:24]):
+        raw_summary = ""
+    summary = truncate(raw_summary, 180)
+    related_html = render_related(related or [])
     country_badge = f'<span class="badge country">{escape(item.country)}</span>' if item.country else ""
     deadline = parse_iso_date(item.deadline_at)
     remaining = days_until(deadline)
@@ -453,6 +480,7 @@ def render_card(config: WatchConfig, item: StoredItem, *, priority: bool = False
   <p class="item-meta">出典: {escape(item.source_name)} / 公開日: {escape(format_date(item.published_at))} / ページ反映日: {escape(format_date(item.fetched_at))}</p>
   <div>{keywords}</div>
   {f'<p class="summary">{linkify_html(summary)}</p>' if summary else ''}
+  {related_html}
   <p class="summary">次アクション: {escape(next_action_for(item, remaining))}</p>
   {f'<p class="angle">Nihongo Catch! 提案切り口: {escape(angle)}</p>' if angle else ''}
 </article>
@@ -461,6 +489,19 @@ def render_card(config: WatchConfig, item: StoredItem, *, priority: bool = False
 
 def truncate(value: str, max_length: int) -> str:
     return value if len(value) <= max_length else value[: max_length - 1] + "…"
+
+
+def render_related(related: list[StoredItem]) -> str:
+    """束ねた同一ニュースの他媒体報道を参照リンクとして残す（情報を消さない重複排除）。"""
+    if not related:
+        return ""
+    links = "、".join(
+        f'<a href="{escape(safe_url(item.url))}" target="_blank" rel="noopener noreferrer">'
+        f"{escape(truncate(item.title, 28))}</a>"
+        for item in related[:3]
+    )
+    more = f" ほか{len(related) - 3}件" if len(related) > 3 else ""
+    return f'<p class="related">関連報道: {links}{more}</p>'
 
 
 def safe_url(url: str) -> str:

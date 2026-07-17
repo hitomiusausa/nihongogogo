@@ -109,6 +109,19 @@
       font-size: 13px;
     }
     .filter.active { background: var(--coral); color: #8d2f25; border-color: var(--coral); font-weight: 700; }
+    .reload {
+      border: 1px solid var(--line);
+      background: var(--paper);
+      color: var(--accent);
+      border-radius: 999px;
+      padding: 4px 12px;
+      margin-left: 8px;
+      cursor: pointer;
+      font: inherit;
+      font-size: 13px;
+      font-weight: 700;
+    }
+    .reload:active { transform: translateY(1px); }
     .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px; }
     .list { display: grid; gap: 10px; }
     article {
@@ -223,11 +236,13 @@
   <header>
     <div class="top">
       <h1>日本語教育<br>資金・政策ウォッチ</h1>
-      <p class="meta">最終更新: 2026-07-17 17:38:02 JST / 対象期間: 直近14日</p>
+      <p class="meta">最終更新: 2026-07-17 17:48:14 JST / 対象期間: 直近14日
+        <button class="reload" id="reload" type="button" title="最新の公開データを読み込み直します">🔄 最新に更新</button>
+      </p>
       <div class="stats">
         <div class="stat"><strong>67</strong>表示件数</div>
         <div class="stat"><strong>11</strong>公募・補助金</div>
-        <div class="stat"><strong>10</strong>本日反映</div>
+        <div class="stat"><strong>10</strong>新鮮ニュース</div>
         <div class="stat"><strong>6</strong>締切検出</div>
         <div class="stat"><strong>1</strong>締切30日以内</div>
         <div class="stat"><strong>0</strong>終了直後</div>
@@ -236,7 +251,7 @@
         <input class="search" id="search" type="search" placeholder="キーワード、自治体名、制度名で検索">
         <div class="filters" aria-label="表示フィルター">
           <button class="filter active" data-filter="all">すべて</button>
-          <button class="filter" data-filter="new">本日反映</button>
+          <button class="filter" data-filter="new">新鮮ニュース</button>
           <button class="filter" data-filter="deadline">締切あり</button>
           <button class="filter" data-filter="urgent">締切30日以内</button>
           <button class="filter" data-filter="expired">終了案件</button>
@@ -295,7 +310,7 @@
   <p class="title"><a href="https://www.pref.kanagawa.jp/docs/z4r/jinkaku_subsidy.html" target="_blank" rel="noopener noreferrer">神奈川県高度外国人材受入支援補助金</a></p>
   <div class="row">
     
-    <span class="badge new">本日反映</span>
+    <span class="badge new">新鮮ニュース</span>
     <span class="badge cat-proposal">公募・補助金・プロポーザル</span>
     
     <span class="badge">スコア 19</span>
@@ -355,7 +370,7 @@
   <p class="title"><a href="https://www.pref.aichi.jp/soshiki/tabunka/r8hozyo.html" target="_blank" rel="noopener noreferrer">「令和8年度外国人児童生徒日本語教育支援補助金について」</a></p>
   <div class="row">
     <span class="badge dead">リンク切れ（2026-07-17確認）</span>
-    <span class="badge new">本日反映</span>
+    <span class="badge new">新鮮ニュース</span>
     <span class="badge cat-proposal">公募・補助金・プロポーザル</span>
     
     <span class="badge">スコア 12</span>
@@ -735,7 +750,7 @@
   <p class="title"><a href="https://vieclamngoainuoc.dolab.gov.vn/loai-hinh/SSW" target="_blank" rel="noopener noreferrer">THÔNG TIN CHO NGƯỜI LAO ĐỘNG ĐI LÀM VIỆC TẠI THỊ TRƯỜNG NHẬT BẢN</a></p>
   <div class="row">
     
-    <span class="badge new">本日反映</span>
+    <span class="badge new">新鮮ニュース</span>
     <span class="badge cat-visa">ニュース（外国人・ビザ）</span>
     <span class="badge country">ベトナム</span>
     <span class="badge">スコア 21</span>
@@ -815,7 +830,7 @@
   <p class="title"><a href="https://www.moj.go.jp/isa/10_00219.html" target="_blank" rel="noopener noreferrer">入国前結核スクリーニングについて</a></p>
   <div class="row">
     
-    <span class="badge new">本日反映</span>
+    <span class="badge new">新鮮ニュース</span>
     <span class="badge cat-visa">ニュース（外国人・ビザ）</span>
     
     <span class="badge">スコア 11</span>
@@ -995,7 +1010,7 @@
   <p class="title"><a href="https://www.moj.go.jp/isa/10_00229.html" target="_blank" rel="noopener noreferrer">ミャンマー国籍の方の在留資格認定証明書の有効期間の延長について</a></p>
   <div class="row">
     
-    <span class="badge new">本日反映</span>
+    <span class="badge new">新鮮ニュース</span>
     <span class="badge cat-visa">ニュース（外国人・ビザ）</span>
     
     <span class="badge">スコア 4</span>
@@ -1015,7 +1030,7 @@
   <p class="title"><a href="https://www.moj.go.jp/isa/applications/resources/10_00237.html" target="_blank" rel="noopener noreferrer">在留資格「経営・管理」に係る上陸基準省令等の改正について</a></p>
   <div class="row">
     
-    <span class="badge new">本日反映</span>
+    <span class="badge new">新鮮ニュース</span>
     <span class="badge cat-visa">ニュース（外国人・ビザ）</span>
     
     <span class="badge">スコア 4</span>
@@ -1035,7 +1050,7 @@
   <p class="title"><a href="https://www.moj.go.jp/isa/05_00055.html" target="_blank" rel="noopener noreferrer">在留許可手数料の減額対象者のガイドライン（案）に関するパブリックコメントの実施について</a></p>
   <div class="row">
     
-    <span class="badge new">本日反映</span>
+    <span class="badge new">新鮮ニュース</span>
     <span class="badge cat-visa">ニュース（外国人・ビザ）</span>
     
     <span class="badge">スコア 4</span>
@@ -1055,7 +1070,7 @@
   <p class="title"><a href="https://www.moj.go.jp/isa/applications/resources/10_00001.html" target="_blank" rel="noopener noreferrer">入管法施行令等の改正に関するパブリック・コメントの実施について</a></p>
   <div class="row">
     
-    <span class="badge new">本日反映</span>
+    <span class="badge new">新鮮ニュース</span>
     <span class="badge cat-visa">ニュース（外国人・ビザ）</span>
     
     <span class="badge">スコア 4</span>
@@ -1295,7 +1310,7 @@
   <p class="title"><a href="https://www.kipc.or.jp/topics/information/kanastentry2026/" target="_blank" rel="noopener noreferrer">令和８年度かながわ外国人材活用支援ステーション連携先事業者</a></p>
   <div class="row">
     
-    <span class="badge new">本日反映</span>
+    <span class="badge new">新鮮ニュース</span>
     <span class="badge cat-visa">ニュース（外国人・ビザ）</span>
     
     <span class="badge">スコア 3</span>
@@ -1315,7 +1330,7 @@
   <p class="title"><a href="https://www.kipc.or.jp/topics/information/r8internshipsubsidy/" target="_blank" rel="noopener noreferrer">KIP高度外国人材インターンシップ受入奨励金</a></p>
   <div class="row">
     
-    <span class="badge new">本日反映</span>
+    <span class="badge new">新鮮ニュース</span>
     <span class="badge cat-visa">ニュース（外国人・ビザ）</span>
     
     <span class="badge">スコア 3</span>
@@ -1431,8 +1446,11 @@
 </article>
 </div>
     <footer>
-      <p>収集ヘルス（2026-07-17 17:36）: 取得2251件 / 収集エラー0件 / 取得0件の巡回ページ1件</p>
+      <p>収集ヘルス（2026-07-17 17:46）: 取得2249件 / 収集エラー0件 / 取得0件の巡回ページ1件</p>
 <ul class="health-problems"><li>取得0件: 岐阜県 日本語教育（ページ構造変化・移転の可能性）</li></ul>
+      <p>収集は毎朝8時に自動実行。今すぐ収集し直したい場合は
+        <a href="https://github.com/hitomiusausa/nihongogogo/actions/workflows/daily-update.yml" target="_blank" rel="noopener noreferrer">GitHub Actionsのページ</a>
+        から「Run workflow」を実行してください（リポジトリ権限が必要）。</p>
       <p>Semiosis株式会社 / Nihongo Catch! の販促・運用資金探索用に自動生成。</p>
     </footer>
   </main>
@@ -1457,6 +1475,13 @@
         card.hidden = !(textMatch && filterMatch) || defaultHidden;
       }
     }
+
+    // 手動更新: キャッシュを避けて最新の公開データを読み込み直す
+    document.querySelector("#reload").addEventListener("click", () => {
+      const url = new URL(location.href);
+      url.searchParams.set("refresh", Date.now().toString());
+      location.replace(url.toString());
+    });
 
     search.addEventListener("input", applyFilters);
     for (const button of filters) {

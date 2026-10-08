@@ -37,7 +37,9 @@ IRRELEVANT = "無関係"
 # 拒否・打ち切りは同じ入力で再試行しても結果が変わりにくいので「試行済み」にする。
 NO_CONTENT_STOP_REASONS = {"refusal", "max_tokens"}
 # 認証・権限エラーは全件同じ結果になるので実行ごと打ち切る。
-ABORT_ERROR_NAMES = {"AuthenticationError", "PermissionDeniedError"}
+# 400（リクエスト不正）もリクエストの組み立てやモデル指定の問題でほぼ全件に効くため打ち切る。
+# 項目ごとに「試行済み」にすると、コード側の不具合で全件が空のまま埋まってしまう。
+ABORT_ERROR_NAMES = {"AuthenticationError", "PermissionDeniedError", "BadRequestError"}
 # 一時的なエラーは未試行のまま残し、翌日の実行で再挑戦する。
 RETRY_ERROR_NAMES = {"RateLimitError", "APIStatusError", "APIConnectionError"}
 
@@ -122,12 +124,12 @@ def enrich_items(
             request_id = getattr(exc, "request_id", None)
             message = f"AI要約失敗 id={item.id} {type(exc).__name__}: {exc} request_id={request_id}"
             if kind == "abort":
-                log(f"{message} → 認証/権限エラーのため実行を打ち切り")
+                log(f"{message} → 認証/権限/リクエスト不正のため実行を打ち切り")
                 return EnrichResult(
                     enriched=enriched,
                     skipped=skipped,
                     failed=failed,
-                    aborted=f"{type(exc).__name__}（APIキー・権限を確認）",
+                    aborted=f"{type(exc).__name__}（APIキー・権限・リクエスト内容を確認）",
                 )
             log(message)
             failed += 1

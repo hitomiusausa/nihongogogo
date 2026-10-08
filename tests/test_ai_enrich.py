@@ -35,6 +35,10 @@ class RateLimitError(APIStatusError):
     pass
 
 
+class BadRequestError(APIStatusError):
+    pass
+
+
 def text_response(payload: dict, *, stop_reason: str = "end_turn") -> SimpleNamespace:
     return SimpleNamespace(
         stop_reason=stop_reason,
@@ -175,6 +179,17 @@ class AiEnrichTest(unittest.TestCase):
         self.assertEqual(len(client.calls), 1)
         self.assertEqual(len(logs), 1)
         self.assertIn("req_err", logs[0])
+        self.assertEqual(len(self.store.items_needing_enrichment(10)), 2)
+
+    def test_bad_request_aborts_without_marking_items(self):
+        self.add("日本語教育 補助金 1", "https://example.com/1")
+        self.add("日本語教育 補助金 2", "https://example.com/2")
+        client = FakeClient([BadRequestError("invalid model"), text_response({})])
+
+        result, _ = self.run_enrich(client)
+
+        self.assertTrue(result.aborted)
+        self.assertEqual(len(client.calls), 1)
         self.assertEqual(len(self.store.items_needing_enrichment(10)), 2)
 
     def test_rate_limit_leaves_item_unattempted_and_continues(self):

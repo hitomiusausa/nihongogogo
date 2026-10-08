@@ -1,3 +1,4 @@
 # This project intentionally uses only the Python standard library.
 # Requires Python 3.9+.
 
+# Optional: AI要約（enrich コマンド）を使う場合のみ requirements-ai.txt を追加インストール。

@@ -25,6 +25,18 @@ jobs:
           python -m nihongo_funding_watch run --since-days 14
           python -m nihongo_funding_watch check-links --since-days 14
           python -m nihongo_funding_watch check-duplicates
+
+      # AI要約は失敗してもサイト生成・公開を止めない（キー未設定なら何もせず終了）。
+      - name: AI enrich (optional)
+        continue-on-error: true
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          python -m pip install -r requirements-ai.txt
+          python -m nihongo_funding_watch enrich
+
+      - name: Build site
+        run: |
           python -m nihongo_funding_watch site --since-days 14 --site-dir public
           python -m nihongo_funding_watch export-csv public/items.csv
           mkdir -p docs

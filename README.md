@@ -95,3 +95,30 @@ python3 -m nihongo_funding_watch check-links --since-days 14
 # テスト
 python3 -m unittest discover -s tests
 ```
+
+## AI要約（任意）
+
+新しく入った記事に Claude（モデル `claude-sonnet-5-5`）で次の3つを付け、SQLite（`ai_*` 列）に保存してサイトとCSVに出します。
+
+- **AI要約**: 2文以内の日本語要約（入力に無い日付・金額・団体名は作らない指示）。サイトでは「AI要約」ラベル付きでタイトル下に表示
+- **AI関連度**: 高／中／低／無関係。「無関係」（旅行割引などの紛れ込み）は既定で非表示にし、「AIが無関係と判定した記事も表示（N件）」ボタンで確認できる
+- **営業の切り口**: 公募・補助金カテゴリだけ、Nihongo Catch! としての応募・提案の切り口を1行
+
+Google News 以外の記事は本文も取得して先頭6000文字まで渡します（`nihongo_funding_watch/ai_enrich.py` 冒頭の定数で調整）。一度試した記事は再処理しません（拒否・打ち切りも「試行済み」）。レート制限など一時的なエラーの記事は翌日に再挑戦します。
+
+設定と実行:
+
+- GitHub リポジトリの Secrets に `ANTHROPIC_API_KEY` を登録すると、日次ワークフローが収集後・サイト生成前に `enrich` を実行します。このステップは失敗してもサイト生成・公開を止めません（`continue-on-error`）。キー未設定なら何もせずスキップします
+- 依存は `requirements-ai.txt`（`anthropic` SDK）だけ。コア機能は従来どおり標準ライブラリのみで動きます
+- 費用: 新着は1日2〜7件程度、1回最大40件なので少額です
+
+```bash
+pip install -r requirements-ai.txt
+export ANTHROPIC_API_KEY=...
+
+# 未処理の新着に付ける（既定 最大40件）
+python3 -m nihongo_funding_watch enrich
+
+# 過去分をまとめて付ける（バックフィル）
+python3 -m nihongo_funding_watch enrich --limit 400
+```

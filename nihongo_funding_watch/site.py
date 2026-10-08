@@ -22,6 +22,8 @@ CATEGORY_ORDER = [
     "ニュース（外国人・ビザ）",
     "その他",
 ]
+AI_IRRELEVANT = "無関係"
+AI_RELEVANCE_CLASSES = {"高": "rel-high", "中": "rel-mid", "低": "rel-low", "無関係": "rel-none"}
 RECENTLY_EXPIRED_DAYS = 30
 ARCHIVE_AFTER_DAYS = 180
 
@@ -105,6 +107,15 @@ def render_site(
     reflected_today = [
         item for item in visible_items if is_first_seen_today(item, now)
     ]
+    # AIが「無関係」と判定した記事は既定で隠す（トグルで表示）。件数表示も隠した分を除く。
+    irrelevant_count = sum(1 for item in visible_items if is_ai_irrelevant(item))
+    shown_items = [item for item in visible_items if not is_ai_irrelevant(item)]
+    irrelevant_toggle = (
+        f'<button class="filter toggle" id="show-irrelevant" type="button" aria-pressed="false">'
+        f"AIが無関係と判定した記事も表示（{irrelevant_count}件）</button>"
+        if irrelevant_count
+        else ""
+    )
     sections = [
         (category, sort_for_display(category, grouped.get(category, [])))
         for category in CATEGORY_ORDER
@@ -222,6 +233,7 @@ def render_site(
       font-size: 13px;
     }}
     .filter.active {{ background: var(--coral); color: #8d2f25; border-color: var(--coral); font-weight: 700; }}
+    .ai-toggle-row {{ display: flex; justify-content: flex-end; margin-top: 8px; }}
     .reload {{
       border: 1px solid var(--line);
       background: var(--paper);
@@ -282,6 +294,12 @@ def render_site(
     .badge.dead {{ color: var(--danger); background: rgba(184, 57, 47, 0.08); border-color: var(--danger); font-weight: 700; }}
     .angle {{ margin: 8px 0 0; font-size: 13px; color: #315b35; border-top: 1px solid var(--line); padding-top: 8px; }}
     .summary {{ color: #3c4043; font-size: 13px; margin: 8px 0 0; overflow-wrap: anywhere; }}
+    .ai-summary {{ color: #2f3a3f; font-size: 13px; margin: 0 0 8px; padding: 6px 8px; background: rgba(167, 216, 240, 0.16); border-left: 3px solid var(--blue); border-radius: 4px; overflow-wrap: anywhere; }}
+    .ai-label {{ display: inline-block; font-size: 11px; font-weight: 700; color: #25556a; border: 1px solid var(--blue); border-radius: 999px; padding: 0 6px; margin-right: 6px; background: var(--paper); white-space: nowrap; }}
+    .badge.rel-high {{ color: #236d3a; background: rgba(162, 213, 171, 0.38); border-color: var(--green); }}
+    .badge.rel-mid {{ color: #25556a; background: rgba(167, 216, 240, 0.30); border-color: var(--blue); }}
+    .badge.rel-low {{ color: #66616a; background: #f1eef2; border-color: #d7cedb; }}
+    .badge.rel-none {{ color: #66616a; background: #f1eef2; border-color: #d7cedb; text-decoration: line-through; }}
     .related {{ color: var(--muted); font-size: 12px; margin: 8px 0 0; overflow-wrap: anywhere; }}
     .tag {{
       display: inline-block;
@@ -338,6 +356,7 @@ def render_site(
       .controls {{ grid-template-columns: 1fr; }}
       .search {{ height: 44px; font-size: 16px; }}
       .filters {{ justify-content: flex-start; }}
+      .ai-toggle-row {{ justify-content: flex-start; }}
       .filter {{ min-height: 40px; padding: 0 14px; font-size: 14px; }}
       .grid {{ grid-template-columns: 1fr; }}
       article {{ padding: 15px; }}
@@ -353,8 +372,8 @@ def render_site(
         <button class="reload" id="reload" type="button" title="最新の公開データを読み込み直します">🔄 最新に更新</button>
       </p>
       <div class="stats">
-        <div class="stat"><strong>{len(visible_items)}</strong>表示件数</div>
-        <div class="stat"><strong>{len(grouped.get("公募・補助金・プロポーザル", []))}</strong>公募・補助金</div>
+        <div class="stat"><strong>{len(shown_items)}</strong>表示件数</div>
+        <div class="stat"><strong>{len([item for item in grouped.get("公募・補助金・プロポーザル", []) if not is_ai_irrelevant(item)])}</strong>公募・補助金</div>
         <div class="stat"><strong>{len(reflected_today)}</strong>新鮮ニュース</div>
         <div class="stat"><strong>{len(with_deadlines)}</strong>締切検出</div>
         <div class="stat"><strong>{len(urgent_items)}</strong>締切30日以内</div>
@@ -374,6 +393,7 @@ def render_site(
           <button class="filter" data-filter="その他">その他</button>
         </div>
       </div>
+      {f'<div class="ai-toggle-row">{irrelevant_toggle}</div>' if irrelevant_toggle else ''}
     </div>
   </header>
   <main>
@@ -388,9 +408,11 @@ def render_site(
   </main>
   <script>
     const search = document.querySelector("#search");
-    const filters = Array.from(document.querySelectorAll(".filter"));
+    const filters = Array.from(document.querySelectorAll(".filter[data-filter]"));
+    const irrelevantToggle = document.querySelector("#show-irrelevant");
     const cards = Array.from(document.querySelectorAll("article[data-text]"));
     let activeFilter = "all";
+    let showIrrelevant = false;
 
     function applyFilters() {{
       const query = search.value.trim().toLowerCase();
@@ -403,7 +425,9 @@ def render_site(
           (activeFilter === "deadline" && card.dataset.deadline === "true") ||
           (activeFilter === "urgent" && card.dataset.urgent === "true") ||
           (activeFilter === "expired" && card.dataset.expired === "true");
-        const defaultHidden = card.dataset.expiredOld === "true" && activeFilter !== "expired";
+        const defaultHidden =
+          (card.dataset.expiredOld === "true" && activeFilter !== "expired") ||
+          (card.dataset.aiIrrelevant === "true" && !showIrrelevant);
         card.hidden = !(textMatch && filterMatch) || defaultHidden;
       }}
     }}
@@ -416,6 +440,14 @@ def render_site(
     }});
 
     search.addEventListener("input", applyFilters);
+    if (irrelevantToggle) {{
+      irrelevantToggle.addEventListener("click", () => {{
+        showIrrelevant = !showIrrelevant;
+        irrelevantToggle.classList.toggle("active", showIrrelevant);
+        irrelevantToggle.setAttribute("aria-pressed", String(showIrrelevant));
+        applyFilters();
+      }});
+    }}
     for (const button of filters) {{
       button.addEventListener("click", () => {{
         activeFilter = button.dataset.filter;
@@ -461,11 +493,15 @@ def render_section(
     related_map: dict[int, list[StoredItem]] | None = None,
 ) -> str:
     category_class = category_class_for(title)
+    # 無関係判定は既定で隠すので、件数と30件枠は関連ありの記事で使い、隠す分は末尾に回す。
+    shown = [item for item in items if not is_ai_irrelevant(item)]
+    hidden = [item for item in items if is_ai_irrelevant(item)]
+    hidden_note = f"（AI無関係判定 {len(hidden)}件は非表示）" if hidden else ""
     return (
         f'<div class="section-head"><h2 class="section-title">'
         f'<span class="section-dot {category_class}"></span>{escape(title)}</h2>'
-        f'<span class="count">{len(items)}件</span></div>\n'
-        f"{render_cards(config, items[:30], related_map=related_map)}"
+        f'<span class="count">{len(shown)}件{hidden_note}</span></div>\n'
+        f"{render_cards(config, shown[:30] + hidden[:30], related_map=related_map)}"
     )
 
 
@@ -531,6 +567,25 @@ def render_card(
         class_names.append("expired")
     class_name = " ".join(name for name in class_names if name)
     deadline_badge = render_deadline_badge(deadline, remaining)
+    is_irrelevant = is_ai_irrelevant(item)
+    ai_summary_html = (
+        f'<p class="ai-summary"><span class="ai-label">AI要約</span>{escape(item.ai_summary)}</p>'
+        if item.ai_summary
+        else ""
+    )
+    relevance_badge = (
+        f'<span class="badge {AI_RELEVANCE_CLASSES[item.ai_relevance]}">'
+        f"AI関連度 {escape(item.ai_relevance)}</span>"
+        if item.ai_relevance in AI_RELEVANCE_CLASSES
+        else ""
+    )
+    sales_hint_html = (
+        f'<p class="angle"><span class="ai-label">AI</span>営業の切り口: {escape(item.ai_sales_hint)}</p>'
+        if item.ai_sales_hint and item.primary_category == "公募・補助金・プロポーザル"
+        else ""
+    )
+    hidden_attr = " hidden" if is_old_expired or is_irrelevant else ""
+    irrelevant_attr = ' data-ai-irrelevant="true"' if is_irrelevant else ""
     text = " ".join(
         [
             item.title,
@@ -538,13 +593,15 @@ def render_card(
             item.country,
             item.primary_category,
             item.summary,
+            item.ai_summary or "",
             " ".join(item.matched_keywords),
             "リンク切れ" if is_dead else "",
         ]
     ).lower()
     return f"""
-<article class="{class_name}" data-category="{escape(item.primary_category)}" data-deadline="{str(bool(deadline)).lower()}" data-urgent="{str(is_urgent).lower()}" data-expired="{str(remaining is not None and remaining < 0).lower()}" data-expired-old="{str(is_old_expired).lower()}" data-new="{str(is_new).lower()}" data-dead="{str(is_dead).lower()}" data-text="{escape(text)}"{" hidden" if is_old_expired else ""}>
+<article class="{class_name}" data-category="{escape(item.primary_category)}" data-deadline="{str(bool(deadline)).lower()}" data-urgent="{str(is_urgent).lower()}" data-expired="{str(remaining is not None and remaining < 0).lower()}" data-expired-old="{str(is_old_expired).lower()}" data-new="{str(is_new).lower()}" data-dead="{str(is_dead).lower()}" data-text="{escape(text)}"{irrelevant_attr}{hidden_attr}>
   <p class="title"><a href="{escape(safe_url(item.url))}" target="_blank" rel="noopener noreferrer">{escape(item.title)}</a></p>
+  {ai_summary_html}
   <div class="row">
     {dead_badge}
     {'<span class="badge new">新鮮ニュース</span>' if is_new else ''}
@@ -553,6 +610,7 @@ def render_card(
     <span class="badge">スコア {item.score}</span>
     {deadline_badge}
     {amount_badge}
+    {relevance_badge}
   </div>
   <p class="item-meta">出典: {escape(item.source_name)} / 公開日: {escape(format_date(item.published_at))} / ページ反映日: {escape(format_date(item.fetched_at))}</p>
   <div>{keywords}</div>
@@ -560,6 +618,7 @@ def render_card(
   {related_html}
   <p class="summary">次アクション: {escape(next_action_for(item, remaining))}</p>
   {f'<p class="angle">Nihongo Catch! 提案切り口: {escape(angle)}</p>' if angle else ''}
+  {sales_hint_html}
 </article>
 """
 
@@ -671,6 +730,10 @@ def next_action_for(item: StoredItem, remaining: int | None) -> str:
     if item.primary_category == "ニュース（日本語教育）":
         return "認定校、登録日本語教員、Can Do評価との接点を確認"
     return "営業先候補、担当部署、導入打診の切り口を確認"
+
+
+def is_ai_irrelevant(item: StoredItem) -> bool:
+    return item.ai_relevance == AI_IRRELEVANT
 
 
 def category_class_for(category: str) -> str:

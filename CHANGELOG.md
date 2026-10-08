@@ -1,5 +1,21 @@
 # 改修記録
 
+## 2026-10-08 AI要約（Claude）を追加
+
+### きっかけ
+
+- カードの概要がほぼ「掲載元: ニコニコニュース」だけで、中身が分からない
+- 「全国旅行支援まとめ」のような無関係記事が紛れ込む
+
+### 対応
+
+- `nihongo_funding_watch/ai_enrich.py` と `enrich` コマンドを新設。新着記事ごとに Claude（`claude-sonnet-5-5`、構造化出力）で「AI要約」「AI関連度（高/中/低/無関係）」「営業の切り口（公募のみ）」を生成
+- SQLite に `ai_summary` / `ai_relevance` / `ai_sales_hint` / `ai_model` / `ai_enriched_at` 列を追加（`initialize()` で自動追加。毎日の再取得で消えない）
+- サイト: AI要約をラベル付きで表示、関連度バッジ、公募カードに「営業の切り口」。「無関係」判定は既定で非表示にしてトグルで表示
+- CSV の末尾に `ai_summary` / `ai_relevance` / `ai_sales_hint` 列を追加（既存列の順番は不変）
+- 日次ワークフロー: 収集の後・サイト生成の前に `enrich` ステップ（`continue-on-error`、Secret `ANTHROPIC_API_KEY`）。キー未設定・SDK未導入なら一行出してスキップ
+- `anthropic` SDK は `requirements-ai.txt` に分離。コアは標準ライブラリのみのまま
+
 ## 2026-07-17 大規模改修（クレーム対応＋機能改善）
 
 公開ページ: https://hitomiusausa.github.io/nihongogogo/

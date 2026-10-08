@@ -27,6 +27,9 @@ def export_csv(store: WatchStore, output: Path) -> None:
                 "deadline_at",
                 "dead_at",
                 "summary",
+                "ai_summary",
+                "ai_relevance",
+                "ai_sales_hint",
             ]
         )
         for item in store.all_items():
@@ -47,5 +50,8 @@ def export_csv(store: WatchStore, output: Path) -> None:
                     item.deadline_at,
                     item.dead_at,
                     item.summary,
+                    item.ai_summary,
+                    item.ai_relevance,
+                    item.ai_sales_hint,
                 ]
             )

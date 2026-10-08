@@ -1,0 +1,3 @@
+# AI要約（python -m nihongo_funding_watch enrich）専用の任意依存。
+# コアの収集・サイト生成は標準ライブラリだけで動く（requirements.txt 参照）。
+anthropic==1.12.1

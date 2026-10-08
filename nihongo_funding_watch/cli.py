@@ -4,6 +4,7 @@ import argparse
 import sys
 from pathlib import Path
 
+from .ai_enrich import DEFAULT_LIMIT as DEFAULT_ENRICH_LIMIT, enrich_items
 from .config import load_config
 from .export import export_csv
 from .pipeline import check_links, run_collection, write_health
@@ -52,6 +53,12 @@ def build_parser() -> argparse.ArgumentParser:
     )
     links.add_argument("--since-days", type=int, default=14)
 
+    enrich = sub.add_parser(
+        "enrich",
+        help="Add Claude-generated summaries to new items (needs ANTHROPIC_API_KEY).",
+    )
+    enrich.add_argument("--limit", type=int, default=DEFAULT_ENRICH_LIMIT)
+
     return parser
 
 
@@ -94,6 +101,16 @@ def main() -> None:
             f"checked={result.checked} marked_dead={result.marked_dead} "
             f"revived={result.revived}"
         )
+        return
+
+    if args.command == "enrich":
+        result = enrich_items(store, limit=args.limit)
+        if result.skip_reason:
+            print(result.skip_reason)
+            return
+        print(f"enriched={result.enriched} skipped={result.skipped} failed={result.failed}")
+        if result.aborted:
+            print(f"  ABORTED: {result.aborted}", file=sys.stderr)
         return
 
     if args.command == "check-duplicates":

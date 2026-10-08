@@ -42,6 +42,16 @@ class StoredItem:
     country: str = ""
     dead_at: str | None = None
     first_seen_at: str | None = None
+    # AI要約（ai_enrich.py が書き込む。未処理の行は全部 None）
+    ai_summary: str | None = None
+    ai_relevance: str | None = None
+    ai_sales_hint: str | None = None
+    ai_model: str | None = None
+    ai_enriched_at: str | None = None
+
+
+# AI要約の列。_upsert（毎日の再取得）では触らないので、一度付けた要約は消えない。
+AI_COLUMNS = ("ai_summary", "ai_relevance", "ai_sales_hint", "ai_model", "ai_enriched_at")
 
 
 class WatchStore:
@@ -90,6 +100,9 @@ class WatchStore:
                 db.execute("ALTER TABLE items ADD COLUMN dead_at TEXT")
             if not column_exists(db, "items", "first_seen_at"):
                 db.execute("ALTER TABLE items ADD COLUMN first_seen_at TEXT")
+            for column in AI_COLUMNS:
+                if not column_exists(db, "items", column):
+                    db.execute(f"ALTER TABLE items ADD COLUMN {column} TEXT")
             db.execute(
                 "CREATE INDEX IF NOT EXISTS idx_items_deadline_at ON items(deadline_at)"
             )
@@ -254,6 +267,42 @@ class WatchStore:
             ).fetchall()
         return [row_to_item(row) for row in rows]
 
+    def items_needing_enrichment(self, limit: int) -> list[StoredItem]:
+        """AI要約をまだ試していない生存中の行を、初出の新しい順に返す。"""
+        with closing(self.connect()) as db:
+            rows = db.execute(
+                """
+                SELECT * FROM items
+                WHERE ai_enriched_at IS NULL AND dead_at IS NULL
+                ORDER BY COALESCE(first_seen_at, fetched_at) DESC, id DESC
+                LIMIT ?
+                """,
+                (limit,),
+            ).fetchall()
+        return [row_to_item(row) for row in rows]
+
+    def save_enrichment(
+        self,
+        item_id: int,
+        *,
+        summary: str,
+        relevance: str | None,
+        sales_hint: str,
+        model: str,
+    ) -> None:
+        """AI要約を保存する。拒否・打ち切りでも ai_enriched_at を入れて再試行ループを防ぐ。"""
+        now = datetime.now(timezone.utc).isoformat()
+        with closing(self.connect()) as db, db:
+            db.execute(
+                """
+                UPDATE items SET
+                    ai_summary=?, ai_relevance=?, ai_sales_hint=?,
+                    ai_model=?, ai_enriched_at=?
+                WHERE id=?
+                """,
+                (summary, relevance, sales_hint, model, now, item_id),
+            )
+
     def duplicate_groups(self) -> list[tuple[str, int, str]]:
         with closing(self.connect()) as db:
             rows = db.execute(
@@ -294,6 +343,7 @@ def row_to_item(row: sqlite3.Row) -> StoredItem:
         country=str(row["country"]) if "country" in row.keys() else "",
         dead_at=row["dead_at"] if "dead_at" in row.keys() else None,
         first_seen_at=row["first_seen_at"] if "first_seen_at" in row.keys() else None,
+        **{column: row[column] if column in row.keys() else None for column in AI_COLUMNS},
     )
 
 

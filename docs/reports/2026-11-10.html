@@ -1,0 +1,1832 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>日本語教育 資金・政策ウォッチ</title>
+  <link rel="icon" type="image/png" href="images/nihongogogogo3.png">
+  <link rel="apple-touch-icon" href="images/nihongogogogo3.png">
+  <style>
+    :root {
+      color-scheme: light;
+      --pink: #F4C6C3;
+      --green: #A2D5AB;
+      --cream: #F9F7F0;
+      --blue: #A7D8F0;
+      --yellow: #FCE77C;
+      --coral: #F8AFA6;
+      --header: #A7D8F0;
+      --bg: var(--cream);
+      --ink: #253036;
+      --muted: #687276;
+      --line: #ded7c7;
+      --paper: #fffdf8;
+      --soft: var(--yellow);
+      --accent: #2d6f7d;
+      --accent-2: #8d4b43;
+      --danger: #b8392f;
+      --warning: #866500;
+      --good: #236d3a;
+      --proposal: var(--coral);
+      --education: var(--blue);
+      --visa: var(--green);
+      --other: var(--yellow);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      -webkit-text-size-adjust: 100%;
+      text-size-adjust: 100%;
+      font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Yu Gothic", sans-serif;
+      background-color: var(--bg);
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='112' height='112' viewBox='0 0 112 112'%3E%3Crect width='112' height='112' fill='%23F9F7F0'/%3E%3Crect x='0' y='0' width='56' height='56' fill='%23A7D8F0' fill-opacity='.18'/%3E%3Crect x='56' y='0' width='56' height='56' fill='%23FCE77C' fill-opacity='.18'/%3E%3Crect x='0' y='56' width='56' height='56' fill='%23A2D5AB' fill-opacity='.16'/%3E%3Crect x='56' y='56' width='56' height='56' fill='%23F4C6C3' fill-opacity='.18'/%3E%3C/svg%3E");
+      background-size: 112px 112px;
+      color: var(--ink);
+      line-height: 1.55;
+    }
+    header {
+      padding: 56px 20px 40px;
+      border-bottom: 1px solid var(--line);
+      background:
+        linear-gradient(rgba(249, 247, 240, 0.5), rgba(249, 247, 240, 0.62)),
+        url("images/nihongogogogo4.png") center / cover no-repeat,
+        var(--header);
+      position: sticky;
+      top: 0;
+      z-index: 2;
+      overflow: hidden;
+    }
+    main { width: min(1120px, calc(100% - 32px)); margin: 0 auto 56px; }
+    .top { width: min(1120px, calc(100% - 32px)); margin: 0 auto; position: relative; z-index: 1; }
+    h1 { margin: 0 0 6px; font-size: clamp(24px, 3vw, 34px); line-height: 1.18; letter-spacing: 0; }
+    h2 { margin: 28px 0 12px; font-size: 20px; letter-spacing: 0; }
+    .meta { color: var(--muted); margin: 0; }
+    .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin-top: 16px; }
+    .stat {
+      aspect-ratio: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 8px;
+      border: 2px solid var(--blue);
+      background: rgba(255, 253, 246, 0.4);
+      border-radius: 50%;
+    }
+    .stat:nth-child(2) { border-color: var(--coral); }
+    .stat:nth-child(3) { border-color: var(--green); }
+    .stat:nth-child(4) { border-color: var(--yellow); }
+    .stat:nth-child(5) { border-color: var(--pink); }
+    .stat:nth-child(6) { border-color: var(--blue); }
+    .stat strong { display: block; font-size: 23px; color: var(--accent); line-height: 1.2; }
+    .controls {
+      display: grid;
+      grid-template-columns: minmax(220px, 1fr) auto;
+      gap: 10px;
+      margin: 18px 0 0;
+      align-items: center;
+    }
+    .search {
+      width: 100%;
+      height: 40px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 0 12px;
+      font: inherit;
+      background: var(--paper);
+    }
+    .filters { display: flex; flex-wrap: wrap; gap: 8px; justify-content: flex-end; }
+    .filter {
+      border: 1px solid var(--line);
+      background: var(--paper);
+      color: var(--ink);
+      border-radius: 8px;
+      height: 36px;
+      padding: 0 10px;
+      cursor: pointer;
+      font: inherit;
+      font-size: 13px;
+    }
+    .filter.active { background: var(--coral); color: #8d2f25; border-color: var(--coral); font-weight: 700; }
+    .ai-toggle-row { display: flex; justify-content: flex-end; margin-top: 8px; }
+    .reload {
+      border: 1px solid var(--line);
+      background: var(--paper);
+      color: var(--accent);
+      border-radius: 999px;
+      padding: 4px 12px;
+      margin-left: 8px;
+      cursor: pointer;
+      font: inherit;
+      font-size: 13px;
+      font-weight: 700;
+    }
+    .reload:active { transform: translateY(1px); }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px; }
+    .list { display: grid; gap: 10px; }
+    article {
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 13px;
+      min-width: 0;
+      box-shadow: 0 1px 0 rgba(20, 30, 20, 0.04);
+    }
+    article.urgent { border-left: 4px solid var(--danger); }
+    article.expired { opacity: 0.68; }
+    article.expired-recent { opacity: 1; }
+    article.expired-old[hidden] { display: none; }
+    article.cat-proposal { border-top: 4px solid var(--proposal); }
+    article.cat-education { border-top: 4px solid var(--education); }
+    article.cat-visa { border-top: 4px solid var(--visa); }
+    article.cat-other { border-top: 4px solid var(--other); }
+    a { color: #064f85; text-decoration-thickness: 1px; text-underline-offset: 2px; overflow-wrap: anywhere; word-break: break-word; }
+    .title { font-weight: 700; font-size: 15px; margin: 0 0 8px; overflow-wrap: anywhere; }
+    .item-meta { color: var(--muted); font-size: 13px; margin: 0 0 8px; }
+    .row { display: flex; gap: 6px; flex-wrap: wrap; margin: 0 0 8px; align-items: center; }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      border-radius: 999px;
+      padding: 2px 8px;
+      font-size: 12px;
+      border: 1px solid var(--line);
+      background: #f8faf7;
+      color: var(--muted);
+    }
+    .badge.deadline { color: #25556a; background: rgba(167, 216, 240, 0.35); border-color: var(--blue); }
+    .badge.urgent { color: var(--danger); background: rgba(248, 175, 166, 0.32); border-color: var(--coral); }
+    .badge.soon { color: var(--warning); background: rgba(252, 231, 124, 0.44); border-color: var(--yellow); }
+    .badge.expired-recent { color: #7d3b00; background: rgba(244, 198, 195, 0.36); border-color: var(--pink); }
+    .badge.expired { color: #66616a; background: #f1eef2; border-color: #d7cedb; }
+    .badge.cat-proposal { color: #8d352b; background: rgba(248, 175, 166, 0.34); border-color: var(--coral); }
+    .badge.cat-education { color: #25556a; background: rgba(167, 216, 240, 0.36); border-color: var(--blue); }
+    .badge.cat-visa { color: #286337; background: rgba(162, 213, 171, 0.38); border-color: var(--green); }
+    .badge.cat-other { color: #6f5a00; background: rgba(252, 231, 124, 0.46); border-color: var(--yellow); }
+    .badge.country { color: #4b3b7a; background: rgba(244, 198, 195, 0.42); border-color: var(--pink); font-weight: 700; }
+    .badge.new { color: #8d2f25; background: rgba(248, 175, 166, 0.5); border-color: var(--coral); font-weight: 700; }
+    .badge.amount { color: #236d3a; background: rgba(162, 213, 171, 0.38); border-color: var(--green); font-weight: 700; }
+    .badge.dead { color: var(--danger); background: rgba(184, 57, 47, 0.08); border-color: var(--danger); font-weight: 700; }
+    .angle { margin: 8px 0 0; font-size: 13px; color: #315b35; border-top: 1px solid var(--line); padding-top: 8px; }
+    .summary { color: #3c4043; font-size: 13px; margin: 8px 0 0; overflow-wrap: anywhere; }
+    .ai-summary { color: #2f3a3f; font-size: 13px; margin: 0 0 8px; padding: 6px 8px; background: rgba(167, 216, 240, 0.16); border-left: 3px solid var(--blue); border-radius: 4px; overflow-wrap: anywhere; }
+    .ai-label { display: inline-block; font-size: 11px; font-weight: 700; color: #25556a; border: 1px solid var(--blue); border-radius: 999px; padding: 0 6px; margin-right: 6px; background: var(--paper); white-space: nowrap; }
+    .badge.rel-high { color: #236d3a; background: rgba(162, 213, 171, 0.38); border-color: var(--green); }
+    .badge.rel-mid { color: #25556a; background: rgba(167, 216, 240, 0.30); border-color: var(--blue); }
+    .badge.rel-low { color: #66616a; background: #f1eef2; border-color: #d7cedb; }
+    .badge.rel-none { color: #66616a; background: #f1eef2; border-color: #d7cedb; text-decoration: line-through; }
+    .related { color: var(--muted); font-size: 12px; margin: 8px 0 0; overflow-wrap: anywhere; }
+    .tag {
+      display: inline-block;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 1px 8px;
+      margin: 2px 4px 2px 0;
+      font-size: 12px;
+      color: var(--accent-2);
+      background: rgba(249, 247, 240, 0.86);
+    }
+    .section-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: baseline;
+      margin-top: 28px;
+    }
+    .section-head h2 { margin: 0 0 12px; }
+    .section-title {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .section-dot {
+      display: inline-block;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: var(--accent);
+    }
+    .section-dot.cat-proposal { background: var(--proposal); }
+    .section-dot.cat-education { background: var(--education); }
+    .section-dot.cat-visa { background: var(--visa); }
+    .section-dot.cat-other { background: var(--other); }
+    .count { color: var(--muted); font-size: 13px; }
+    .empty { color: var(--muted); background: var(--paper); border: 1px solid var(--line); border-radius: 8px; padding: 18px; }
+    footer { color: var(--muted); font-size: 13px; margin-top: 34px; }
+    .health-problems { color: var(--warning); font-size: 12px; margin: 4px 0 10px; padding-left: 18px; }
+    @media (max-width: 720px) {
+      header {
+        position: static;
+        padding: 24px 16px calc(min(52vw, 240px) + 64px);
+        background:
+          linear-gradient(rgba(249, 247, 240, 0.30), rgba(249, 247, 240, 0.42)),
+          url("images/nihongogogogo4.png") bottom center / contain no-repeat,
+          var(--header);
+      }
+      main { width: calc(100% - 24px); }
+      .top { width: calc(100% - 24px); }
+      .stats { grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 10px; }
+      .stat { padding: 6px 4px; font-size: 12px; line-height: 1.35; text-align: center; }
+      .stat strong { font-size: 25px; margin-bottom: 2px; }
+      .controls { grid-template-columns: 1fr; }
+      .search { height: 44px; font-size: 16px; }
+      .filters { justify-content: flex-start; }
+      .ai-toggle-row { justify-content: flex-start; }
+      .filter { min-height: 40px; padding: 0 14px; font-size: 14px; }
+      .grid { grid-template-columns: 1fr; }
+      article { padding: 15px; }
+      .title { font-size: 16px; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="top">
+      <h1>日本語教育<br>資金・政策ウォッチ</h1>
+      <p class="meta">最終更新: 2026-11-10 13:32:36 JST / 対象期間: 直近14日
+        <button class="reload" id="reload" type="button" title="最新の公開データを読み込み直します">🔄 最新に更新</button>
+      </p>
+      <div class="stats">
+        <div class="stat"><strong>122</strong>表示件数</div>
+        <div class="stat"><strong>9</strong>公募・補助金</div>
+        <div class="stat"><strong>11</strong>新鮮ニュース</div>
+        <div class="stat"><strong>5</strong>締切検出</div>
+        <div class="stat"><strong>2</strong>締切30日以内</div>
+        <div class="stat"><strong>1</strong>終了直後</div>
+      </div>
+      <div class="controls">
+        <input class="search" id="search" type="search" placeholder="キーワード、自治体名、制度名で検索">
+        <div class="filters" aria-label="表示フィルター">
+          <button class="filter active" data-filter="all">すべて</button>
+          <button class="filter" data-filter="new">新鮮ニュース</button>
+          <button class="filter" data-filter="deadline">締切あり</button>
+          <button class="filter" data-filter="urgent">締切30日以内</button>
+          <button class="filter" data-filter="expired">終了案件</button>
+          <button class="filter" data-filter="公募・補助金・プロポーザル">公募</button>
+          <button class="filter" data-filter="ニュース（日本語教育）">日本語教育</button>
+          <button class="filter" data-filter="ニュース（外国人・ビザ）">外国人・ビザ</button>
+          <button class="filter" data-filter="その他">その他</button>
+        </div>
+      </div>
+      <div class="ai-toggle-row"><button class="filter toggle" id="show-irrelevant" type="button" aria-pressed="false">AIが無関係と判定した記事も表示（4件）</button></div>
+    </div>
+  </header>
+  <main>
+    <div class="section-head"><h2 class="section-title"><span class="section-dot cat-proposal"></span>公募・補助金・プロポーザル</h2><span class="count">9件</span></div>
+<div class="list">
+<article class="cat-proposal urgent" data-category="公募・補助金・プロポーザル" data-deadline="true" data-urgent="true" data-expired="false" data-expired-old="false" data-new="false" data-dead="false" data-text="岐阜県外国人介護人材日本語学習支援事業費補助金 岐阜県 介護人材日本語補助金  公募・補助金・プロポーザル source page: https://www.pref.gifu.lg.jp/page/131091.html / 1.事業概要 介護職種の外国人技能実習生又は介護分野における特定技能外国人（以下、「外国人介護人材」という。 / 4.補助対象経費 介護事業者が負担する外国人介護人材の日本語学習にかかる経費 ※詳細は「岐阜県外国人介護人材日本語学習支援事業費補助金交付要綱」をご確認ください。 / ※交付決定後に実施した事業、かつ支払ったものが補助対象となります。 / 定額が確認できる資料 等） ＜申請受付期間＞ 令和8年4月1日（水曜日）から令和8年11月13日（金曜日） ※予算額の上限に達し次第、募集を終了します。 ＜申請期限＞ 補助事業開始日の属する月の前月15日（15日が土日祝日等 / 金額: 補助率2分の1 岐阜県が、外国人介護人材（介護職種の技能実習生・介護分野の特定技能外国人）を受け入れる県内の介護事業者に対し、日本語学習にかかる経費の2分の1を補助する。上限は1人15万円・1事業所30万円で、申請受付は2026年4月1日から11月13日まで（予算上限に達し次第終了）。 補助金 補助 外国人介護人材 介護人材 特定技能 技能実習 ">
+  <p class="title"><a href="https://www.pref.gifu.lg.jp/page/131091.html" target="_blank" rel="noopener noreferrer">岐阜県外国人介護人材日本語学習支援事業費補助金</a></p>
+  <p class="ai-summary"><span class="ai-label">AI要約</span>岐阜県が、外国人介護人材（介護職種の技能実習生・介護分野の特定技能外国人）を受け入れる県内の介護事業者に対し、日本語学習にかかる経費の2分の1を補助する。上限は1人15万円・1事業所30万円で、申請受付は2026年4月1日から11月13日まで（予算上限に達し次第終了）。</p>
+  <div class="row">
+    
+    
+    <span class="badge cat-proposal">公募・補助金・プロポーザル</span>
+    
+    <span class="badge">スコア 22</span>
+    <span class="badge urgent">締切 2026-11-13 あと3日</span>
+    <span class="badge amount">補助率2分の1</span>
+    <span class="badge rel-high">AI関連度 高</span>
+  </div>
+  <p class="item-meta">出典: 岐阜県 介護人材日本語補助金 / 公開日: 2026-04-01 / ページ反映日: 2026-11-10</p>
+  <div><span class="tag">補助金</span><span class="tag">補助</span><span class="tag">外国人介護人材</span><span class="tag">介護人材</span><span class="tag">特定技能</span><span class="tag">技能実習</span></div>
+  <p class="summary">Source page: <a href="https://www.pref.gifu.lg.jp/page/131091.html" target="_blank" rel="noopener noreferrer">https://www.pref.gifu.lg.jp/page/131091.html</a> / 1.事業概要 介護職種の外国人技能実習生又は介護分野における特定技能外国人（以下、「外国人介護人材」という。 / 4.補助対象経費 介護事業者が負担する外国人介護人材の日本語学習にかかる経費 ※詳細は「岐阜県外国人介護人材日本語学習支援事…</p>
+  
+  <p class="summary">次アクション: 公募要領、応募資格、対象経費、提出書類、共同提案可否を確認</p>
+  <p class="angle">Nihongo Catch! 提案切り口: Nihongo Catch! を、来日前・入学前の日本語力底上げ、確認テスト、学習ログ可視化を含む運用パッケージとして提案できる可能性があります。</p>
+  <p class="angle"><span class="ai-label">AI</span>営業の切り口: 補助対象は受入れ介護事業者の日本語学習費のため、Nihongo Catch!を県内の介護事業者へ日本語学習手段として提案し、補助金を活用した導入（1人15万円・半額補助）を後押しする形が狙える。</p>
+</article>
+
+
+<article class="cat-proposal urgent" data-category="公募・補助金・プロポーザル" data-deadline="true" data-urgent="true" data-expired="false" data-expired-old="false" data-new="false" data-dead="false" data-text="令和8年度「日本語教育の参照枠」を活用した教育プログラム受講者の評価手法等に係る調査研究事業における一般競争入札（最低価格落札方式）について 文部科学省 公募情報  公募・補助金・プロポーザル source page: https://www.mext.go.jp/b_menu/boshu/index.htm / 令和8年11月6日 支出負担行為担当官 文部科学省総合教育政策局長 淵上 孝 入札説明書一式 入札説明書 (pdf:675kb) （別冊）仕様書 (pdf:254kb) （別冊）委託要領 (pdf:421kb) （別冊）委託要項 (pdf:163kb) お問合せ先 総合教育政策局 / （1）入札書の提出場所、契約条項を示す場所、入札説明書の交付場所及び問合せ先 〒100-8959 東京都千代田区霞が関3-2-2 文部科学省総合教育政策局日本語教育課登録日本語教員係 tel 03-5253-4111（内線5793）… / オンライン （参加を希望する場合は事前登録が必要） （3）入札書の受領期限 令和8年11月26日（木曜日）18時15分 （4）開札の日時及び場所 令和8年12月18日（金曜日）13時30分 文部科学省入札室 4．その他 （1 文部科学省が、令和8年度「日本語教育の参照枠」を活用した教育プログラム受講者の評価手法等に係る調査研究事業について一般競争入札を公告した。履行期間は契約締結日から令和9年3月23日までで、入札書の受領期限は令和8年11月26日18時15分、開札は12月18日。 委託 日本語教育 ">
+  <p class="title"><a href="https://www.mext.go.jp/b_menu/boshu/detail/mext_00584.html" target="_blank" rel="noopener noreferrer">令和8年度「日本語教育の参照枠」を活用した教育プログラム受講者の評価手法等に係る調査研究事業における一般競争入札（最低価格落札方式）について</a></p>
+  <p class="ai-summary"><span class="ai-label">AI要約</span>文部科学省が、令和8年度「日本語教育の参照枠」を活用した教育プログラム受講者の評価手法等に係る調査研究事業について一般競争入札を公告した。履行期間は契約締結日から令和9年3月23日までで、入札書の受領期限は令和8年11月26日18時15分、開札は12月18日。</p>
+  <div class="row">
+    
+    
+    <span class="badge cat-proposal">公募・補助金・プロポーザル</span>
+    
+    <span class="badge">スコア 8</span>
+    <span class="badge soon">締切 2026-11-26 あと16日</span>
+    
+    <span class="badge rel-high">AI関連度 高</span>
+  </div>
+  <p class="item-meta">出典: 文部科学省 公募情報 / 公開日: 2026-11-06 / ページ反映日: 2026-11-10</p>
+  <div><span class="tag">委託</span><span class="tag">日本語教育</span></div>
+  <p class="summary">Source page: <a href="https://www.mext.go.jp/b_menu/boshu/index.htm" target="_blank" rel="noopener noreferrer">https://www.mext.go.jp/b_menu/boshu/index.htm</a> / 令和8年11月6日 支出負担行為担当官 文部科学省総合教育政策局長 淵上 孝 入札説明書一式 入札説明書 (PDF:675KB) （別冊）仕様書 (PDF:254KB) （別冊）委託要領 (PDF:421KB) （別冊）委託要項 (PD…</p>
+  
+  <p class="summary">次アクション: 公募要領、応募資格、対象経費、提出書類、共同提案可否を確認</p>
+  <p class="angle">Nihongo Catch! 提案切り口: Nihongo Catch! を、来日前・入学前の日本語力底上げ、確認テスト、学習ログ可視化を含む運用パッケージとして提案できる可能性があります。</p>
+  <p class="angle"><span class="ai-label">AI</span>営業の切り口: 受講者の評価手法の調査研究事業のため、Nihongo Catch! の学習・評価データや参照枠対応の知見を生かし、全省庁統一資格（役務の提供等）を満たした上で単独またはコンソーシアムでの入札参加を検討できる。入札説明会は11月24日のオンライン開催で事前登録が必要。</p>
+</article>
+
+
+<article class="cat-proposal" data-category="公募・補助金・プロポーザル" data-deadline="true" data-urgent="false" data-expired="false" data-expired-old="false" data-new="false" data-dead="false" data-text="神奈川県高度外国人材受入支援補助金 神奈川 外国人材活用支援  公募・補助金・プロポーザル source page: https://www.kipc.or.jp/business-support/productivity/foreign-talent/ / 本補助金は、在留資格認定の状況などにより、交付を受けられない場合があります。 / （チラシ）高度外国人材の受入れに関する補助金を利用していますか（pdf：433kb） 【モデルケース】（pdf：147kb） 申請する方の想定されるスケジュールです。 / 神奈川県高度外国人材受入支援補助金 神奈川県高度外国人材受入支援補助金のページです 1 神奈川県高度外国人材受入支援補助金とは 中小企業の高度外国人材(技術・人文知識・国際業務又は高度専門職)の採用手続きに係る初期経費に対する補助金です。 / るか判定の参考としてください。 2 公募期間 令和8年4月1日（水曜日）から令和9年2月12日（金曜日）まで （注記）申請は先着順で受け付け、予算額に達した時点で受付を終了します。 3 要綱・手引き 1 要綱（pdf：437 / 金額: 上限50万円 神奈川県が、中小企業による高度外国人材（技術・人文知識・国際業務または高度専門職）の採用手続きにかかる初期経費を補助する制度。1人当たり補助対象経費の3分の1以内（上限50万円）で、公募期間は令和8年4月1日から令和9年2月12日までだが、先着順で予算額に達し次第終了する。 公募 補助金 補助 外国人材 在留資格 ">
+  <p class="title"><a href="https://www.pref.kanagawa.jp/docs/z4r/jinkaku_subsidy.html" target="_blank" rel="noopener noreferrer">神奈川県高度外国人材受入支援補助金</a></p>
+  <p class="ai-summary"><span class="ai-label">AI要約</span>神奈川県が、中小企業による高度外国人材（技術・人文知識・国際業務または高度専門職）の採用手続きにかかる初期経費を補助する制度。1人当たり補助対象経費の3分の1以内（上限50万円）で、公募期間は令和8年4月1日から令和9年2月12日までだが、先着順で予算額に達し次第終了する。</p>
+  <div class="row">
+    
+    
+    <span class="badge cat-proposal">公募・補助金・プロポーザル</span>
+    
+    <span class="badge">スコア 19</span>
+    <span class="badge deadline">締切 2027-02-12 あと94日</span>
+    <span class="badge amount">上限50万円</span>
+    <span class="badge rel-mid">AI関連度 中</span>
+  </div>
+  <p class="item-meta">出典: 神奈川 外国人材活用支援 / 公開日: 日付不明 / ページ反映日: 2026-11-10</p>
+  <div><span class="tag">公募</span><span class="tag">補助金</span><span class="tag">補助</span><span class="tag">外国人材</span><span class="tag">在留資格</span></div>
+  <p class="summary">Source page: <a href="https://www.kipc.or.jp/business-support/productivity/foreign-talent/" target="_blank" rel="noopener noreferrer">https://www.kipc.or.jp/business-support/productivity/foreign-talent/</a> / 本補助金は、在留資格認定の状況などにより、交付を受けられない場合があります。 / （チラシ）高度外国人材の受入れに関する補助金を利用していますか（PDF：433KB） 【モデルケース】（PD…</p>
+  
+  <p class="summary">次アクション: 対象者、予算規模、Nihongo Catch! の提案余地を確認</p>
+  <p class="angle">Nihongo Catch! 提案切り口: Nihongo Catch! を、来日前・入学前の日本語力底上げ、確認テスト、学習ログ可視化を含む運用パッケージとして提案できる可能性があります。</p>
+  <p class="angle"><span class="ai-label">AI</span>営業の切り口: 補助対象は中小企業による高度外国人材の採用初期経費で日本語講習そのものは対象外とみられるため、直接応募ではなく、県内の受入企業や登録支援機関に制度を案内しつつ、採用後の日本語学習支援としてNihongo Catch!を提案する形が現実的。</p>
+</article>
+
+
+<article class="cat-proposal" data-category="公募・補助金・プロポーザル" data-deadline="false" data-urgent="false" data-expired="false" data-expired-old="false" data-new="false" data-dead="false" data-text="外国人雇用の助成金はいくら？2026年10月改正で最大25万円に｜使える5制度と在留資格・罰則 google news: 外国人材 補助金 自治体  公募・補助金・プロポーザル 掲載元: 補助金ポータル 外国人を雇用する事業主が活用できる助成金を2026年度版として5つ紹介し、雇用前に確認すべき在留資格や届出、違反時の罰則もあわせて解説する内容。 補助金 補助 助成 在留資格 ">
+  <p class="title"><a href="https://news.google.com/rss/articles/CBMiW0FVX3lxTFBzeDhCRlZuUjB3MkxLTG9ISHVqYWRoS0E3M0tRMUN1STk0UUxmeHZjYk04OHB3V1hrVE9sekRMWVZyMVNUTVlYZW9OMTVVcG82N0dfUDJYMjQwbWc?oc=5" target="_blank" rel="noopener noreferrer">外国人雇用の助成金はいくら？2026年10月改正で最大25万円に｜使える5制度と在留資格・罰則</a></p>
+  <p class="ai-summary"><span class="ai-label">AI要約</span>外国人を雇用する事業主が活用できる助成金を2026年度版として5つ紹介し、雇用前に確認すべき在留資格や届出、違反時の罰則もあわせて解説する内容。</p>
+  <div class="row">
+    
+    
+    <span class="badge cat-proposal">公募・補助金・プロポーザル</span>
+    
+    <span class="badge">スコア 16</span>
+    <span class="badge">締切未検出</span>
+    
+    <span class="badge rel-mid">AI関連度 中</span>
+  </div>
+  <p class="item-meta">出典: Google News: 外国人材 補助金 自治体 / 公開日: 2026-10-26 / ページ反映日: 2026-11-09</p>
+  <div><span class="tag">補助金</span><span class="tag">補助</span><span class="tag">助成</span><span class="tag">在留資格</span></div>
+  <p class="summary">掲載元: 補助金ポータル</p>
+  
+  <p class="summary">次アクション: 対象者、予算規模、Nihongo Catch! の提案余地を確認</p>
+  <p class="angle">Nihongo Catch! 提案切り口: Nihongo Catch! を、来日前・入学前の日本語力底上げ、確認テスト、学習ログ可視化を含む運用パッケージとして提案できる可能性があります。</p>
+  <p class="angle"><span class="ai-label">AI</span>営業の切り口: 助成金を使う受入企業向けに、外国人従業員向けの日本語講習を組み合わせて Nihongo Catch! を提案できそう。</p>
+</article>
+
+
+<article class="cat-proposal" data-category="公募・補助金・プロポーザル" data-deadline="false" data-urgent="false" data-expired="false" data-expired-old="false" data-new="false" data-dead="false" data-text="令和８年度福岡県外国人介護人材確保強化事業費補助金 福岡県 外国人介護補助金  公募・補助金・プロポーザル source page: https://www.pref.fukuoka.lg.jp/contents/kakuhokyoka.html / 5 補助対象経費 法人グループが行う、以下の事業とする。 / 採択に当たっては、高齢者地域包括ケア推進課において、応募要件に該当する旨を確認した後、「事業者選定委員会」が福岡県外国人介護人材確保強化事業費補助金事業者選定要領の審査基準に基づき、申請書等の審査を行い、選定する。 / 補助事業概要（補助金の申請受付は終了しました） 外国人介護人材を確保する観点から、海外現地での働きかけを強化し、海外現地の学校との連携を強化するなど、現地での人材確保に資する取組に対して支援を行うことで、外国人介護人材の受入促進を図るた… / 金額: 上限500万円・補助率10分の10 福岡県が、県内で外国人介護人材を受け入れる（予定を含む）介護事業所・施設を運営する、4法人以上で構成する法人グループ向けに実施する補助金。海外現地の学校との連携や説明会開催、介護の日本語学習支援などに補助率10分の10・上限500万円で支援し、申請受付は令和8年8月3日で終了している。 補助金 補助 外国人介護人材 介護人材 ">
+  <p class="title"><a href="https://www.pref.fukuoka.lg.jp/contents/kakuhokyoka.html" target="_blank" rel="noopener noreferrer">令和８年度福岡県外国人介護人材確保強化事業費補助金</a></p>
+  <p class="ai-summary"><span class="ai-label">AI要約</span>福岡県が、県内で外国人介護人材を受け入れる（予定を含む）介護事業所・施設を運営する、4法人以上で構成する法人グループ向けに実施する補助金。海外現地の学校との連携や説明会開催、介護の日本語学習支援などに補助率10分の10・上限500万円で支援し、申請受付は令和8年8月3日で終了している。</p>
+  <div class="row">
+    
+    
+    <span class="badge cat-proposal">公募・補助金・プロポーザル</span>
+    
+    <span class="badge">スコア 15</span>
+    <span class="badge">締切未検出</span>
+    <span class="badge amount">上限500万円・補助率10分の10</span>
+    <span class="badge rel-high">AI関連度 高</span>
+  </div>
+  <p class="item-meta">出典: 福岡県 外国人介護補助金 / 公開日: 2026-10-01 / ページ反映日: 2026-11-10</p>
+  <div><span class="tag">補助金</span><span class="tag">補助</span><span class="tag">外国人介護人材</span><span class="tag">介護人材</span></div>
+  <p class="summary">Source page: <a href="https://www.pref.fukuoka.lg.jp/contents/kakuhokyoka.html" target="_blank" rel="noopener noreferrer">https://www.pref.fukuoka.lg.jp/contents/kakuhokyoka.html</a> / 5 補助対象経費 法人グループが行う、以下の事業とする。 / 採択に当たっては、高齢者地域包括ケア推進課において、応募要件に該当する旨を確認した後、「事業者選定委員会」が福岡県外国人介護人材確保強化事業費補助金事業…</p>
+  
+  <p class="summary">次アクション: 対象者、予算規模、Nihongo Catch! の提案余地を確認</p>
+  <p class="angle">Nihongo Catch! 提案切り口: Nihongo Catch! を、来日前・入学前の日本語力底上げ、確認テスト、学習ログ可視化を含む運用パッケージとして提案できる可能性があります。</p>
+  <p class="angle"><span class="ai-label">AI</span>営業の切り口: 補助対象に「海外現地での介護の日本語学習支援」が必須事業として含まれるため、Nihongo Catch!の介護日本語教材・オンライン講習を、法人グループ向けの現地学習支援メニューとして提案できる。受付は終了しているため、次年度の公募に備えて福岡県内の介護法人グループへ事前に働きかけたい。</p>
+</article>
+
+
+<article class="cat-proposal" data-category="公募・補助金・プロポーザル" data-deadline="false" data-urgent="false" data-expired="false" data-expired-old="false" data-new="false" data-dead="false" data-text="【終了】令和8年度宮崎県外国人材定着促進支援事業費補助金について google news: 日本語教育 補助金  公募・補助金・プロポーザル 掲載元: 宮崎県 宮崎県が令和8年度の外国人材定着促進支援事業費補助金について、今年度最後の募集期間を再延長した。 補助金 補助 外国人材 ">
+  <p class="title"><a href="https://news.google.com/rss/articles/CBMiogFBVV95cUxOWEt1LWFINm5KbTNzMk45bi1DYjZ2S1Z5UHhudVpTaHVYWDRHRE5QQU1uUE9zUm9CRzZVelhaVVZLY2tENlFWTGVaSzNEZ2VXT25TNmttSS1TNWJyLWxMempqRENNU1hXd2ZScHNCRFdaVXVUOVdaekRUQWFKU1p2d0x4NjdvSERZS0g5bzFaWXYya2tMT05kSVJpRURxRVZsekE?oc=5" target="_blank" rel="noopener noreferrer">【終了】令和8年度宮崎県外国人材定着促進支援事業費補助金について</a></p>
+  <p class="ai-summary"><span class="ai-label">AI要約</span>宮崎県が令和8年度の外国人材定着促進支援事業費補助金について、今年度最後の募集期間を再延長した。</p>
+  <div class="row">
+    
+    
+    <span class="badge cat-proposal">公募・補助金・プロポーザル</span>
+    
+    <span class="badge">スコア 11</span>
+    <span class="badge">締切未検出</span>
+    
+    <span class="badge rel-high">AI関連度 高</span>
+  </div>
+  <p class="item-meta">出典: Google News: 日本語教育 補助金 / 公開日: 2026-10-26 / ページ反映日: 2026-11-09</p>
+  <div><span class="tag">補助金</span><span class="tag">補助</span><span class="tag">外国人材</span></div>
+  <p class="summary">掲載元: 宮崎県</p>
+  
+  <p class="summary">次アクション: 対象者、予算規模、Nihongo Catch! の提案余地を確認</p>
+  <p class="angle">Nihongo Catch! 提案切り口: Nihongo Catch! を、来日前・入学前の日本語力底上げ、確認テスト、学習ログ可視化を含む運用パッケージとして提案できる可能性があります。</p>
+  <p class="angle"><span class="ai-label">AI</span>営業の切り口: 宮崎県内の受入企業や登録支援機関が補助金を活用して外国人材の日本語学習に取り組めるよう、Nihongo Catch!を定着支援の学習手段として提案できる可能性がある。</p>
+</article>
+
+
+<article class="cat-proposal" data-category="公募・補助金・プロポーザル" data-deadline="false" data-urgent="false" data-expired="false" data-expired-old="false" data-new="false" data-dead="false" data-text="長野県は外国人留学生の県内企業への就職支援、⾃治体国際化協会が助成でアデコが運営 google news: 国際交流協会 多文化共生 委託事業  公募・補助金・プロポーザル 掲載元: アセアンポータル 長野県が、外国人留学生の県内企業への就職を支援する事業を進める。自治体国際化協会の助成を受け、運営はアデコが担う。 助成 留学生 ">
+  <p class="title"><a href="https://news.google.com/rss/articles/CBMiVEFVX3lxTE9saDJTeW4ya0NZYWNLSTBGd0xPRm5RblIzS1Z4Rkx2VkcxWW1CZzF5TWhocUpEdm1QY0tucXBtZThBWm5xdUxSUGtFSU8yZm1TdG9UbQ?oc=5" target="_blank" rel="noopener noreferrer">長野県は外国人留学生の県内企業への就職支援、⾃治体国際化協会が助成でアデコが運営</a></p>
+  <p class="ai-summary"><span class="ai-label">AI要約</span>長野県が、外国人留学生の県内企業への就職を支援する事業を進める。自治体国際化協会の助成を受け、運営はアデコが担う。</p>
+  <div class="row">
+    
+    
+    <span class="badge cat-proposal">公募・補助金・プロポーザル</span>
+    
+    <span class="badge">スコア 7</span>
+    <span class="badge">締切未検出</span>
+    
+    <span class="badge rel-high">AI関連度 高</span>
+  </div>
+  <p class="item-meta">出典: Google News: 国際交流協会 多文化共生 委託事業 / 公開日: 2026-10-15 / ページ反映日: 2026-10-29</p>
+  <div><span class="tag">助成</span><span class="tag">留学生</span></div>
+  <p class="summary">掲載元: アセアンポータル</p>
+  
+  <p class="summary">次アクション: 対象者、予算規模、Nihongo Catch! の提案余地を確認</p>
+  <p class="angle">Nihongo Catch! 提案切り口: Nihongo Catch! を、来日前・入学前の日本語力底上げ、確認テスト、学習ログ可視化を含む運用パッケージとして提案できる可能性があります。</p>
+  <p class="angle"><span class="ai-label">AI</span>営業の切り口: 留学生の県内就職支援では就職後の日本語力向上が課題になりやすいため、Nihongo Catch!を研修や定着支援の日本語学習プログラムとして運営事業者や県内の受入企業に提案できそう。</p>
+</article>
+
+
+<article class="cat-proposal expired-recent expired" data-category="公募・補助金・プロポーザル" data-deadline="true" data-urgent="false" data-expired="true" data-expired-old="false" data-new="false" data-dead="true" data-text="令和8年度認定日本語教育機関に係る経済的基礎確認等支援事業に係る一般競争入札（最低価格落札方式）について 文部科学省 公募情報  公募・補助金・プロポーザル source page: https://www.mext.go.jp/b_menu/boshu/index.htm / （1）件名 令和8年度認定日本語教育機関に係る経済的基礎確認等支援事業 / 令和8年10月19日 支出負担行為担当官 文部科学省総合教育政策局長 淵上 孝 入札説明書一式 入札説明書 (pdf:532kb) （別冊）仕様書 (pdf:251kb) （別冊）契約書（案） (pdf:310kb) （別冊）委託要項 (pdf:149kb) （別冊）委託要領 ( / ）をもって落札価格とするので、入札者は、消費税及び地方消費税に係る課税事業者であるか免税事業者であるかを問わず、見積もった契約金額の110分の100に相当す… / オンライン （参加を希望する場合は事前登録が必要） （4）入札書の受領期限 令和8年11月2日（月曜日）17時00分 （5）開札の日時及び場所 令和8年11月20日（金曜日）11時00分 文部科学省入札室 4．その他 （1） 文部科学省が「令和8年度認定日本語教育機関に係る経済的基礎確認等支援事業」の一般競争入札（最低価格落札方式）を公告した。履行期間は契約締結日から令和9年3月31日までで、入札書の受領期限は令和8年11月2日17時、開札は11月20日。 委託 日本語教育 認定日本語教育機関 リンク切れ">
+  <p class="title"><a href="https://www.mext.go.jp/b_menu/boshu/detail/mext_00567.html" target="_blank" rel="noopener noreferrer">令和8年度認定日本語教育機関に係る経済的基礎確認等支援事業に係る一般競争入札（最低価格落札方式）について</a></p>
+  <p class="ai-summary"><span class="ai-label">AI要約</span>文部科学省が「令和8年度認定日本語教育機関に係る経済的基礎確認等支援事業」の一般競争入札（最低価格落札方式）を公告した。履行期間は契約締結日から令和9年3月31日までで、入札書の受領期限は令和8年11月2日17時、開札は11月20日。</p>
+  <div class="row">
+    <span class="badge dead">リンク切れ（2026-11-03確認）</span>
+    
+    <span class="badge cat-proposal">公募・補助金・プロポーザル</span>
+    
+    <span class="badge">スコア 14</span>
+    <span class="badge expired-recent">終了直後 2026-11-02 8日前</span>
+    
+    <span class="badge rel-mid">AI関連度 中</span>
+  </div>
+  <p class="item-meta">出典: 文部科学省 公募情報 / 公開日: 2026-10-19 / ページ反映日: 2026-11-02</p>
+  <div><span class="tag">委託</span><span class="tag">日本語教育</span><span class="tag">認定日本語教育機関</span></div>
+  <p class="summary">Source page: <a href="https://www.mext.go.jp/b_menu/boshu/index.htm" target="_blank" rel="noopener noreferrer">https://www.mext.go.jp/b_menu/boshu/index.htm</a> / （1）件名 令和8年度認定日本語教育機関に係る経済的基礎確認等支援事業 / 令和8年10月19日 支出負担行為担当官 文部科学省総合教育政策局長 淵上 孝 入札説明書一式 入札説明書 (PDF:532KB) （別冊）仕様書 (PDF:2…</p>
+  
+  <p class="summary">次アクション: 過去案件として類似公募の条件、金額、提出書類を確認</p>
+  <p class="angle">Nihongo Catch! 提案切り口: Nihongo Catch! を、来日前・入学前の日本語力底上げ、確認テスト、学習ログ可視化を含む運用パッケージとして提案できる可能性があります。</p>
+  <p class="angle"><span class="ai-label">AI</span>営業の切り口: 認定日本語教育機関の経済的基礎確認の支援業務で、全省庁統一資格（役務の提供等）が必要な入札案件。Nihongo Catch! の教材・学習サービスが直接活きる内容ではないため、単独応募よりも、認定日本語教育機関の制度動向の把握や、機関向け営業の接点づくりに活用するのが現実的。</p>
+</article>
+
+
+<article class="cat-proposal expired-old expired" data-category="公募・補助金・プロポーザル" data-deadline="true" data-urgent="false" data-expired="true" data-expired-old="true" data-new="false" data-dead="false" data-text="令和９年度マレーシア政府派遣留学生予備教育派遣教員の募集（退職教員対象）について 文部科学省 公募情報  公募・補助金・プロポーザル source page: https://www.mext.go.jp/b_menu/boshu/index.htm / この度、令和9年度の派遣教員について、高等学校等の教員として勤務し、退職をした方を対象として、以下のとおり募集を行います。 / 2 募集する教科及び採用予定人数 数学、物理、化学のいずれかを担当する者（各教科若干名） 3 応募要件 以下の要件全てを満たす者を対象とします。 / 【提出用フォーム】 令和9年度マレーシア派遣教員応募書類提出（公募） 【提出期限】 令和8年7月24日（金曜日）17時00分（厳守） なお、データでの御提出が出来ない場合は、応募書類一式を（3）の「応募書類提出先」まで御提出ください。 文部科学省が、令和9年度にマレーシア・マラヤ大学予備教育部へ派遣する数学・物理・化学の教員を、高等学校等を退職した方から募集する。派遣期間は令和9年4月から2年間で、応募書類の提出期限は令和8年7月24日17時（基本情報の入力期限は7月10日17時）。 公募 留学生 " hidden>
+  <p class="title"><a href="https://www.mext.go.jp/b_menu/boshu/detail/mext_00535.html" target="_blank" rel="noopener noreferrer">令和９年度マレーシア政府派遣留学生予備教育派遣教員の募集（退職教員対象）について</a></p>
+  <p class="ai-summary"><span class="ai-label">AI要約</span>文部科学省が、令和9年度にマレーシア・マラヤ大学予備教育部へ派遣する数学・物理・化学の教員を、高等学校等を退職した方から募集する。派遣期間は令和9年4月から2年間で、応募書類の提出期限は令和8年7月24日17時（基本情報の入力期限は7月10日17時）。</p>
+  <div class="row">
+    
+    
+    <span class="badge cat-proposal">公募・補助金・プロポーザル</span>
+    
+    <span class="badge">スコア 7</span>
+    <span class="badge expired">終了案件 2026-07-24 109日前</span>
+    
+    <span class="badge rel-low">AI関連度 低</span>
+  </div>
+  <p class="item-meta">出典: 文部科学省 公募情報 / 公開日: 2026-06-03 / ページ反映日: 2026-11-10</p>
+  <div><span class="tag">公募</span><span class="tag">留学生</span></div>
+  <p class="summary">Source page: <a href="https://www.mext.go.jp/b_menu/boshu/index.htm" target="_blank" rel="noopener noreferrer">https://www.mext.go.jp/b_menu/boshu/index.htm</a> / この度、令和9年度の派遣教員について、高等学校等の教員として勤務し、退職をした方を対象として、以下のとおり募集を行います。 / 2 募集する教科及び採用予定人数 数学、物理、化学のいずれかを担当する者（各教科若干名） 3 応募要件 以下…</p>
+  
+  <p class="summary">次アクション: 通常一覧からは外し、次年度や類似公募の参考情報として保管</p>
+  <p class="angle">Nihongo Catch! 提案切り口: Nihongo Catch! を、来日前・入学前の日本語力底上げ、確認テスト、学習ログ可視化を含む運用パッケージとして提案できる可能性があります。</p>
+  <p class="angle"><span class="ai-label">AI</span>営業の切り口: 高校退職教員個人を対象とした教員派遣の募集で、日本語教育サービス事業者としての応募や提案の余地は乏しいため、営業上の対応は不要。</p>
+</article>
+</div><div class="section-head"><h2 class="section-title"><span class="section-dot cat-education"></span>ニュース（日本語教育）</h2><span class="count">18件</span></div>
+<div class="list">
+<article class="cat-education" data-category="ニュース（日本語教育）" data-deadline="false" data-urgent="false" data-expired="false" data-expired-old="false" data-new="false" data-dead="false" data-text="【開催報告】日本語学校26校から40名の先生方が参加。学校の垣根を越えて教育現場の実践や課題を共有する「日本語教育 実践フォーラム presented by handson ai」を開催 google news: 認定日本語教育機関 補助金  ニュース（日本語教育） 掲載元: pr times 日本語学校26校から40名の教員が参加し、学校の垣根を越えて教育現場の実践や課題を共有する「日本語教育 実践フォーラム presented by handson ai」が開催された。開催報告として公表されている。 日本語教育 日本語学校 ">
+  <p class="title"><a href="https://news.google.com/rss/articles/CBMiakFVX3lxTFBTbnNsMThya2ZGZTR1SU04azkwdzdMZ0wtOTNxSVNxMHUzTkpwazJaekZ3VFd6S0dwRXJYWEtIZDZUYmRibnJFZEFLV0RWVHFBNmNlN08xeGFvb2RVbGR2V0Y4WGtndmhYaUE?oc=5" target="_blank" rel="noopener noreferrer">【開催報告】日本語学校26校から40名の先生方が参加。学校の垣根を越えて教育現場の実践や課題を共有する「日本語教育 実践フォーラム presented by HandsOn AI」を開催</a></p>
+  <p class="ai-summary"><span class="ai-label">AI要約</span>日本語学校26校から40名の教員が参加し、学校の垣根を越えて教育現場の実践や課題を共有する「日本語教育 実践フォーラム presented by HandsOn AI」が開催された。開催報告として公表されている。</p>
+  <div class="row">
+    
+    
+    <span class="badge cat-education">ニュース（日本語教育）</span>
+    
+    <span class="badge">スコア 8</span>
+    <span class="badge">締切未検出</span>
+    
+    <span class="badge rel-mid">AI関連度 中</span>
+  </div>
+  <p class="item-meta">出典: Google News: 認定日本語教育機関 補助金 / 公開日: 2026-11-06 / ページ反映日: 2026-11-10</p>
+  <div><span class="tag">日本語教育</span><span class="tag">日本語学校</span></div>
+  <p class="summary">掲載元: PR TIMES</p>
+  
+  <p class="summary">次アクション: 認定校、登録日本語教員、Can Do評価との接点を確認</p>
+  <p class="angle">Nihongo Catch! 提案切り口: 認定日本語教育機関、登録日本語教員、Can Do型評価などの政策文脈に沿って、教育品質管理と学習継続支援の導入提案に使えます。</p>
+  
+</article>
+
+
+<article class="cat-education" data-category="ニュース（日本語教育）" data-deadline="false" data-urgent="false" data-expired="false" data-expired-old="false" data-new="false" data-dead="false" data-text="【長野県松本市】外国人介護人材の「採用後」を支える 日本語学習支援事業で初の対面交流授業を実施｜infoseekニュース google news: 外国人材 日本語教育 委託  ニュース（日本語教育） 掲載元: infoseek 長野県松本市で、外国人介護人材の採用後の定着を支える日本語学習支援事業として、初めての対面交流授業が実施された。 外国人介護人材 介護人材 ">
+  <p class="title"><a href="https://news.google.com/rss/articles/CBMickFVX3lxTE0xRXFLRlZQSW1oWjFvZUxtaEo5ZHF1Y0FCNVgzcS1oS1o1VjVONjM3djVwS1UzTE1CVGRlTEhKR2VuVl9yaVh5TngxbmFzcmhYX09semZacVhOakN6cHRHMEF1ZWNaMTN6ajhfOTFrUXd5UQ?oc=5" target="_blank" rel="noopener noreferrer">【長野県松本市】外国人介護人材の「採用後」を支える 日本語学習支援事業で初の対面交流授業を実施｜Infoseekニュース</a></p>
+  <p class="ai-summary"><span class="ai-label">AI要約</span>長野県松本市で、外国人介護人材の採用後の定着を支える日本語学習支援事業として、初めての対面交流授業が実施された。</p>
+  <div class="row">
+    
+    
+    <span class="badge cat-education">ニュース（日本語教育）</span>
+    
+    <span class="badge">スコア 7</span>
+    <span class="badge">締切未検出</span>
+    
+    <span class="badge rel-high">AI関連度 高</span>
+  </div>
+  <p class="item-meta">出典: Google News: 外国人材 日本語教育 委託 / 公開日: 2026-10-22 / ページ反映日: 2026-10-29</p>
+  <div><span class="tag">外国人介護人材</span><span class="tag">介護人材</span></div>
+  <p class="summary">掲載元: Infoseek</p>
+  
+  <p class="summary">次アクション: 認定校、登録日本語教員、Can Do評価との接点を確認</p>
+  <p class="angle">Nihongo Catch! 提案切り口: 認定日本語教育機関、登録日本語教員、Can Do型評価などの政策文脈に沿って、教育品質管理と学習継続支援の導入提案に使えます。</p>
+  
+</article>
+
+
+<article class="cat-education" data-category="ニュース（日本語教育）" data-deadline="false" data-urgent="false" data-expired="false" data-expired-old="false" data-new="false" data-dead="false" data-text="外国人介護人材の定着へ 技能向上図る研修 三重 四日市 google news: 福岡県 外国人介護人材 補助金  ニュース（日本語教育） 掲載元: nhkニュース 三重県四日市市で、外国人介護人材の定着と技能向上を目的とした研修が行われた。nhkニュースが報じたもので、介護分野で働く外国人材が対象。 外国人介護人材 介護人材 ">
+  <p class="title"><a href="https://news.google.com/rss/articles/CBMiX0FVX3lxTFB6OHY2UE8tVFlMVUJNWmFHRFBQSzVPZnpXVUlPaVFta1dvc1JiMnZWT0FaSGxlN1JJYTBDSWRpOHhHdVBPclRqSmpIN0FudHNCeXVoU2tmWXhsLS1obDFF?oc=5" target="_blank" rel="noopener noreferrer">外国人介護人材の定着へ 技能向上図る研修 三重 四日市</a></p>
+  <p class="ai-summary"><span class="ai-label">AI要約</span>三重県四日市市で、外国人介護人材の定着と技能向上を目的とした研修が行われた。NHKニュースが報じたもので、介護分野で働く外国人材が対象。</p>
+  <div class="row">
+    
+    
+    <span class="badge cat-education">ニュース（日本語教育）</span>
+    
+    <span class="badge">スコア 7</span>
+    <span class="badge">締切未検出</span>
+    
+    <span class="badge rel-mid">AI関連度 中</span>
+  </div>
+  <p class="item-meta">出典: Google News: 福岡県 外国人介護人材 補助金 / 公開日: 2026-10-22 / ページ反映日: 2026-11-01</p>
+  <div><span class="tag">外国人介護人材</span><span class="tag">介護人材</span></div>
+  <p class="summary">掲載元: NHKニュース</p>
+  
+  <p class="summary">次アクション: 認定校、登録日本語教員、Can Do評価との接点を確認</p>
+  <p class="angle">Nihongo Catch! 提案切り口: 認定日本語教育機関、登録日本語教員、Can Do型評価などの政策文脈に沿って、教育品質管理と学習継続支援の導入提案に使えます。</p>
+  
+</article>
+
+
+<article class="cat-education" data-category="ニュース（日本語教育）" data-deadline="false" data-urgent="false" data-expired="false" data-expired-old="false" data-new="false" data-dead="false" data-text="日本語教育 東京都 多文化共生  ニュース（日本語教育） source page: https://www.seikatubunka.metro.tokyo.lg.jp/chiiki_tabunka / (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({&#x27;gtm.start&#x27;: new date().gettime(),event:&#x27;gtm.js&#x27;});var f=d.getelementsbytagname(s)[0], j=d.createelement(s),dl=l!=&#x27;datalayer&#x27;?&#x27;&amp;l=&#x27;+l:&#x27;&#x27;;j.async=true;j.src= &#x27;https://www.googletagmanager.com/gtm.js?id=&#x27;+i+dl;f.pare 東京都生活文化局の多文化共生ポータル内にある「日本語教育」のページ。都による地域の日本語教育に関する取組を扱うページだが、具体的な施策内容や日程、金額は読み取れない。 日本語教育 ">
+  <p class="title"><a href="https://www.seikatubunka.metro.tokyo.lg.jp/chiiki_tabunka/tabunka/nihongo_kyouiku" target="_blank" rel="noopener noreferrer">日本語教育</a></p>
+  <p class="ai-summary"><span class="ai-label">AI要約</span>東京都生活文化局の多文化共生ポータル内にある「日本語教育」のページ。都による地域の日本語教育に関する取組を扱うページだが、具体的な施策内容や日程、金額は読み取れない。</p>
+  <div class="row">
+    
+    
+    <span class="badge cat-education">ニュース（日本語教育）</span>
+    
+    <span class="badge">スコア 4</span>
+    <span class="badge">締切未検出</span>
+    
+    <span class="badge rel-mid">AI関連度 中</span>
+  </div>
+  <p class="item-meta">出典: 東京都 多文化共生 / 公開日: 日付不明 / ページ反映日: 2026-11-10</p>
+  <div><span class="tag">日本語教育</span></div>
+  <p class="summary">Source page: <a href="https://www.seikatubunka.metro.tokyo.lg.jp/chiiki_tabunka" target="_blank" rel="noopener noreferrer">https://www.seikatubunka.metro.tokyo.lg.jp/chiiki_tabunka</a> / (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({&#x27;gtm.start&#x27;: new Date().getTime(),event:&#x27;gtm.js&#x27;});var f=d.g…</p>
+  
+  <p class="summary">次アクション: 認定校、登録日本語教員、Can Do評価との接点を確認</p>
+  <p class="angle">Nihongo Catch! 提案切り口: 認定日本語教育機関、登録日本語教員、Can Do型評価などの政策文脈に沿って、教育品質管理と学習継続支援の導入提案に使えます。</p>
+  
+</article>
+
+
+<article class="cat-education" data-category="ニュース（日本語教育）" data-deadline="false" data-urgent="false" data-expired="false" data-expired-old="false" data-new="false" data-dead="false" data-text="日本語教育大会・その他会議 文部科学省 報道発表  ニュース（日本語教育） source page: https://www.mext.go.jp/b_menu/houdou/index.htm / 基調講演 登録日本語教員養成機関事例発表 日本語教師養成・研修推進拠点整備事業報告等 ※内容の詳細については追って本ページを更新し、お知らせいたします。 / 場所：文部科学省（東京都千代田区霞が関3ー2 ー 2） 内容：登録日本語教員等の養成・研修をテーマに以下を実施予定です。 文部科学省が令和8年12月11日（金）10時〜16時半（予定）に、文部科学省（東京都千代田区霞が関）で来場型の「文部科学省日本語教育大会」を開催する。テーマは登録日本語教員等の養成・研修で、基調講演、登録日本語教員養成機関の事例発表、日本語教師養成・研修推進拠点整備事業の報告などを予定し、参加は原則事前申し込み制で、後日アーカイブ配信を予定している。 日本語教育 ">
+  <p class="title"><a href="https://www.mext.go.jp/a_menu/nihongo_kyoiku/mext_02916.html" target="_blank" rel="noopener noreferrer">日本語教育大会・その他会議</a></p>
+  <p class="ai-summary"><span class="ai-label">AI要約</span>文部科学省が令和8年12月11日（金）10時〜16時半（予定）に、文部科学省（東京都千代田区霞が関）で来場型の「文部科学省日本語教育大会」を開催する。テーマは登録日本語教員等の養成・研修で、基調講演、登録日本語教員養成機関の事例発表、日本語教師養成・研修推進拠点整備事業の報告などを予定し、参加は原則事前申し込み制で、後日アーカイブ配信を予定している。</p>
+  <div class="row">
+    
+    
+    <span class="badge cat-education">ニュース（日本語教育）</span>
+    
+    <span class="badge">スコア 4</span>
+    <span class="badge">締切未検出</span>
+    
+    <span class="badge rel-mid">AI関連度 中</span>
+  </div>
+  <p class="item-meta">出典: 文部科学省 報道発表 / 公開日: 日付不明 / ページ反映日: 2026-11-09</p>
+  <div><span class="tag">日本語教育</span></div>
+  <p class="summary">Source page: <a href="https://www.mext.go.jp/b_menu/houdou/index.htm" target="_blank" rel="noopener noreferrer">https://www.mext.go.jp/b_menu/houdou/index.htm</a> / 基調講演 登録日本語教員養成機関事例発表 日本語教師養成・研修推進拠点整備事業報告等 ※内容の詳細については追って本ページを更新し、お知らせいたします。 / 場所：文部科学省（東京都千代田区霞が関3ー2 ー 2） 内容：登録日本語教員…</p>
+  
+  <p class="summary">次アクション: 認定校、登録日本語教員、Can Do評価との接点を確認</p>
+  <p class="angle">Nihongo Catch! 提案切り口: 認定日本語教育機関、登録日本語教員、Can Do型評価などの政策文脈に沿って、教育品質管理と学習継続支援の導入提案に使えます。</p>
+  
+</article>
+
+
+<article class="cat-education" data-category="ニュース（日本語教育）" data-deadline="false" data-urgent="false" data-expired="false" data-expired-old="false" data-new="false" data-dead="false" data-text="大東建託、日本語教育事業に参入 人材確保へインドネシアで来春開校（朝日新聞） google news: 日本語教育 委託事業  ニュース（日本語教育） 掲載元: yahoo!ニュース 大東建託が日本語教育事業に参入し、人材確保を目的にインドネシアで来春に日本語学校を開校する。 日本語教育 ">
+  <p class="title"><a href="https://news.google.com/rss/articles/CBMiZ0FVX3lxTFBZRVZCdzBLNnV6QmZpWE5Za1lWVWRyQUgzbGhLZnpaU05NY3FuSEFYZ2JJYkxEN0VhVk1DX20xb09iNXlGNXhtblVPYnJsRTlnYzZWWTlqRXlLcU9WUGJ2c0h5NEcwcU0?oc=5" target="_blank" rel="noopener noreferrer">大東建託、日本語教育事業に参入 人材確保へインドネシアで来春開校（朝日新聞）</a></p>
+  <p class="ai-summary"><span class="ai-label">AI要約</span>大東建託が日本語教育事業に参入し、人材確保を目的にインドネシアで来春に日本語学校を開校する。</p>
+  <div class="row">
+    
+    
+    <span class="badge cat-education">ニュース（日本語教育）</span>
+    
+    <span class="badge">スコア 4</span>
+    <span class="badge">締切未検出</span>
+    
+    <span class="badge rel-high">AI関連度 高</span>
+  </div>
+  <p class="item-meta">出典: Google News: 日本語教育 委託事業 / 公開日: 2026-11-07 / ページ反映日: 2026-11-10</p>
+  <div><span class="tag">日本語教育</span></div>
+  <p class="summary">掲載元: Yahoo!ニュース</p>
+  
+  <p class="summary">次アクション: 認定校、登録日本語教員、Can Do評価との接点を確認</p>
+  <p class="angle">Nihongo Catch! 提案切り口: 認定日本語教育機関、登録日本語教員、Can Do型評価などの政策文脈に沿って、教育品質管理と学習継続支援の導入提案に使えます。</p>
+  
+</article>
+
+
+<article class="cat-education" data-category="ニュース（日本語教育）" data-deadline="false" data-urgent="false" data-expired="false" data-expired-old="false" data-new="false" data-dead="false" data-text="バングラデシュの日本語教育機関「asia it &amp; language institute」との連携を推進 google news: 特定技能 日本語教育 支援  ニュース（日本語教育） 掲載元: pr times バングラデシュの日本語教育機関「asia it &amp; language institute」との連携を推進するという、pr times掲載の発表。日本での就労を目指す現地の人材育成に関わる取り組みとみられる。 日本語教育 ">
+  <p class="title"><a href="https://news.google.com/rss/articles/CBMiakFVX3lxTE5nYWdQZXVNUVpWcklOLURHNVIzR2hVMk1YX0UxSHpVeWJtbTIxTVhGb29KTnN4QjZ1TnJ1eTYwY2dhWlN0TWJVUnRiZnhfSkk3NnhEbThqalYwaEtJVFVhclVJTzFqT25XUGc?oc=5" target="_blank" rel="noopener noreferrer">バングラデシュの日本語教育機関「Asia IT &amp; Language Institute」との連携を推進</a></p>
+  <p class="ai-summary"><span class="ai-label">AI要約</span>バングラデシュの日本語教育機関「Asia IT &amp; Language Institute」との連携を推進するという、PR TIMES掲載の発表。日本での就労を目指す現地の人材育成に関わる取り組みとみられる。</p>
+  <div class="row">
+    
+    
+    <span class="badge cat-education">ニュース（日本語教育）</span>
+    
+    <span class="badge">スコア 4</span>
+    <span class="badge">締切未検出</span>
+    
+    <span class="badge rel-mid">AI関連度 中</span>
+  </div>
+  <p class="item-meta">出典: Google News: 特定技能 日本語教育 支援 / 公開日: 2026-11-05 / ページ反映日: 2026-11-09</p>
+  <div><span class="tag">日本語教育</span></div>
+  <p class="summary">掲載元: PR TIMES</p>
+  
+  <p class="summary">次アクション: 認定校、登録日本語教員、Can Do評価との接点を確認</p>
+  <p class="angle">Nihongo Catch! 提案切り口: 認定日本語教育機関、登録日本語教員、Can Do型評価などの政策文脈に沿って、教育品質管理と学習継続支援の導入提案に使えます。</p>
+  
+</article>
+
+
+<article class="cat-education" data-category="ニュース（日本語教育）" data-deadline="false" data-urgent="false" data-expired="false" data-expired-old="false" data-new="false" data-dead="false" data-text="文科省「日本語教育大会」12/11…登録日本語教員の養成・研修 google news: 文部科学省 日本語教育 留学生  ニュース（日本語教育） 掲載元: リセマム 文部科学省が12月11日に「日本語教育大会」を開催し、登録日本語教員の養成・研修をテーマに取り上げる。日本語教育に携わる人材の育成や研修のあり方が対象となる。 日本語教育 ">
+  <p class="title"><a href="https://news.google.com/rss/articles/CBMiZkFVX3lxTE1RNU9pYmsxRC01MnM1dGQ5THZ6QmxnT1NKZTQ3UmFPLU9ac2hjQ2hDc2tXaHpLRWlYREVvZUxVa1ZEZTJVTXBpZWdXV096R2VxZE5McGNBajIyT3cwRVl1ZnZYYUFndw?oc=5" target="_blank" rel="noopener noreferrer">文科省「日本語教育大会」12/11…登録日本語教員の養成・研修</a></p>
+  <p class="ai-summary"><span class="ai-label">AI要約</span>文部科学省が12月11日に「日本語教育大会」を開催し、登録日本語教員の養成・研修をテーマに取り上げる。日本語教育に携わる人材の育成や研修のあり方が対象となる。</p>
+  <div class="row">
+    
+    
+    <span class="badge cat-education">ニュース（日本語教育）</span>
+    
+    <span class="badge">スコア 4</span>
+    <span class="badge">締切未検出</span>
+    
+    <span class="badge rel-mid">AI関連度 中</span>
+  </div>
+  <p class="item-meta">出典: Google News: 文部科学省 日本語教育 留学生 / 公開日: 2026-11-02 / ページ反映日: 2026-11-06</p>
+  <div><span class="tag">日本語教育</span></div>
+  <p class="summary">掲載元: リセマム</p>
+  
+  <p class="summary">次アクション: 認定校、登録日本語教員、Can Do評価との接点を確認</p>
+  <p class="angle">Nihongo Catch! 提案切り口: 認定日本語教育機関、登録日本語教員、Can Do型評価などの政策文脈に沿って、教育品質管理と学習継続支援の導入提案に使えます。</p>
+  
+</article>
+
+
+<article class="cat-education" data-category="ニュース（日本語教育）" data-deadline="false" data-urgent="false" data-expired="false" data-expired-old="false" data-new="false" data-dead="false" data-text="聖学院大学は外国にルーツを持つ生徒を対象とした総合型選抜「講義方式入試」を新設 ―入学後は日本語教育で、大学の学びに必要な日本語力を育成 google news: 日本語学校 入学前教育  ニュース（日本語教育） 掲載元: 大学プレスセンター 聖学院大学が、外国にルーツを持つ生徒を対象とした総合型選抜「講義方式入試」を新設した。入学後は日本語教育を通じて、大学の学びに必要な日本語力を育成する。 日本語教育 ">
+  <p class="title"><a href="https://news.google.com/rss/articles/CBMiVkFVX3lxTE1ld3ZKRXRHMjloc2s4aDVDSW55bkQ3a25veWJ2Tk9qSG4tWS1BSzEzcHJwUm5KTm1lTW1nSDV3WVJIUGMtRlY3MjFvWklCaGFoQll3VGJ3?oc=5" target="_blank" rel="noopener noreferrer">聖学院大学は外国にルーツを持つ生徒を対象とした総合型選抜「講義方式入試」を新設 ―入学後は日本語教育で、大学の学びに必要な日本語力を育成</a></p>
+  <p class="ai-summary"><span class="ai-label">AI要約</span>聖学院大学が、外国にルーツを持つ生徒を対象とした総合型選抜「講義方式入試」を新設した。入学後は日本語教育を通じて、大学の学びに必要な日本語力を育成する。</p>
+  <div class="row">
+    
+    
+    <span class="badge cat-education">ニュース（日本語教育）</span>
+    
+    <span class="badge">スコア 4</span>
+    <span class="badge">締切未検出</span>
+    
+    <span class="badge rel-mid">AI関連度 中</span>
+  </div>
+  <p class="item-meta">出典: Google News: 日本語学校 入学前教育 / 公開日: 2026-10-26 / ページ反映日: 2026-10-28</p>
+  <div><span class="tag">日本語教育</span></div>
+  <p class="summary">掲載元: 大学プレスセンター</p>
+  
+  <p class="summary">次アクション: 認定校、登録日本語教員、Can Do評価との接点を確認</p>
+  <p class="angle">Nihongo Catch! 提案切り口: 認定日本語教育機関、登録日本語教員、Can Do型評価などの政策文脈に沿って、教育品質管理と学習継続支援の導入提案に使えます。</p>
+  
+</article>
+
+
+<article class="cat-education" data-category="ニュース（日本語教育）" data-deadline="false" data-urgent="false" data-expired="false" data-expired-old="false" data-new="false" data-dead="false" data-text="子供の日本語教育支援、20年で20倍に 札幌の外国人増 指導員待遇改善急務 google news: 日本語教育 補助金  ニュース（日本語教育） 掲載元: 北海道新聞デジタル 札幌市で外国人の増加を背景に、子どもへの日本語教育支援の利用が20年で約20倍に拡大した。日本語指導員の待遇改善が急務になっていると北海道新聞デジタルが伝えている。 日本語教育 ">
+  <p class="title"><a href="https://news.google.com/rss/articles/CBMiWkFVX3lxTE1EV0lkbHhpeHphYkRuaUgzSGJxUU9CdVlvM2VOdVhNLXRFbTBCUkdrZ3hqdVNBVzhrVnZQbXh6RExITDJZUFpjdEh6OVdibEhaNngxVzQzejl2dw?oc=5" target="_blank" rel="noopener noreferrer">子供の日本語教育支援、20年で20倍に 札幌の外国人増 指導員待遇改善急務</a></p>
+  <p class="ai-summary"><span class="ai-label">AI要約</span>札幌市で外国人の増加を背景に、子どもへの日本語教育支援の利用が20年で約20倍に拡大した。日本語指導員の待遇改善が急務になっていると北海道新聞デジタルが伝えている。</p>
+  <div class="row">
+    
+    
+    <span class="badge cat-education">ニュース（日本語教育）</span>
+    
+    <span class="badge">スコア 4</span>
+    <span class="badge">締切未検出</span>
+    
+    <span class="badge rel-mid">AI関連度 中</span>
+  </div>
+  <p class="item-meta">出典: Google News: 日本語教育 補助金 / 公開日: 2026-10-23 / ページ反映日: 2026-11-04</p>
+  <div><span class="tag">日本語教育</span></div>
+  <p class="summary">掲載元: 北海道新聞デジタル</p>
+  
+  <p class="summary">次アクション: 認定校、登録日本語教員、Can Do評価との接点を確認</p>
+  <p class="angle">Nihongo Catch! 提案切り口: 認定日本語教育機関、登録日本語教員、Can Do型評価などの政策文脈に沿って、教育品質管理と学習継続支援の導入提案に使えます。</p>
+  
+</article>
+
+
+<article class="cat-education" data-category="ニュース（日本語教育）" data-deadline="false" data-urgent="false" data-expired="false" data-expired-old="false" data-new="false" data-dead="false" data-text="市立小中高で多国籍化 日本語教育支援 20年で20倍 市民団体 指導員の待遇改善を google news: 日本語教育 補助金  ニュース（日本語教育） 掲載元: 北海道新聞デジタル 市立の小中高校で外国籍の児童生徒が増え、日本語教育の支援対象が20年で20倍に拡大した。市民団体が日本語指導員の待遇改善を求めている。 日本語教育 ">
+  <p class="title"><a href="https://news.google.com/rss/articles/CBMiWkFVX3lxTE1iQ245T0NUb1AzQl9jZm8tYlFuMHNWRGtQbjZVLTJqMDh1enlOSk5ZSW13SUVLa25qSmVRcWZZNjhMNEYySnZWRE1oRms3TURZT3k0dWZhdUNMdw?oc=5" target="_blank" rel="noopener noreferrer">市立小中高で多国籍化 日本語教育支援 20年で20倍 市民団体 指導員の待遇改善を</a></p>
+  <p class="ai-summary"><span class="ai-label">AI要約</span>市立の小中高校で外国籍の児童生徒が増え、日本語教育の支援対象が20年で20倍に拡大した。市民団体が日本語指導員の待遇改善を求めている。</p>
+  <div class="row">
+    
+    
+    <span class="badge cat-education">ニュース（日本語教育）</span>
+    
+    <span class="badge">スコア 4</span>
+    <span class="badge">締切未検出</span>
+    
+    <span class="badge rel-mid">AI関連度 中</span>
+  </div>
+  <p class="item-meta">出典: Google News: 日本語教育 補助金 / 公開日: 2026-10-23 / ページ反映日: 2026-10-30</p>
+  <div><span class="tag">日本語教育</span></div>
+  <p class="summary">掲載元: 北海道新聞デジタル</p>
+  
+  <p class="summary">次アクション: 認定校、登録日本語教員、Can Do評価との接点を確認</p>
+  <p class="angle">Nihongo Catch! 提案切り口: 認定日本語教育機関、登録日本語教員、Can Do型評価などの政策文脈に沿って、教育品質管理と学習継続支援の導入提案に使えます。</p>
+  
+</article>
+
+
+<article class="cat-education" data-category="ニュース（日本語教育）" data-deadline="false" data-urgent="false" data-expired="false" data-expired-old="false" data-new="false" data-dead="false" data-text="日本は外国人の社会統合を支援するため、日本語教育を拡充する。 google news: 日本語教育 補助金  ニュース（日本語教育） 掲載元: vietnam.vn 日本が外国人の社会統合を支援するため、日本語教育を拡充するという内容で、外国人住民や外国人材が対象。vietnam.vnが伝えた。 日本語教育 ">
+  <p class="title"><a href="https://news.google.com/rss/articles/CBMilAFBVV95cUxNbE1nbGxmb01ZeEdESzRReU16SmRVcDBPbWxlQmZIZGxVT0dfeU94N2dhV29BTWhfZDRzM0tYSktoYm9hX1VnTGVWSGtNbjltbW5Gc3lGMGZrQXFMbDNzWUNZM01iY09VZ1RlWHBtVlRRLU4wc0NRRnZoTHNvekoxZF9FUGZwdTV5QkdNbENRUExCdGQ3?oc=5" target="_blank" rel="noopener noreferrer">日本は外国人の社会統合を支援するため、日本語教育を拡充する。</a></p>
+  <p class="ai-summary"><span class="ai-label">AI要約</span>日本が外国人の社会統合を支援するため、日本語教育を拡充するという内容で、外国人住民や外国人材が対象。Vietnam.vnが伝えた。</p>
+  <div class="row">
+    
+    
+    <span class="badge cat-education">ニュース（日本語教育）</span>
+    
+    <span class="badge">スコア 4</span>
+    <span class="badge">締切未検出</span>
+    
+    <span class="badge rel-high">AI関連度 高</span>
+  </div>
+  <p class="item-meta">出典: Google News: 日本語教育 補助金 / 公開日: 2026-10-22 / ページ反映日: 2026-11-04</p>
+  <div><span class="tag">日本語教育</span></div>
+  <p class="summary">掲載元: Vietnam.vn</p>
+  
+  <p class="summary">次アクション: 認定校、登録日本語教員、Can Do評価との接点を確認</p>
+  <p class="angle">Nihongo Catch! 提案切り口: 認定日本語教育機関、登録日本語教員、Can Do型評価などの政策文脈に沿って、教育品質管理と学習継続支援の導入提案に使えます。</p>
+  
+</article>
+
+
+<article class="cat-education" data-category="ニュース（日本語教育）" data-deadline="false" data-urgent="false" data-expired="false" data-expired-old="false" data-new="false" data-dead="false" data-text="インドネシアの大手送り出し機関 「すらら にほんご」で日本語教育のデジタル化へ ～年間2,000人の送り出し体制へ～ google news: 特定技能 日本語教育 支援  ニュース（日本語教育） 掲載元: pr times インドネシアの大手送り出し機関が、デジタル教材「すらら にほんご」を導入して日本語教育のデジタル化を進める。年間2,000人の送り出し体制を目指す取り組み。 日本語教育 ">
+  <p class="title"><a href="https://news.google.com/rss/articles/CBMiakFVX3lxTE90Wm9lMnhYV2wwYnlCeEdJemtZT0J5eE9OTWh2Qk4tUDRBUWNpTXh4aVo0Y0lPX0ViMnNiamxYeEFlOUpBT0ppSE1CUmpvcWNnWFM2U2xYOHBOVWstSTlmVWQxVHRqUmVfTVE?oc=5" target="_blank" rel="noopener noreferrer">インドネシアの大手送り出し機関 「すらら にほんご」で日本語教育のデジタル化へ ～年間2,000人の送り出し体制へ～</a></p>
+  <p class="ai-summary"><span class="ai-label">AI要約</span>インドネシアの大手送り出し機関が、デジタル教材「すらら にほんご」を導入して日本語教育のデジタル化を進める。年間2,000人の送り出し体制を目指す取り組み。</p>
+  <div class="row">
+    
+    
+    <span class="badge cat-education">ニュース（日本語教育）</span>
+    
+    <span class="badge">スコア 4</span>
+    <span class="badge">締切未検出</span>
+    
+    <span class="badge rel-high">AI関連度 高</span>
+  </div>
+  <p class="item-meta">出典: Google News: 特定技能 日本語教育 支援 / 公開日: 2026-10-21 / ページ反映日: 2026-10-31</p>
+  <div><span class="tag">日本語教育</span></div>
+  <p class="summary">掲載元: PR TIMES</p>
+  
+  <p class="summary">次アクション: 認定校、登録日本語教員、Can Do評価との接点を確認</p>
+  <p class="angle">Nihongo Catch! 提案切り口: 認定日本語教育機関、登録日本語教員、Can Do型評価などの政策文脈に沿って、教育品質管理と学習継続支援の導入提案に使えます。</p>
+  
+</article>
+
+
+<article class="cat-education" data-category="ニュース（日本語教育）" data-deadline="false" data-urgent="false" data-expired="false" data-expired-old="false" data-new="false" data-dead="false" data-text="バイト週28時間、ビザも厳格化…締め付けが進む日本で、それでも外国人留学生が就職を目指す“切実な理由”（spa!） google news: 出入国在留管理庁 留学生 在留資格  ニュース（日本語教育） 掲載元: yahoo!ニュース 留学生のアルバイトが週28時間までに制限され、在留資格の審査も厳格化するなか、それでも日本での就職を目指す外国人留学生の事情を取り上げたspa!の報道。 留学生 ">
+  <p class="title"><a href="https://news.google.com/rss/articles/CBMiiAFBVV95cUxQYTlQb2poZDZsRTFPaXlSSTVKR1FVTlNOelVxVXFNUkRtMk1FNjRFZmtrQV9rdXNxQ2dYUnNPTEw5ZUROZGJUTUFwenhRQUUzak1jOTZObU9UX3lDZjlzRENSLU5HZkZzYTJPa3RDVXRaNXUyMlpzRXNCM0NXWk1zWTVnZks4dHRT?oc=5" target="_blank" rel="noopener noreferrer">バイト週28時間、ビザも厳格化…締め付けが進む日本で、それでも外国人留学生が就職を目指す“切実な理由”（SPA!）</a></p>
+  <p class="ai-summary"><span class="ai-label">AI要約</span>留学生のアルバイトが週28時間までに制限され、在留資格の審査も厳格化するなか、それでも日本での就職を目指す外国人留学生の事情を取り上げたSPA!の報道。</p>
+  <div class="row">
+    
+    
+    <span class="badge cat-education">ニュース（日本語教育）</span>
+    
+    <span class="badge">スコア 3</span>
+    <span class="badge">締切未検出</span>
+    
+    <span class="badge rel-mid">AI関連度 中</span>
+  </div>
+  <p class="item-meta">出典: Google News: 出入国在留管理庁 留学生 在留資格 / 公開日: 2026-11-06 / ページ反映日: 2026-11-10</p>
+  <div><span class="tag">留学生</span></div>
+  <p class="summary">掲載元: Yahoo!ニュース</p>
+  
+  <p class="summary">次アクション: 認定校、登録日本語教員、Can Do評価との接点を確認</p>
+  <p class="angle">Nihongo Catch! 提案切り口: 認定日本語教育機関、登録日本語教員、Can Do型評価などの政策文脈に沿って、教育品質管理と学習継続支援の導入提案に使えます。</p>
+  
+</article>
+
+
+<article class="cat-education" data-category="ニュース（日本語教育）" data-deadline="false" data-urgent="false" data-expired="false" data-expired-old="false" data-new="false" data-dead="false" data-text="関西学院大学、留学生向け英語公式サイトを wovn.io で中国語・韓国語に対応 google news: 外国人材 日本語教育 委託  ニュース（日本語教育） 掲載元: ニコニコニュース 関西学院大学が、留学生向けの英語公式サイトを wovn.io により中国語・韓国語にも対応させた。留学生への情報提供の多言語化を進める取り組み。 留学生 ">
+  <p class="title"><a href="https://news.google.com/rss/articles/CBMie0FVX3lxTE1BTjh5alFWVWY4MGdyMDlYQnV2SkRzZE5HWlVsZWZjUHpBRms2dHdlMzRnLU9MNE94VWdsNXFDT1hxNEd1MlBGUGV3ajFIbVJYQXhGdG8xTGJQcG5qTkZnaFpOS3E0cUJGWVlpMW1veDJLUHZFR3ZlN21QRQ?oc=5" target="_blank" rel="noopener noreferrer">関西学院大学、留学生向け英語公式サイトを WOVN.io で中国語・韓国語に対応</a></p>
+  <p class="ai-summary"><span class="ai-label">AI要約</span>関西学院大学が、留学生向けの英語公式サイトを WOVN.io により中国語・韓国語にも対応させた。留学生への情報提供の多言語化を進める取り組み。</p>
+  <div class="row">
+    
+    
+    <span class="badge cat-education">ニュース（日本語教育）</span>
+    
+    <span class="badge">スコア 3</span>
+    <span class="badge">締切未検出</span>
+    
+    <span class="badge rel-low">AI関連度 低</span>
+  </div>
+  <p class="item-meta">出典: Google News: 外国人材 日本語教育 委託 / 公開日: 2026-11-05 / ページ反映日: 2026-11-06</p>
+  <div><span class="tag">留学生</span></div>
+  <p class="summary">掲載元: ニコニコニュース</p>
+  
+  <p class="summary">次アクション: 認定校、登録日本語教員、Can Do評価との接点を確認</p>
+  <p class="angle">Nihongo Catch! 提案切り口: 認定日本語教育機関、登録日本語教員、Can Do型評価などの政策文脈に沿って、教育品質管理と学習継続支援の導入提案に使えます。</p>
+  
+</article>
+
+
+<article class="cat-education" data-category="ニュース（日本語教育）" data-deadline="false" data-urgent="false" data-expired="false" data-expired-old="false" data-new="false" data-dead="false" data-text="【東京国際大学にて留学生向け就活セミナーを開催！】参加者約100名・満足度87.1%を記録 google news: 文部科学省 日本語教育 留学生  ニュース（日本語教育） 掲載元: ニコニコニュース 東京国際大学で留学生向けの就活セミナーが開催され、参加者は約100名、満足度は87.1%だった。 留学生 ">
+  <p class="title"><a href="https://news.google.com/rss/articles/CBMie0FVX3lxTE1SWjJsaF9FREJOZmtaV3A3RzRiZ3lONzhMRUFScU1sVi1XSXpsclI0RFI0R1NmOFM4MGVWV29WY3pEZ1F0Rk5tWlpEUnBJYjJWS01temxjcnRmdXA3RWFUWUtmUjJ4YTB2R3RLS0tkSnJnRE85c21TSk1aSQ?oc=5" target="_blank" rel="noopener noreferrer">【東京国際大学にて留学生向け就活セミナーを開催！】参加者約100名・満足度87.1%を記録</a></p>
+  <p class="ai-summary"><span class="ai-label">AI要約</span>東京国際大学で留学生向けの就活セミナーが開催され、参加者は約100名、満足度は87.1%だった。</p>
+  <div class="row">
+    
+    
+    <span class="badge cat-education">ニュース（日本語教育）</span>
+    
+    <span class="badge">スコア 3</span>
+    <span class="badge">締切未検出</span>
+    
+    <span class="badge rel-mid">AI関連度 中</span>
+  </div>
+  <p class="item-meta">出典: Google News: 文部科学省 日本語教育 留学生 / 公開日: 2026-11-05 / ページ反映日: 2026-11-05</p>
+  <div><span class="tag">留学生</span></div>
+  <p class="summary">掲載元: ニコニコニュース</p>
+  
+  <p class="summary">次アクション: 認定校、登録日本語教員、Can Do評価との接点を確認</p>
+  <p class="angle">Nihongo Catch! 提案切り口: 認定日本語教育機関、登録日本語教員、Can Do型評価などの政策文脈に沿って、教育品質管理と学習継続支援の導入提案に使えます。</p>
+  
+</article>
+
+
+<article class="cat-education" data-category="ニュース（日本語教育）" data-deadline="false" data-urgent="false" data-expired="false" data-expired-old="false" data-new="false" data-dead="false" data-text="外国人留学生のキャリア形成と企業との出会いを支援 google news: 外国人材 日本語教育 委託  ニュース（日本語教育） 掲載元: pr times 外国人留学生のキャリア形成を支援し、企業との出会いの機会をつくる取り組みについてpr timesで発表された。 留学生 ">
+  <p class="title"><a href="https://news.google.com/rss/articles/CBMiakFVX3lxTE1oNVVpYndqdm9IN3UwQWhGQU1DNEhhampidER6YTktY19xUEZraXVLMUVKcWV2NTVQZTZEaWlINWVkMTVMV3pZNnRMREFrS1o2S1NtdzY5bFIwc1JJQXBXMFNPMkZxVS1zQmc?oc=5" target="_blank" rel="noopener noreferrer">外国人留学生のキャリア形成と企業との出会いを支援</a></p>
+  <p class="ai-summary"><span class="ai-label">AI要約</span>外国人留学生のキャリア形成を支援し、企業との出会いの機会をつくる取り組みについてPR TIMESで発表された。</p>
+  <div class="row">
+    
+    
+    <span class="badge cat-education">ニュース（日本語教育）</span>
+    
+    <span class="badge">スコア 3</span>
+    <span class="badge">締切未検出</span>
+    
+    <span class="badge rel-mid">AI関連度 中</span>
+  </div>
+  <p class="item-meta">出典: Google News: 外国人材 日本語教育 委託 / 公開日: 2026-10-28 / ページ反映日: 2026-11-02</p>
+  <div><span class="tag">留学生</span></div>
+  <p class="summary">掲載元: PR TIMES</p>
+  
+  <p class="summary">次アクション: 認定校、登録日本語教員、Can Do評価との接点を確認</p>
+  <p class="angle">Nihongo Catch! 提案切り口: 認定日本語教育機関、登録日本語教員、Can Do型評価などの政策文脈に沿って、教育品質管理と学習継続支援の導入提案に使えます。</p>
+  
+</article>
+
+
+<article class="cat-education" data-category="ニュース（日本語教育）" data-deadline="false" data-urgent="false" data-expired="false" data-expired-old="false" data-new="false" data-dead="false" data-text="外国人留学生の方 google news: 文部科学省 日本語教育 留学生  ニュース（日本語教育） 掲載元: 東京工科大学 東京工科大学が掲載した、外国人留学生の方に向けたページ。 留学生 ">
+  <p class="title"><a href="https://news.google.com/rss/articles/CBMia0FVX3lxTE9pRU9pRk1STGhDZVlkOHUwbERBRjhxYVl1WkF4NGEwMFF4bl9JZ2VFSWUzYjdjM0ZwMFp3Uk9hdkw2OFdGNVg3cFRGaTdvYnhuSlNhUjZ3ekN3aUtYMGQySmRQRzRNZjBUTzFF?oc=5" target="_blank" rel="noopener noreferrer">外国人留学生の方</a></p>
+  <p class="ai-summary"><span class="ai-label">AI要約</span>東京工科大学が掲載した、外国人留学生の方に向けたページ。</p>
+  <div class="row">
+    
+    
+    <span class="badge cat-education">ニュース（日本語教育）</span>
+    
+    <span class="badge">スコア 3</span>
+    <span class="badge">締切未検出</span>
+    
+    <span class="badge rel-low">AI関連度 低</span>
+  </div>
+  <p class="item-meta">出典: Google News: 文部科学省 日本語教育 留学生 / 公開日: 2026-10-23 / ページ反映日: 2026-11-01</p>
+  <div><span class="tag">留学生</span></div>
+  <p class="summary">掲載元: 東京工科大学</p>
+  
+  <p class="summary">次アクション: 認定校、登録日本語教員、Can Do評価との接点を確認</p>
+  <p class="angle">Nihongo Catch! 提案切り口: 認定日本語教育機関、登録日本語教員、Can Do型評価などの政策文脈に沿って、教育品質管理と学習継続支援の導入提案に使えます。</p>
+  
+</article>
+</div><div class="section-head"><h2 class="section-title"><span class="section-dot cat-visa"></span>ニュース（外国人・ビザ）</h2><span class="count">91件（AI無関係判定 4件は非表示）</span></div>
+<div class="list">
+<article class="cat-visa" data-category="ニュース（外国人・ビザ）" data-deadline="false" data-urgent="false" data-expired="false" data-expired-old="false" data-new="false" data-dead="false" data-text="thông tin cho người lao động đi làm việc tại thị trường nhật bản ベトナム dolab-jica 特定技能情報 ベトナム ニュース（外国人・ビザ） 日本語概要: 日本の特定技能制度に関するベトナム側の案内です。技能実習プログラムにも触れています。epaの看護・介護人材に関係します。日本語要件や jft-basic/jlpt に関係します。送り出し事業者・費用負担に関する注意事項が含まれます。 / 原文抜粋: thông tin cho người lao động đi làm việc tại thị trường nhật bản thông tin cho người lao … / source page: https://vieclamngoainuoc.dolab.gov.vn/loai-hinh/ssw ベトナム内務省海外労働管理局のdolab-jicaが、日本で働くベトナム人向けに特定技能1号の案内を掲載している。応募条件は日本語能力試験n4またはjft-basicと技能試験の合格、もしくは技能実習2号・3号の修了で、受入側が日本語訓練と技能講習に各5万円以上を負担し、給与は月18万〜25万円程度とされる。 epa nhật bản lao động 介護人材 特定技能 技能実習 jft-basic ">
+  <p class="title"><a href="https://vieclamngoainuoc.dolab.gov.vn/loai-hinh/SSW" target="_blank" rel="noopener noreferrer">THÔNG TIN CHO NGƯỜI LAO ĐỘNG ĐI LÀM VIỆC TẠI THỊ TRƯỜNG NHẬT BẢN</a></p>
+  <p class="ai-summary"><span class="ai-label">AI要約</span>ベトナム内務省海外労働管理局のDOLAB-JICAが、日本で働くベトナム人向けに特定技能1号の案内を掲載している。応募条件は日本語能力試験N4またはJFT-Basicと技能試験の合格、もしくは技能実習2号・3号の修了で、受入側が日本語訓練と技能講習に各5万円以上を負担し、給与は月18万〜25万円程度とされる。</p>
+  <div class="row">
+    
+    
+    <span class="badge cat-visa">ニュース（外国人・ビザ）</span>
+    <span class="badge country">ベトナム</span>
+    <span class="badge">スコア 21</span>
+    <span class="badge">締切未検出</span>
+    
+    <span class="badge rel-high">AI関連度 高</span>
+  </div>
+  <p class="item-meta">出典: ベトナム DOLAB-JICA 特定技能情報 / 公開日: 日付不明 / ページ反映日: 2026-11-06</p>
+  <div><span class="tag">EPA</span><span class="tag">Nhật Bản</span><span class="tag">lao động</span><span class="tag">介護人材</span><span class="tag">特定技能</span><span class="tag">技能実習</span><span class="tag">JFT-Basic</span></div>
+  <p class="summary">日本語概要: 日本の特定技能制度に関するベトナム側の案内です。技能実習プログラムにも触れています。EPAの看護・介護人材に関係します。日本語要件や JFT-Basic/JLPT に関係します。送り出し事業者・費用負担に関する注意事項が含まれます。 / 原文抜粋: THÔNG TIN CHO NGƯỜI LAO ĐỘNG ĐI LÀM VIỆC TẠI TH…</p>
+  
+  <p class="summary">次アクション: 制度変更が学校・受入機関の日本語教育ニーズに与える影響を確認</p>
+  <p class="angle">Nihongo Catch! 提案切り口: 在留資格や外国人材受入れ要件の変化に合わせ、学校・受入機関向けに来日前学習と日本語力確認の仕組みとして訴求できます。</p>
+  
+</article>
+
+
+<article class="cat-visa" data-category="ニュース（外国人・ビザ）" data-deadline="false" data-urgent="false" data-expired="false" data-expired-old="false" data-new="false" data-dead="false" data-text="pengumuman hasil matching ii calon pekerja migran indonesiakandidat nurse dan careworker batch ke-20 program g to g jepang tahun penempatan 2027 インドネシア kp2mi/bp2mi g to g japan インドネシア ニュース（外国人・ビザ） 日本語概要: 日本語基礎試験に関する告知です。合格発表に関する情報です。インドネシア政府の g to g 日本派遣プログラムに関する告知です。epaの看護師・介護福祉士候補者に関係します。日本就労を目指すインドネシア人候補者向け情報です。 / 原文抜粋: pengumuman hasil matching ii calon pekerja migran indonesiakandidat nurse dan careworker … / source page: https://kp2mi.go.id/gtog-data/jepang/pengumuman?draw=1&amp;start=0&amp;length=20 / 一覧掲載日: 6 november 2026 インドネシア移住労働者保護省（kp2mi）が、日本とのepa（g to g）プログラム第20期（2027年派遣）の看護師・介護福祉士候補者のマッチングii結果を発表した。合格は看護師3名・介護福祉士8名で、累計では看護師26名・介護福祉士300名となり、11月中旬に予定されるn4レベルの日本語研修に進む。 careworker g to g epa nurse jepang pekerja migran pekerja ">
+  <p class="title"><a href="https://kp2mi.go.id/gtog-detail/jepang/pengumuman-hasil-matching-ii-calon-pekerja-migran-indonesiakandidat-nurse-dan-careworker-batch-ke-20-program-g-to-g-jepang-tahun-penempatan-2027" target="_blank" rel="noopener noreferrer">PENGUMUMAN HASIL MATCHING II CALON PEKERJA MIGRAN INDONESIAKANDIDAT NURSE DAN CAREWORKER BATCH KE-20 PROGRAM G TO G JEPANG TAHUN PENEMPATAN 2027</a></p>
+  <p class="ai-summary"><span class="ai-label">AI要約</span>インドネシア移住労働者保護省（KP2MI）が、日本とのEPA（G to G）プログラム第20期（2027年派遣）の看護師・介護福祉士候補者のマッチングII結果を発表した。合格は看護師3名・介護福祉士8名で、累計では看護師26名・介護福祉士300名となり、11月中旬に予定されるN4レベルの日本語研修に進む。</p>
+  <div class="row">
+    
+    
+    <span class="badge cat-visa">ニュース（外国人・ビザ）</span>
+    <span class="badge country">インドネシア</span>
+    <span class="badge">スコア 20</span>
+    <span class="badge">締切未検出</span>
+    
+    <span class="badge rel-mid">AI関連度 中</span>
+  </div>
+  <p class="item-meta">出典: インドネシア KP2MI/BP2MI G to G Japan / 公開日: 2026-11-06 / ページ反映日: 2026-11-10</p>
+  <div><span class="tag">careworker</span><span class="tag">G to G</span><span class="tag">EPA</span><span class="tag">nurse</span><span class="tag">Jepang</span><span class="tag">pekerja migran</span><span class="tag">pekerja</span></div>
+  <p class="summary">日本語概要: 日本語基礎試験に関する告知です。合格発表に関する情報です。インドネシア政府の G to G 日本派遣プログラムに関する告知です。EPAの看護師・介護福祉士候補者に関係します。日本就労を目指すインドネシア人候補者向け情報です。 / 原文抜粋: PENGUMUMAN HASIL MATCHING II CALON PEKERJA MIGRAN I…</p>
+  
+  <p class="summary">次アクション: 制度変更が学校・受入機関の日本語教育ニーズに与える影響を確認</p>
+  <p class="angle">Nihongo Catch! 提案切り口: 在留資格や外国人材受入れ要件の変化に合わせ、学校・受入機関向けに来日前学習と日本語力確認の仕組みとして訴求できます。</p>
+  
+</article>
+
+
+<article class="cat-visa" data-category="ニュース（外国人・ビザ）" data-deadline="false" data-urgent="false" data-expired="false" data-expired-old="false" data-new="true" data-dead="false" data-text="pengumuman pemanggilan pelaksanaan pelatihan bahasa jepang calon pekerja migran indonesia program g to g jepang batch xx tahun 2026 インドネシア kp2mi/bp2mi g to g japan インドネシア ニュース（外国人・ビザ） 日本語概要: 日本語基礎試験に関する告知です。試験実施・参加手順に関する情報です。インドネシア政府の g to g 日本派遣プログラムに関する告知です。epaの看護師・介護福祉士候補者に関係します。日本就労を目指すインドネシア人候補者向け情報です。 / 原文抜粋: pengumuman pemanggilan pelaksanaan pelatihan bahasa jepang calon pekerja migran indonesia… / source page: https://kp2mi.go.id/gtog-data/jepang/pengumuman?draw=1&amp;start=0&amp;length=20 / 一覧掲載日: 9 november 2026 インドネシア政府（kp2mi/bp2mi）が、日本とのg to gプログラム第xx期のマッチング合格者326名（看護師26名、介護福祉士候補300名）向けに、日本語研修の実施を告知した。研修はオンラインで2026年11月17日から2027年5月まで行われ、参加者はパスポートのアップロードと社会保障（bpjs）の支払いを出発前に済ませる必要がある。 g to g epa jepang bahasa jepang pekerja migran pekerja ">
+  <p class="title"><a href="https://kp2mi.go.id/gtog-detail/jepang/pengumuman-pemanggilan-pelaksanaan-pelatihan-bahasa-jepang-calon-pekerja-migran-indonesia-program-g-to-g-jepang-batch-xx-tahun-2026" target="_blank" rel="noopener noreferrer">PENGUMUMAN PEMANGGILAN PELAKSANAAN PELATIHAN BAHASA JEPANG CALON PEKERJA MIGRAN INDONESIA PROGRAM G TO G JEPANG BATCH XX TAHUN 2026</a></p>
+  <p class="ai-summary"><span class="ai-label">AI要約</span>インドネシア政府（KP2MI/BP2MI）が、日本とのG to Gプログラム第XX期のマッチング合格者326名（看護師26名、介護福祉士候補300名）向けに、日本語研修の実施を告知した。研修はオンラインで2026年11月17日から2027年5月まで行われ、参加者はパスポートのアップロードと社会保障（BPJS）の支払いを出発前に済ませる必要がある。</p>
+  <div class="row">
+    
+    <span class="badge new">新鮮ニュース</span>
+    <span class="badge cat-visa">ニュース（外国人・ビザ）</span>
+    <span class="badge country">インドネシア</span>
+    <span class="badge">スコア 17</span>
+    <span class="badge">締切未検出</span>
+    
+    <span class="badge rel-mid">AI関連度 中</span>
+  </div>
+  <p class="item-meta">出典: インドネシア KP2MI/BP2MI G to G Japan / 公開日: 2026-11-09 / ページ反映日: 2026-11-10</p>
+  <div><span class="tag">G to G</span><span class="tag">EPA</span><span class="tag">Jepang</span><span class="tag">bahasa Jepang</span><span class="tag">pekerja migran</span><span class="tag">pekerja</span></div>
+  <p class="summary">日本語概要: 日本語基礎試験に関する告知です。試験実施・参加手順に関する情報です。インドネシア政府の G to G 日本派遣プログラムに関する告知です。EPAの看護師・介護福祉士候補者に関係します。日本就労を目指すインドネシア人候補者向け情報です。 / 原文抜粋: PENGUMUMAN PEMANGGILAN PELAKSANAAN PELATIHAN B…</p>
+  
+  <p class="summary">次アクション: 制度変更が学校・受入機関の日本語教育ニーズに与える影響を確認</p>
+  <p class="angle">Nihongo Catch! 提案切り口: 在留資格や外国人材受入れ要件の変化に合わせ、学校・受入機関向けに来日前学習と日本語力確認の仕組みとして訴求できます。</p>
+  
+</article>
+
+
+<article class="cat-visa" data-category="ニュース（外国人・ビザ）" data-deadline="false" data-urgent="false" data-expired="false" data-expired-old="false" data-new="false" data-dead="false" data-text="在留期間内での変更又は更新許可を希望する場合について 出入国在留管理庁  ニュース（外国人・ビザ） source page: https://www.moj.go.jp/isa/ / 〇 ４月に就労を開始することを目的とした留学生からの在留資格変更許可申請 〇 在留資格「技能実習」から在留資格「特定技能」への在留資格変更許可申請 （注２）中長期在留者ではなく、３か月以内の在留期間をお持ちの方は、その在留期間のおおむね２分の１が経過したときから申請 が可能です。 / 〇 在留資格変更許可申請 在留資格の変更の事由が生じたら速やかに申請をしてください。 / そうした 日常生活上の制限が発生することを避けるためには、在留期間内（特例期間に至る前）に在留資格の変更又は在留期間の更新が許可されることが望… 出入国在留管理庁が、在留期間内に在留資格の変更・更新の許可を得たい在留カード所持者向けに申請時期の目安を示した。在留期間更新は満了の3か月前から45日前まで、在留資格変更は事由が生じたら速やかに申請するよう求めている。 留学生 在留資格 特定技能 技能実習 ">
+  <p class="title"><a href="https://www.moj.go.jp/isa/10_00270.html" target="_blank" rel="noopener noreferrer">在留期間内での変更又は更新許可を希望する場合について</a></p>
+  <p class="ai-summary"><span class="ai-label">AI要約</span>出入国在留管理庁が、在留期間内に在留資格の変更・更新の許可を得たい在留カード所持者向けに申請時期の目安を示した。在留期間更新は満了の3か月前から45日前まで、在留資格変更は事由が生じたら速やかに申請するよう求めている。</p>
+  <div class="row">
+    
+    
+    <span class="badge cat-visa">ニュース（外国人・ビザ）</span>
+    
+    <span class="badge">スコア 14</span>
+    <span class="badge">締切未検出</span>
+    
+    <span class="badge rel-mid">AI関連度 中</span>
+  </div>
+  <p class="item-meta">出典: 出入国在留管理庁 / 公開日: 日付不明 / ページ反映日: 2026-11-10</p>
+  <div><span class="tag">留学生</span><span class="tag">在留資格</span><span class="tag">特定技能</span><span class="tag">技能実習</span></div>
+  <p class="summary">Source page: <a href="https://www.moj.go.jp/isa/" target="_blank" rel="noopener noreferrer">https://www.moj.go.jp/isa/</a> / 〇 ４月に就労を開始することを目的とした留学生からの在留資格変更許可申請 〇 在留資格「技能実習」から在留資格「特定技能」への在留資格変更許可申請 （注２）中長期在留者ではなく、３か月以内の在留期間をお持ちの方は、その在留期間のおおむね２分の１が経過したときから申請 が可能…</p>
+  
+  <p class="summary">次アクション: 制度変更が学校・受入機関の日本語教育ニーズに与える影響を確認</p>
+  <p class="angle">Nihongo Catch! 提案切り口: 在留資格や外国人材受入れ要件の変化に合わせ、学校・受入機関向けに来日前学習と日本語力確認の仕組みとして訴求できます。</p>
+  
+</article>
+
+
+<article class="cat-visa" data-category="ニュース（外国人・ビザ）" data-deadline="false" data-urgent="false" data-expired="false" data-expired-old="false" data-new="false" data-dead="false" data-text="japan opens 18 industries to foreign workers under specified skilled worker programme google news: philippines: japan work フィリピン ニュース（外国人・ビザ） 日本語概要: 日本の特定技能制度に関するフィリピン側の案内です。労働・雇用関連の告知として確認対象です。 / 原文抜粋: japan opens 18 industries to foreign workers under specified skilled worker programme jap… 日本の特定技能制度で外国人材の受け入れ対象が18分野に広がったことを伝えるフィリピン側の報道で、特定技能で働くことを考える外国人労働者や受入側が対象。 specified skilled worker foreign workers 特定技能 ">
+  <p class="title"><a href="https://news.google.com/rss/articles/CBMirwFBVV95cUxPXy1oaEVCNU4wanRYLWZHSkI2Vnh4Z2VsNkw2OGozekYxcDVCLUtjZS1XYUR6TFFhaEZzWmZhRlZFX2c4a183c3ItWDlJeXJTdVlYZFh5SUxRSzh0eGR5X0NnWGFneHNFaHEyQXRpRnFLOVFfVmZtZ0NkdXVFcG9HLUNyYmNlMDNWMkx5ajBYaWdCS0lVLTdtdkV6MlRBXzRCcU15MldlSGJyT2RnYUY0?oc=5" target="_blank" rel="noopener noreferrer">Japan Opens 18 Industries to Foreign Workers Under Specified Skilled Worker Programme</a></p>
+  <p class="ai-summary"><span class="ai-label">AI要約</span>日本の特定技能制度で外国人材の受け入れ対象が18分野に広がったことを伝えるフィリピン側の報道で、特定技能で働くことを考える外国人労働者や受入側が対象。</p>
+  <div class="row">
+    
+    
+    <span class="badge cat-visa">ニュース（外国人・ビザ）</span>
+    <span class="badge country">フィリピン</span>
+    <span class="badge">スコア 11</span>
+    <span class="badge">締切未検出</span>
+    
+    <span class="badge rel-high">AI関連度 高</span>
+  </div>
+  <p class="item-meta">出典: Google News: Philippines: Japan work / 公開日: 2026-11-03 / ページ反映日: 2026-11-07</p>
+  <div><span class="tag">specified skilled worker</span><span class="tag">foreign workers</span><span class="tag">特定技能</span></div>
+  <p class="summary">日本語概要: 日本の特定技能制度に関するフィリピン側の案内です。労働・雇用関連の告知として確認対象です。 / 原文抜粋: Japan Opens 18 Industries to Foreign Workers Under Specified Skilled Worker Programme Jap…</p>
+  
+  <p class="summary">次アクション: 制度変更が学校・受入機関の日本語教育ニーズに与える影響を確認</p>
+  <p class="angle">Nihongo Catch! 提案切り口: 在留資格や外国人材受入れ要件の変化に合わせ、学校・受入機関向けに来日前学習と日本語力確認の仕組みとして訴求できます。</p>
+  
+</article>
+
+
+<article class="cat-visa" data-category="ニュース（外国人・ビザ）" data-deadline="false" data-urgent="false" data-expired="false" data-expired-old="false" data-new="true" data-dead="false" data-text="295 calon pekerja migran sulut siap magang ke jepang, pemprov tekankan disiplin dan etos kerja google news: indonesia: japan workers インドネシア ニュース（外国人・ビザ） 日本語概要: 日本就労を目指すインドネシア人候補者向け情報です。 / 原文抜粋: 295 calon pekerja migran sulut siap magang ke jepang, pemprov tekankan disiplin dan etos … 北スラウェシ州（インドネシア）から295人の移住労働者候補が日本での研修・就労（マグアン）に向けて準備を整えており、州政府は規律と勤労意欲の重要性を強調している。 epa jepang pekerja migran pekerja ">
+  <p class="title"><a href="https://news.google.com/rss/articles/CBMi3wFBVV95cUxQTDVGODJRVXFvMjVfS3c3UEtMYnJLMVhpRE5QbFdlbGpULVhHZmE1REtGaEdma2tlblBaOUpfdzBFTTJaaS0tMzhzV1lHaEl0R3JhRzJTbGJueUJhZ2piUi1HaV9adTJCd2tfYUVhSE9tckRReUd4WmxrUEVOUHF0bnFhV2o4LTlsajVyQ3lqbFlDSVNielQwcW5KTFpudXJUVFFMU3dwM1VmMWFaYmRibnBSdUZ2MFdGbkpCQzdHNklockN4T3A5a2R5cTA1bGdpcFA1WWFBQmhITHF2Q0pZ?oc=5" target="_blank" rel="noopener noreferrer">295 Calon Pekerja Migran Sulut Siap Magang ke Jepang, Pemprov Tekankan Disiplin dan Etos Kerja</a></p>
+  <p class="ai-summary"><span class="ai-label">AI要約</span>北スラウェシ州（インドネシア）から295人の移住労働者候補が日本での研修・就労（マグアン）に向けて準備を整えており、州政府は規律と勤労意欲の重要性を強調している。</p>
+  <div class="row">
+    
+    <span class="badge new">新鮮ニュース</span>
+    <span class="badge cat-visa">ニュース（外国人・ビザ）</span>
+    <span class="badge country">インドネシア</span>
+    <span class="badge">スコア 10</span>
+    <span class="badge">締切未検出</span>
+    
+    <span class="badge rel-high">AI関連度 高</span>
+  </div>
+  <p class="item-meta">出典: Google News: Indonesia: Japan workers / 公開日: 2026-11-09 / ページ反映日: 2026-11-10</p>
+  <div><span class="tag">EPA</span><span class="tag">Jepang</span><span class="tag">pekerja migran</span><span class="tag">pekerja</span></div>
+  <p class="summary">日本語概要: 日本就労を目指すインドネシア人候補者向け情報です。 / 原文抜粋: 295 Calon Pekerja Migran Sulut Siap Magang ke Jepang, Pemprov Tekankan Disiplin dan Etos …</p>
+  
+  <p class="summary">次アクション: 制度変更が学校・受入機関の日本語教育ニーズに与える影響を確認</p>
+  <p class="angle">Nihongo Catch! 提案切り口: 在留資格や外国人材受入れ要件の変化に合わせ、学校・受入機関向けに来日前学習と日本語力確認の仕組みとして訴求できます。</p>
+  
+</article>
+
+
+<article class="cat-visa" data-category="ニュース（外国人・ビザ）" data-deadline="false" data-urgent="false" data-expired="false" data-expired-old="false" data-new="false" data-dead="false" data-text="pengumuman pelaksanaan info sesi jaminan sosial ketenagakerjaan bagi calon pekerja migraan indonesia program g to g jepang batch xx tahun 2026 インドネシア kp2mi/bp2mi g to g japan インドネシア ニュース（外国人・ビザ） 日本語概要: 日本語基礎試験に関する告知です。試験実施・参加手順に関する情報です。インドネシア政府の g to g 日本派遣プログラムに関する告知です。日本就労を目指すインドネシア人候補者向け情報です。 / 原文抜粋: pengumuman pelaksanaan info sesi jaminan sosial ketenagakerjaan bagi calon pekerja migraa… / source page: https://kp2mi.go.id/gtog-data/jepang/pengumuman?draw=1&amp;start=0&amp;length=20 / 一覧掲載日: 5 november 2026 インドネシア移住労働者保護省（kp2mi/bp2mi）が、日本向けg to gプログラム第xxバッチのうちマッチングiとiiを通過した候補者を対象に、労働社会保障（bpjs ketenagakerjaan）の説明セッションを2026年11月9日9時（西部インドネシア時間）にzoomでオンライン開催すると告知した。候補者は開始30分前までに入室し、受講後、日本語n4研修の開始前に社会保障への加入登録を行う必要がある。 g to g epa jepang pekerja ">
+  <p class="title"><a href="https://kp2mi.go.id/gtog-detail/jepang/pengumuman-pelaksanaan-info-sesi-jaminan-sosial-ketenagakerjaan-bagi-calon-pekerja-migraan-indonesia-program-g-to-g-jepang-batch-xx-tahun-2026" target="_blank" rel="noopener noreferrer">PENGUMUMAN PELAKSANAAN INFO SESI JAMINAN SOSIAL KETENAGAKERJAAN BAGI CALON PEKERJA MIGRAAN INDONESIA PROGRAM G TO G JEPANG BATCH XX TAHUN 2026</a></p>
+  <p class="ai-summary"><span class="ai-label">AI要約</span>インドネシア移住労働者保護省（KP2MI/BP2MI）が、日本向けG to Gプログラム第XXバッチのうちマッチングIとIIを通過した候補者を対象に、労働社会保障（BPJS Ketenagakerjaan）の説明セッションを2026年11月9日9時（西部インドネシア時間）にZoomでオンライン開催すると告知した。候補者は開始30分前までに入室し、受講後、日本語N4研修の開始前に社会保障への加入登録を行う必要がある。</p>
+  <div class="row">
+    
+    
+    <span class="badge cat-visa">ニュース（外国人・ビザ）</span>
+    <span class="badge country">インドネシア</span>
+    <span class="badge">スコア 10</span>
+    <span class="badge">締切未検出</span>
+    
+    <span class="badge rel-mid">AI関連度 中</span>
+  </div>
+  <p class="item-meta">出典: インドネシア KP2MI/BP2MI G to G Japan / 公開日: 2026-11-05 / ページ反映日: 2026-11-10</p>
+  <div><span class="tag">G to G</span><span class="tag">EPA</span><span class="tag">Jepang</span><span class="tag">pekerja</span></div>
+  <p class="summary">日本語概要: 日本語基礎試験に関する告知です。試験実施・参加手順に関する情報です。インドネシア政府の G to G 日本派遣プログラムに関する告知です。日本就労を目指すインドネシア人候補者向け情報です。 / 原文抜粋: PENGUMUMAN PELAKSANAAN INFO SESI JAMINAN SOSIAL KETENAGAKERJAAN BAGI …</p>
+  
+  <p class="summary">次アクション: 制度変更が学校・受入機関の日本語教育ニーズに与える影響を確認</p>
+  <p class="angle">Nihongo Catch! 提案切り口: 在留資格や外国人材受入れ要件の変化に合わせ、学校・受入機関向けに来日前学習と日本語力確認の仕組みとして訴求できます。</p>
+  
+</article>
+
+
+<article class="cat-visa" data-category="ニュース（外国人・ビザ）" data-deadline="false" data-urgent="false" data-expired="false" data-expired-old="false" data-new="false" data-dead="false" data-text="trường cao đẳng y dược phú thọ: mở rộng cơ hội việc làm tại nhật bản cho sinh viên ngành điều dưỡng google news: vietnam: japanese language ベトナム ニュース（外国人・ビザ） 日本語概要: epaの看護・介護人材に関係します。 / 原文抜粋: trường cao đẳng y dược phú thọ: mở rộng cơ hội việc làm tại nhật bản cho sinh viên ngành … ベトナムのフートー医薬短期大学が、看護学科の学生向けに日本での就業機会を広げる取り組みを進めている。epaなど看護・介護人材の日本就労に関わる動きで、対象は看護を学ぶ学生。 epa nhật bản điều dưỡng 介護人材 ">
+  <p class="title"><a href="https://news.google.com/rss/articles/CBMiygFBVV95cUxOVzNSUWRyYS13RGd5Nl9jSDRRdXMxTV9fd1FlVHVaRnNnQThVREFqRkkyekJsX3BvM09STVJOMU1pQVBvek9FT0l1c3FGVDNGMkFINWozR096ZUd3dnhqQ3RWVzM5Vk5YVkVnNHZpZDJURXVMTzRzTk85cWZyNlVjUWtkWFN3eXMyd1dob3RBdURsN3hLTmdjaDZLTUhoRHM2enhmcHdzOUJiUDIyUkR2TWRyT3BvT1d2LWNsODhQcXZPUXNWYUR4M3VR?oc=5" target="_blank" rel="noopener noreferrer">Trường Cao đẳng Y Dược Phú Thọ: Mở rộng cơ hội việc làm tại Nhật Bản cho sinh viên ngành Điều dưỡng</a></p>
+  <p class="ai-summary"><span class="ai-label">AI要約</span>ベトナムのフートー医薬短期大学が、看護学科の学生向けに日本での就業機会を広げる取り組みを進めている。EPAなど看護・介護人材の日本就労に関わる動きで、対象は看護を学ぶ学生。</p>
+  <div class="row">
+    
+    
+    <span class="badge cat-visa">ニュース（外国人・ビザ）</span>
+    <span class="badge country">ベトナム</span>
+    <span class="badge">スコア 10</span>
+    <span class="badge">締切未検出</span>
+    
+    <span class="badge rel-mid">AI関連度 中</span>
+  </div>
+  <p class="item-meta">出典: Google News: Vietnam: Japanese language / 公開日: 2026-11-04 / ページ反映日: 2026-11-07</p>
+  <div><span class="tag">EPA</span><span class="tag">Nhật Bản</span><span class="tag">điều dưỡng</span><span class="tag">介護人材</span></div>
+  <p class="summary">日本語概要: EPAの看護・介護人材に関係します。 / 原文抜粋: Trường Cao đẳng Y Dược Phú Thọ: Mở rộng cơ hội việc làm tại Nhật Bản cho sinh viên ngành …</p>
+  
+  <p class="summary">次アクション: 制度変更が学校・受入機関の日本語教育ニーズに与える影響を確認</p>
+  <p class="angle">Nihongo Catch! 提案切り口: 在留資格や外国人材受入れ要件の変化に合わせ、学校・受入機関向けに来日前学習と日本語力確認の仕組みとして訴求できます。</p>
+  
+</article>
+
+
+<article class="cat-visa" data-category="ニュース（外国人・ビザ）" data-deadline="false" data-urgent="false" data-expired="false" data-expired-old="false" data-new="true" data-dead="false" data-text="seratus pekerja kalsel disiapkan ke jepang, diberi pelatihan bahasa dan kompetensi keterampilan google news: indonesia: japan workers インドネシア ニュース（外国人・ビザ） 日本語概要: インドネシア発の日本就労・外国人材関連情報です。 / 原文抜粋: seratus pekerja kalsel disiapkan ke jepang, diberi pelatihan bahasa dan kompetensi ketera… インドネシア・南カリマンタン州（カルセル）で、日本への派遣を目指す労働者約100人に対し、日本語研修と技能（スキル）の習得訓練が行われる。 外国人材 epa jepang pekerja ">
+  <p class="title"><a href="https://news.google.com/rss/articles/CBMi3AFBVV95cUxQNXBzVDdpRk5sNWZ5X1dQeWkwUjJZc3BTUmVrODBveGw1bERmOFl3LXg2Xy1mWklGUGVHRm9KRE1xVTZPRTZBVi1fLW1PaUN4akVzV0dubGxZREJnWm4xUTAwcWhXYl9NbTJuaVF6R25ZQXZjdVN4Qnlpdmdua3phR0JvaGY2RVBBXzd0N1IyalB4UzZVWTQyUlZJS2dPdzlDQk5DS0VSMWIwaTljMHBTRUxZc2tkY1gyRGtpaUk3YjRUemNLdWNOWGFyVVBaMnBOb2k3R1otaUs5WWZV?oc=5" target="_blank" rel="noopener noreferrer">Seratus Pekerja Kalsel Disiapkan ke Jepang, Diberi Pelatihan Bahasa dan Kompetensi Keterampilan</a></p>
+  <p class="ai-summary"><span class="ai-label">AI要約</span>インドネシア・南カリマンタン州（カルセル）で、日本への派遣を目指す労働者約100人に対し、日本語研修と技能（スキル）の習得訓練が行われる。</p>
+  <div class="row">
+    
+    <span class="badge new">新鮮ニュース</span>
+    <span class="badge cat-visa">ニュース（外国人・ビザ）</span>
+    <span class="badge country">インドネシア</span>
+    <span class="badge">スコア 9</span>
+    <span class="badge">締切未検出</span>
+    
+    <span class="badge rel-mid">AI関連度 中</span>
+  </div>
+  <p class="item-meta">出典: Google News: Indonesia: Japan workers / 公開日: 2026-11-09 / ページ反映日: 2026-11-10</p>
+  <div><span class="tag">外国人材</span><span class="tag">EPA</span><span class="tag">Jepang</span><span class="tag">pekerja</span></div>
+  <p class="summary">日本語概要: インドネシア発の日本就労・外国人材関連情報です。 / 原文抜粋: Seratus Pekerja Kalsel Disiapkan ke Jepang, Diberi Pelatihan Bahasa dan Kompetensi Ketera…</p>
+  
+  <p class="summary">次アクション: 制度変更が学校・受入機関の日本語教育ニーズに与える影響を確認</p>
+  <p class="angle">Nihongo Catch! 提案切り口: 在留資格や外国人材受入れ要件の変化に合わせ、学校・受入機関向けに来日前学習と日本語力確認の仕組みとして訴求できます。</p>
+  
+</article>
+
+
+<article class="cat-visa" data-category="ニュース（外国人・ビザ）" data-deadline="false" data-urgent="false" data-expired="false" data-expired-old="false" data-new="false" data-dead="false" data-text="育成就労の日本語教育、認定校は3校のみ 来春開始も教員確保進まず [外国人] google news: 育成就労 日本語  ニュース（外国人・ビザ） 掲載元: 朝日新聞 育成就労制度で求められる日本語教育について、認定を受けた日本語教育機関が3校のみで、来春の制度開始を控えても教員の確保が進んでいないと朝日新聞が報じた。 日本語教育 育成就労 ">
+  <p class="title"><a href="https://news.google.com/rss/articles/CBMiZ0FVX3lxTE1QZ0JOaGI5RVBaNllQYlVUTnY0RFlWVnFDdzJTbmV5YUktQjZrQnNmM1FzQmhxdXAwSUQ0LTBZZUJmSEhPU0Y2dGNTbjRNNzJGMzZVb3JZZ0lqdVZ2YlAwRmE1NVRuZ2s?oc=5" target="_blank" rel="noopener noreferrer">育成就労の日本語教育、認定校は3校のみ 来春開始も教員確保進まず [外国人]</a></p>
+  <p class="ai-summary"><span class="ai-label">AI要約</span>育成就労制度で求められる日本語教育について、認定を受けた日本語教育機関が3校のみで、来春の制度開始を控えても教員の確保が進んでいないと朝日新聞が報じた。</p>
+  <div class="row">
+    
+    
+    <span class="badge cat-visa">ニュース（外国人・ビザ）</span>
+    
+    <span class="badge">スコア 8</span>
+    <span class="badge">締切未検出</span>
+    
+    <span class="badge rel-high">AI関連度 高</span>
+  </div>
+  <p class="item-meta">出典: Google News: 育成就労 日本語 / 公開日: 2026-11-01 / ページ反映日: 2026-11-10</p>
+  <div><span class="tag">日本語教育</span><span class="tag">育成就労</span></div>
+  <p class="summary">掲載元: 朝日新聞</p>
+  <p class="related">関連報道: <a href="https://news.google.com/rss/articles/CBMibkFVX3lxTE41SlJBcmE1UHB0ejU3OTU4bF93cGxrUWJJUnl3ek9JQzktYnFObTY5MEZxZmk0bklRNVBqM1F1Q0drWU9CcFQzQWFfWUhoMEwzMzVrck9yZUZYUy1EcnpOcF93SkZ5eC16V3M0eFVB?oc=5" target="_blank" rel="noopener noreferrer">育成就労の日本語教育、認定校は3校のみ 来春開始も教員…</a></p>
+  <p class="summary">次アクション: 制度変更が学校・受入機関の日本語教育ニーズに与える影響を確認</p>
+  <p class="angle">Nihongo Catch! 提案切り口: 在留資格や外国人材受入れ要件の変化に合わせ、学校・受入機関向けに来日前学習と日本語力確認の仕組みとして訴求できます。</p>
+  
+</article>
+
+
+<article class="cat-visa" data-category="ニュース（外国人・ビザ）" data-deadline="false" data-urgent="false" data-expired="false" data-expired-old="false" data-new="false" data-dead="false" data-text="【460名が視聴の大人気セミナー無料見逃し配信開始】【育成就労受入れの決定版！】jlpt n4（jft basic a2.2）での送り出しを100％確約。入国後の日本語教育負担を大幅軽減。詳細セミナー - www.tv-tokyo.co.jp google news: 育成就労 日本語  ニュース（外国人・ビザ）  育成就労の受入れ企業向けに、jlpt n4（jft basic a2.2）レベルでの送り出しを確約し、入国後の日本語教育負担を軽減するとうたうセミナーの見逃し配信が始まった。460名が視聴した人気セミナーで、テレビ東京のサイトで公開されている。 日本語教育 育成就労 ">
+  <p class="title"><a href="https://news.google.com/rss/articles/CBMibkFVX3lxTE11NGFpanZ6aG15SjhPWWFqQkdYU054bWQzcl9TVWo5cHRTdVFkQlFWa0xjOHlpX1JDYTlwZFV0TU9XeUZXZGxvRmtQalJnMEpOa1I3SkNqSHZLOWlIVGpQdkZJeVM2Tk9PbWZ0b0l3?oc=5" target="_blank" rel="noopener noreferrer">【460名が視聴の大人気セミナー無料見逃し配信開始】【育成就労受入れの決定版！】JLPT N4（JFT Basic A2.2）での送り出しを100％確約。入国後の日本語教育負担を大幅軽減。詳細セミナー - www.tv-tokyo.co.jp</a></p>
+  <p class="ai-summary"><span class="ai-label">AI要約</span>育成就労の受入れ企業向けに、JLPT N4（JFT Basic A2.2）レベルでの送り出しを確約し、入国後の日本語教育負担を軽減するとうたうセミナーの見逃し配信が始まった。460名が視聴した人気セミナーで、テレビ東京のサイトで公開されている。</p>
+  <div class="row">
+    
+    
+    <span class="badge cat-visa">ニュース（外国人・ビザ）</span>
+    
+    <span class="badge">スコア 8</span>
+    <span class="badge">締切未検出</span>
+    
+    <span class="badge rel-high">AI関連度 高</span>
+  </div>
+  <p class="item-meta">出典: Google News: 育成就労 日本語 / 公開日: 2026-10-29 / ページ反映日: 2026-11-04</p>
+  <div><span class="tag">日本語教育</span><span class="tag">育成就労</span></div>
+  
+  <p class="related">関連報道: <a href="https://news.google.com/rss/articles/CBMiakFVX3lxTE5KNDZIY2lOd1hReGtOd2JvOF9GYlZzSmEyNGFNZTc3UW80dmFiUnhyTlJucjZNTEdmWENhc1FzSk5SWW9GaFVRSkFwbWJTMmYzbk5XNFhGN0QyWnRaeHExSWxFeGx6OXZIY3c?oc=5" target="_blank" rel="noopener noreferrer">【460名が視聴の大人気セミナー無料見逃し配信開始】【…</a></p>
+  <p class="summary">次アクション: 制度変更が学校・受入機関の日本語教育ニーズに与える影響を確認</p>
+  <p class="angle">Nihongo Catch! 提案切り口: 在留資格や外国人材受入れ要件の変化に合わせ、学校・受入機関向けに来日前学習と日本語力確認の仕組みとして訴求できます。</p>
+  
+</article>
+
+
+<article class="cat-visa" data-category="ニュース（外国人・ビザ）" data-deadline="false" data-urgent="false" data-expired="false" data-expired-old="false" data-new="false" data-dead="false" data-text="国土交通省・jac登壇！建設分野の「育成就労・特定技能」最新情報を解説するオンラインセミナー開催 google news: 育成就労 日本語  ニュース（外国人・ビザ） 掲載元: pr times 国土交通省とjacの担当者が登壇し、建設分野の育成就労・特定技能制度の最新情報を解説するオンラインセミナーが開催される。建設分野で外国人材の受け入れを検討する企業などが対象とみられる。 特定技能 育成就労 ">
+  <p class="title"><a href="https://news.google.com/rss/articles/CBMiakFVX3lxTE1kM0xiZnJkVFV3WEIzZjREOVFLYzViREMyOENSM1VwNGtfRDQxZmVTS2lESk1keTBLN2YyYWtERWhyOWRpcWxNQzZOakZyQTFWQ3lONTlKNlllZW5Tbmd3ZWhnNTJLa1pmT2c?oc=5" target="_blank" rel="noopener noreferrer">国土交通省・JAC登壇！建設分野の「育成就労・特定技能」最新情報を解説するオンラインセミナー開催</a></p>
+  <p class="ai-summary"><span class="ai-label">AI要約</span>国土交通省とJACの担当者が登壇し、建設分野の育成就労・特定技能制度の最新情報を解説するオンラインセミナーが開催される。建設分野で外国人材の受け入れを検討する企業などが対象とみられる。</p>
+  <div class="row">
+    
+    
+    <span class="badge cat-visa">ニュース（外国人・ビザ）</span>
+    
+    <span class="badge">スコア 8</span>
+    <span class="badge">締切未検出</span>
+    
+    <span class="badge rel-mid">AI関連度 中</span>
+  </div>
+  <p class="item-meta">出典: Google News: 育成就労 日本語 / 公開日: 2026-10-27 / ページ反映日: 2026-11-04</p>
+  <div><span class="tag">特定技能</span><span class="tag">育成就労</span></div>
+  <p class="summary">掲載元: PR TIMES</p>
+  
+  <p class="summary">次アクション: 制度変更が学校・受入機関の日本語教育ニーズに与える影響を確認</p>
+  <p class="angle">Nihongo Catch! 提案切り口: 在留資格や外国人材受入れ要件の変化に合わせ、学校・受入機関向けに来日前学習と日本語力確認の仕組みとして訴求できます。</p>
+  
+</article>
+
+
+<article class="cat-visa" data-category="ニュース（外国人・ビザ）" data-deadline="false" data-urgent="false" data-expired="false" data-expired-old="false" data-new="true" data-dead="false" data-text="ネオキャリア、特定技能外国人材の入国・就業支援を行う株式会社ninaiteと資本業務提携を開始 google news: 外国人材 補助金 自治体  ニュース（外国人・ビザ） 掲載元: 時事ドットコム ネオキャリアが、特定技能外国人材の入国・就業支援を行う株式会社ninaiteと資本業務提携を開始した。特定技能外国人材の受け入れ支援体制の強化に関わる動きで、掲載元は時事ドットコム。 外国人材 特定技能 ">
+  <p class="title"><a href="https://news.google.com/rss/articles/CBMia0FVX3lxTE5hVjd5SlljVmNIUXJ5SXZTUl9pdjM1eGhraU12d00zWUZfdEFNVXFQeTVHeDJuVklHNkNhVm11eVVFREUwa0JqM3hiX3dHVGk4djZJaWN0RkFTNmJ1enZLWlJHVl9mT0tFYnE4?oc=5" target="_blank" rel="noopener noreferrer">ネオキャリア、特定技能外国人材の入国・就業支援を行う株式会社NINAITEと資本業務提携を開始</a></p>
+  <p class="ai-summary"><span class="ai-label">AI要約</span>ネオキャリアが、特定技能外国人材の入国・就業支援を行う株式会社NINAITEと資本業務提携を開始した。特定技能外国人材の受け入れ支援体制の強化に関わる動きで、掲載元は時事ドットコム。</p>
+  <div class="row">
+    
+    <span class="badge new">新鮮ニュース</span>
+    <span class="badge cat-visa">ニュース（外国人・ビザ）</span>
+    
+    <span class="badge">スコア 7</span>
+    <span class="badge">締切未検出</span>
+    
+    <span class="badge rel-mid">AI関連度 中</span>
+  </div>
+  <p class="item-meta">出典: Google News: 外国人材 補助金 自治体 / 公開日: 2026-11-10 / ページ反映日: 2026-11-10</p>
+  <div><span class="tag">外国人材</span><span class="tag">特定技能</span></div>
+  <p class="summary">掲載元: 時事ドットコム</p>
+  
+  <p class="summary">次アクション: 制度変更が学校・受入機関の日本語教育ニーズに与える影響を確認</p>
+  <p class="angle">Nihongo Catch! 提案切り口: 在留資格や外国人材受入れ要件の変化に合わせ、学校・受入機関向けに来日前学習と日本語力確認の仕組みとして訴求できます。</p>
+  
+</article>
+
+
+<article class="cat-visa" data-category="ニュース（外国人・ビザ）" data-deadline="false" data-urgent="false" data-expired="false" data-expired-old="false" data-new="true" data-dead="false" data-text="jalani pelatihan selama lima bulan, 100 warga kalsel disiapkan bekerja ke jepang google news: indonesia: japan workers インドネシア ニュース（外国人・ビザ） 日本語概要: インドネシア発の日本就労・外国人材関連情報です。 / 原文抜粋: jalani pelatihan selama lima bulan, 100 warga kalsel disiapkan bekerja ke jepang jalani p… インドネシア・南カリマンタン州（kalsel）の住民100人が、5か月間の研修を受けて日本での就労に向けた準備を進めている。 外国人材 epa jepang ">
+  <p class="title"><a href="https://news.google.com/rss/articles/CBMiyAFBVV95cUxQSzU2elY1T1RHQmI3eEdVZ2xkX1E1eHdFTGpnWF9ZX1ctUUdMajk5dm80RUZIcnFkRzNlS0tMbWdNUE5rWS03Q3RfcFFfeUdDRlh6b29CWmdNV0NDbjF2aGE3S1FkNUptcng3TVZjakhScFRNU3RKY1pBVldid0l1T0xuaE1reS1scWE2czNMNTFOdi1Db0NwTzF3VEJiY3ZlRE1rQ2JyZWxNNXA4OWJZbUNITGI0MExsNy1uVVJ3ZVpobG9FTWFSdg?oc=5" target="_blank" rel="noopener noreferrer">Jalani Pelatihan Selama Lima Bulan, 100 Warga Kalsel Disiapkan Bekerja ke Jepang</a></p>
+  <p class="ai-summary"><span class="ai-label">AI要約</span>インドネシア・南カリマンタン州（Kalsel）の住民100人が、5か月間の研修を受けて日本での就労に向けた準備を進めている。</p>
+  <div class="row">
+    
+    <span class="badge new">新鮮ニュース</span>
+    <span class="badge cat-visa">ニュース（外国人・ビザ）</span>
+    <span class="badge country">インドネシア</span>
+    <span class="badge">スコア 7</span>
+    <span class="badge">締切未検出</span>
+    
+    <span class="badge rel-mid">AI関連度 中</span>
+  </div>
+  <p class="item-meta">出典: Google News: Indonesia: Japan workers / 公開日: 2026-11-09 / ページ反映日: 2026-11-10</p>
+  <div><span class="tag">外国人材</span><span class="tag">EPA</span><span class="tag">Jepang</span></div>
+  <p class="summary">日本語概要: インドネシア発の日本就労・外国人材関連情報です。 / 原文抜粋: Jalani Pelatihan Selama Lima Bulan, 100 Warga Kalsel Disiapkan Bekerja ke Jepang Jalani P…</p>
+  
+  <p class="summary">次アクション: 制度変更が学校・受入機関の日本語教育ニーズに与える影響を確認</p>
+  <p class="angle">Nihongo Catch! 提案切り口: 在留資格や外国人材受入れ要件の変化に合わせ、学校・受入機関向けに来日前学習と日本語力確認の仕組みとして訴求できます。</p>
+  
+</article>
+
+
+<article class="cat-visa" data-category="ニュース（外国人・ビザ）" data-deadline="false" data-urgent="false" data-expired="false" data-expired-old="false" data-new="false" data-dead="false" data-text="長崎県と商船三井グループ２社、外国人材受け入れへ協定…新たな「育成就労制度」見据え（長崎新聞） google news: 育成就労 日本語  ニュース（外国人・ビザ） 掲載元: yahoo!ニュース 長崎県と商船三井グループ2社が、外国人材の受け入れに関する協定を結んだ。2027年に始まる新たな「育成就労制度」を見据えた取り組み。 外国人材 育成就労 ">
+  <p class="title"><a href="https://news.google.com/rss/articles/CBMif0FVX3lxTE9uN1pwanBVX0ctbnl1UGtrU2pzeFBKTmlKUERkUEpoTF9HY3I4LU1lVTN0SFJ0SElyQ280bmFOQWxSRlBfMC1Yem9YaUYwV2lIVFRkM3I1SlYtOHEyTTFGZUMybjR4ekl5bVBydWNwWkJVNS02c0cxLXNTY1FnZWM?oc=5" target="_blank" rel="noopener noreferrer">長崎県と商船三井グループ２社、外国人材受け入れへ協定…新たな「育成就労制度」見据え（長崎新聞）</a></p>
+  <p class="ai-summary"><span class="ai-label">AI要約</span>長崎県と商船三井グループ2社が、外国人材の受け入れに関する協定を結んだ。2027年に始まる新たな「育成就労制度」を見据えた取り組み。</p>
+  <div class="row">
+    
+    
+    <span class="badge cat-visa">ニュース（外国人・ビザ）</span>
+    
+    <span class="badge">スコア 7</span>
+    <span class="badge">締切未検出</span>
+    
+    <span class="badge rel-high">AI関連度 高</span>
+  </div>
+  <p class="item-meta">出典: Google News: 育成就労 日本語 / 公開日: 2026-11-08 / ページ反映日: 2026-11-10</p>
+  <div><span class="tag">外国人材</span><span class="tag">育成就労</span></div>
+  <p class="summary">掲載元: Yahoo!ニュース</p>
+  
+  <p class="summary">次アクション: 制度変更が学校・受入機関の日本語教育ニーズに与える影響を確認</p>
+  <p class="angle">Nihongo Catch! 提案切り口: 在留資格や外国人材受入れ要件の変化に合わせ、学校・受入機関向けに来日前学習と日本語力確認の仕組みとして訴求できます。</p>
+  
+</article>
+
+
+<article class="cat-visa" data-category="ニュース（外国人・ビザ）" data-deadline="false" data-urgent="false" data-expired="false" data-expired-old="false" data-new="false" data-dead="false" data-text="「日本に来て、本当によかった」をすべての留学生にオリジネーター、登録支援機関の登録を受け、特定技能人材の紹介・支援事業を開始 google news: 特定技能 日本語教育 支援  ニュース（外国人・ビザ） 掲載元: pr times 株式会社オリジネーターが登録支援機関の登録を受け、特定技能人材の紹介・支援事業を始めた。留学生を主な対象に、日本での就労と生活を支える事業とみられる。 留学生 特定技能 ">
+  <p class="title"><a href="https://news.google.com/rss/articles/CBMia0FVX3lxTFB4N2F6YUdBZzJkMGFTOFVJRzM2YkxrN2xHbTByTFlDUW1vaVpLLXVIVmFIamZhTThmYk80MVFEZmV6R0RldUZxM3ZBTWhiM25Wdm9xanBqOWhPRlZ1MUx4LVhmVHpnbjlkZmFv?oc=5" target="_blank" rel="noopener noreferrer">「日本に来て、本当によかった」をすべての留学生にオリジネーター、登録支援機関の登録を受け、特定技能人材の紹介・支援事業を開始</a></p>
+  <p class="ai-summary"><span class="ai-label">AI要約</span>株式会社オリジネーターが登録支援機関の登録を受け、特定技能人材の紹介・支援事業を始めた。留学生を主な対象に、日本での就労と生活を支える事業とみられる。</p>
+  <div class="row">
+    
+    
+    <span class="badge cat-visa">ニュース（外国人・ビザ）</span>
+    
+    <span class="badge">スコア 7</span>
+    <span class="badge">締切未検出</span>
+    
+    <span class="badge rel-mid">AI関連度 中</span>
+  </div>
+  <p class="item-meta">出典: Google News: 特定技能 日本語教育 支援 / 公開日: 2026-11-05 / ページ反映日: 2026-11-10</p>
+  <div><span class="tag">留学生</span><span class="tag">特定技能</span></div>
+  <p class="summary">掲載元: PR TIMES</p>
+  
+  <p class="summary">次アクション: 制度変更が学校・受入機関の日本語教育ニーズに与える影響を確認</p>
+  <p class="angle">Nihongo Catch! 提案切り口: 在留資格や外国人材受入れ要件の変化に合わせ、学校・受入機関向けに来日前学習と日本語力確認の仕組みとして訴求できます。</p>
+  
+</article>
+
+
+<article class="cat-visa" data-category="ニュース（外国人・ビザ）" data-deadline="false" data-urgent="false" data-expired="false" data-expired-old="false" data-new="false" data-dead="false" data-text="外国人材の受入れ度を90秒でチェック。unicoachが「hr expo 大阪」に出展。特定技能人材から幹部候補の高度人材まで、活躍・定着に向けた診断と個別相談をブースで実施 google news: 外国人材 補助金 自治体  ニュース（外国人・ビザ） 掲載元: pr times unicoachが「hr expo 大阪」に出展し、外国人材の受入れ度を90秒でチェックできる診断と個別相談をブースで実施する。特定技能人材から幹部候補の高度人材まで、企業での活躍・定着を支援する内容。 外国人材 特定技能 ">
+  <p class="title"><a href="https://news.google.com/rss/articles/CBMiakFVX3lxTE9IUWlZNnRpY0JTN3M0bmtxNC1fN2FqZ1ZvU2JVcUl2bXB3OC1YV2lIT2tUQnY2YnU4bVY1UkRLcTN4c3ZQYm9DenRZQzVteXlEcldqNGlqTWVYRXR5dTM1TFpEMVNjNUhuYWc?oc=5" target="_blank" rel="noopener noreferrer">外国人材の受入れ度を90秒でチェック。UNICOACHが「HR EXPO 大阪」に出展。特定技能人材から幹部候補の高度人材まで、活躍・定着に向けた診断と個別相談をブースで実施</a></p>
+  <p class="ai-summary"><span class="ai-label">AI要約</span>UNICOACHが「HR EXPO 大阪」に出展し、外国人材の受入れ度を90秒でチェックできる診断と個別相談をブースで実施する。特定技能人材から幹部候補の高度人材まで、企業での活躍・定着を支援する内容。</p>
+  <div class="row">
+    
+    
+    <span class="badge cat-visa">ニュース（外国人・ビザ）</span>
+    
+    <span class="badge">スコア 7</span>
+    <span class="badge">締切未検出</span>
+    
+    <span class="badge rel-mid">AI関連度 中</span>
+  </div>
+  <p class="item-meta">出典: Google News: 外国人材 補助金 自治体 / 公開日: 2026-11-04 / ページ反映日: 2026-11-09</p>
+  <div><span class="tag">外国人材</span><span class="tag">特定技能</span></div>
+  <p class="summary">掲載元: PR TIMES</p>
+  <p class="related">関連報道: <a href="https://news.google.com/rss/articles/CBMiaEFVX3lxTE5pWl83NjNWZWFiSjVrS2xKZ1lnLUM1RElOdk5MYjM5T0c2alhOX25MVDhfaXV2aXJfSVBCMVNqS01uaFB1QkZjSDgydXdOSkl0RldFMGk5bkFYZEtFUF94cWlJd3B5Y3JK?oc=5" target="_blank" rel="noopener noreferrer">外国人材の受入れ度を90秒でチェック。UNICOACH…</a></p>
+  <p class="summary">次アクション: 制度変更が学校・受入機関の日本語教育ニーズに与える影響を確認</p>
+  <p class="angle">Nihongo Catch! 提案切り口: 在留資格や外国人材受入れ要件の変化に合わせ、学校・受入機関向けに来日前学習と日本語力確認の仕組みとして訴求できます。</p>
+  
+</article>
+
+
+<article class="cat-visa" data-category="ニュース（外国人・ビザ）" data-deadline="false" data-urgent="false" data-expired="false" data-expired-old="false" data-new="false" data-dead="false" data-text="thị trường lao động nhật bản chuyển mình, người lao động việt cần lưu ý gì? google news: vietnam: japanese language ベトナム ニュース（外国人・ビザ） 日本語概要: ベトナム発の日本就労・外国人材関連情報です。 / 原文抜粋: thị trường lao động nhật bản chuyển mình, người lao động việt cần lưu ý gì? thị trường la… 日本の労働市場が変化するなか、日本で働くベトナム人労働者が注意すべき点を取り上げたベトナム発のニュースです。 外国人材 nhật bản lao động ">
+  <p class="title"><a href="https://news.google.com/rss/articles/CBMiuwFBVV95cUxNTHpwNUlrMHd4ODU4WkR2bVdUZjBqbzdIdWN3Vi1PZDFlUnRpX0dBckZYNGdJbV9iSHRRQXpqNXlvb1Vjd01yQW1aY04xeE1lbEItM1RHWEhZOWFBSkR0NTVCTlFRX1dwLUkyS0FmUFRYTHRucENodXRmWkh4XzRhOHM5VWFJVkRpWGI1bFNYaU41TnFWYzMwOXZlYXBQS3pmaC0wZXVsbWpLUzVWeUlCdFJKbkY4VkVpdGxN?oc=5" target="_blank" rel="noopener noreferrer">Thị trường lao động Nhật Bản chuyển mình, người lao động Việt cần lưu ý gì?</a></p>
+  <p class="ai-summary"><span class="ai-label">AI要約</span>日本の労働市場が変化するなか、日本で働くベトナム人労働者が注意すべき点を取り上げたベトナム発のニュースです。</p>
+  <div class="row">
+    
+    
+    <span class="badge cat-visa">ニュース（外国人・ビザ）</span>
+    <span class="badge country">ベトナム</span>
+    <span class="badge">スコア 7</span>
+    <span class="badge">締切未検出</span>
+    
+    <span class="badge rel-mid">AI関連度 中</span>
+  </div>
+  <p class="item-meta">出典: Google News: Vietnam: Japanese language / 公開日: 2026-10-30 / ページ反映日: 2026-11-03</p>
+  <div><span class="tag">外国人材</span><span class="tag">Nhật Bản</span><span class="tag">lao động</span></div>
+  <p class="summary">日本語概要: ベトナム発の日本就労・外国人材関連情報です。 / 原文抜粋: Thị trường lao động Nhật Bản chuyển mình, người lao động Việt cần lưu ý gì? Thị trường la…</p>
+  
+  <p class="summary">次アクション: 制度変更が学校・受入機関の日本語教育ニーズに与える影響を確認</p>
+  <p class="angle">Nihongo Catch! 提案切り口: 在留資格や外国人材受入れ要件の変化に合わせ、学校・受入機関向けに来日前学習と日本語力確認の仕組みとして訴求できます。</p>
+  
+</article>
+
+
+<article class="cat-visa" data-category="ニュース（外国人・ビザ）" data-deadline="false" data-urgent="false" data-expired="false" data-expired-old="false" data-new="false" data-dead="false" data-text="usk dan bp3mi aceh siapkan calon perawat lansia untuk bekerja di jepang google news: indonesia: japanese language インドネシア ニュース（外国人・ビザ） 日本語概要: インドネシア発の日本就労・外国人材関連情報です。 / 原文抜粋: usk dan bp3mi aceh siapkan calon perawat lansia untuk bekerja di jepang usk dan bp3mi ace… インドネシアのシアクアラ大学（usk）とアチェ州のインドネシア移住労働者保護庁事務所（bp3mi aceh）が、日本で働く介護職（高齢者介護）候補者の育成に向けて連携している。 外国人材 epa jepang ">
+  <p class="title"><a href="https://news.google.com/rss/articles/CBMitgFBVV95cUxQajlWRFAza0hlVWRjTzNOVXRiaC1zNjF3NmpoN1l5bXNOcnJpc29GQmstZHhpS1pWd01EYzgyYzQ5TE1PTTd5SDNqbDd5ZENBMnpHblJrVVRqVmRGRzNhYUxuaEpPOUxtMjlndlg2MzdOUTQtaVptRWZfVjBSV25OMWNyUHlJWjVHVUt2bVA0dXFucE44ckZvTmJILVgtOUR5ekt2bkdqUjNoOVhGM3NVZ2dzZXJUdw?oc=5" target="_blank" rel="noopener noreferrer">USK dan BP3MI Aceh Siapkan Calon Perawat Lansia untuk Bekerja di Jepang</a></p>
+  <p class="ai-summary"><span class="ai-label">AI要約</span>インドネシアのシアクアラ大学（USK）とアチェ州のインドネシア移住労働者保護庁事務所（BP3MI Aceh）が、日本で働く介護職（高齢者介護）候補者の育成に向けて連携している。</p>
+  <div class="row">
+    
+    
+    <span class="badge cat-visa">ニュース（外国人・ビザ）</span>
+    <span class="badge country">インドネシア</span>
+    <span class="badge">スコア 7</span>
+    <span class="badge">締切未検出</span>
+    
+    <span class="badge rel-mid">AI関連度 中</span>
+  </div>
+  <p class="item-meta">出典: Google News: Indonesia: Japanese language / 公開日: 2026-10-30 / ページ反映日: 2026-11-03</p>
+  <div><span class="tag">外国人材</span><span class="tag">EPA</span><span class="tag">Jepang</span></div>
+  <p class="summary">日本語概要: インドネシア発の日本就労・外国人材関連情報です。 / 原文抜粋: USK dan BP3MI Aceh Siapkan Calon Perawat Lansia untuk Bekerja di Jepang USK dan BP3MI Ace…</p>
+  
+  <p class="summary">次アクション: 制度変更が学校・受入機関の日本語教育ニーズに与える影響を確認</p>
+  <p class="angle">Nihongo Catch! 提案切り口: 在留資格や外国人材受入れ要件の変化に合わせ、学校・受入機関向けに来日前学習と日本語力確認の仕組みとして訴求できます。</p>
+  
+</article>
+
+
+<article class="cat-visa" data-category="ニュース（外国人・ビザ）" data-deadline="false" data-urgent="false" data-expired="false" data-expired-old="false" data-new="false" data-dead="false" data-text="fkep usk gandeng bp3mi aceh, latih calon perawat lansia untuk bekerja di jepang google news: indonesia: japanese language インドネシア ニュース（外国人・ビザ） 日本語概要: インドネシア発の日本就労・外国人材関連情報です。 / 原文抜粋: fkep usk gandeng bp3mi aceh, latih calon perawat lansia untuk bekerja di jepang fkep usk … インドネシアのシアクアラ大学看護学部（fkep usk）がアチェ州のbp3miと連携し、日本で働く介護人材（高齢者介護の看護師候補）向けの研修を実施する。 外国人材 epa jepang ">
+  <p class="title"><a href="https://news.google.com/rss/articles/CBMi1AFBVV95cUxOZW1ncmZoY09zc011TTE3bjAwd2J4YTRDYzczZTQzSmFVMGp6SkxyWkJXd1gxdnJNdVVmeUpRMjNCLWdFNXRKVFZZdFFpamxmRFd5YS12bjRZQVJJczU3dTh6QlZlbjVTNk1jcWJTVklLX283M2hKN2Rpc292elY2UmNER01maDI4TGFIZ1hwdGxnc0tvZnkzOUQ3MEMwUko3QmZZbE5BR0ZHLVVrT3YxLUxfeDF2QlloWjhaUFB4S1dMdE03Ym12NmVleUt3blhYUXg0Sg?oc=5" target="_blank" rel="noopener noreferrer">FKep USK Gandeng BP3MI Aceh, Latih Calon Perawat Lansia untuk Bekerja di Jepang</a></p>
+  <p class="ai-summary"><span class="ai-label">AI要約</span>インドネシアのシアクアラ大学看護学部（FKep USK）がアチェ州のBP3MIと連携し、日本で働く介護人材（高齢者介護の看護師候補）向けの研修を実施する。</p>
+  <div class="row">
+    
+    
+    <span class="badge cat-visa">ニュース（外国人・ビザ）</span>
+    <span class="badge country">インドネシア</span>
+    <span class="badge">スコア 7</span>
+    <span class="badge">締切未検出</span>
+    
+    <span class="badge rel-mid">AI関連度 中</span>
+  </div>
+  <p class="item-meta">出典: Google News: Indonesia: Japanese language / 公開日: 2026-10-28 / ページ反映日: 2026-11-03</p>
+  <div><span class="tag">外国人材</span><span class="tag">EPA</span><span class="tag">Jepang</span></div>
+  <p class="summary">日本語概要: インドネシア発の日本就労・外国人材関連情報です。 / 原文抜粋: FKep USK Gandeng BP3MI Aceh, Latih Calon Perawat Lansia untuk Bekerja di Jepang FKep USK …</p>
+  
+  <p class="summary">次アクション: 制度変更が学校・受入機関の日本語教育ニーズに与える影響を確認</p>
+  <p class="angle">Nihongo Catch! 提案切り口: 在留資格や外国人材受入れ要件の変化に合わせ、学校・受入機関向けに来日前学習と日本語力確認の仕組みとして訴求できます。</p>
+  
+</article>
+
+
+<article class="cat-visa" data-category="ニュース（外国人・ビザ）" data-deadline="false" data-urgent="false" data-expired="false" data-expired-old="false" data-new="false" data-dead="false" data-text="立命館アジア太平洋大学が「適正校」に再選定…留学生の在留資格取得の手続きが簡素化、来年１月から１年間 google news: 出入国在留管理庁 留学生 在留資格  ニュース（外国人・ビザ） 掲載元: 読売新聞 立命館アジア太平洋大学が出入国在留管理庁の「適正校」に再選定され、留学生の在留資格取得の手続きが来年1月から1年間簡素化される。 留学生 在留資格 ">
+  <p class="title"><a href="https://news.google.com/rss/articles/CBMif0FVX3lxTFAtZzk2dmxLblFtdENwVFpCTF9SRnpvcnlmdkFsVnpzamc4amZaLTlucGhwSUNteVdCRllzZGowZXFQNWZBQjlaSzgtZkE2Zm5kYnlTTXNkS3FDR0FFRU96YkR3eWlsTTV3M3pGSzJUeHJnQk1iTFNGaDlaZXFtbG8?oc=5" target="_blank" rel="noopener noreferrer">立命館アジア太平洋大学が「適正校」に再選定…留学生の在留資格取得の手続きが簡素化、来年１月から１年間</a></p>
+  <p class="ai-summary"><span class="ai-label">AI要約</span>立命館アジア太平洋大学が出入国在留管理庁の「適正校」に再選定され、留学生の在留資格取得の手続きが来年1月から1年間簡素化される。</p>
+  <div class="row">
+    
+    
+    <span class="badge cat-visa">ニュース（外国人・ビザ）</span>
+    
+    <span class="badge">スコア 7</span>
+    <span class="badge">締切未検出</span>
+    
+    <span class="badge rel-mid">AI関連度 中</span>
+  </div>
+  <p class="item-meta">出典: Google News: 出入国在留管理庁 留学生 在留資格 / 公開日: 2026-10-28 / ページ反映日: 2026-11-10</p>
+  <div><span class="tag">留学生</span><span class="tag">在留資格</span></div>
+  <p class="summary">掲載元: 読売新聞</p>
+  
+  <p class="summary">次アクション: 制度変更が学校・受入機関の日本語教育ニーズに与える影響を確認</p>
+  <p class="angle">Nihongo Catch! 提案切り口: 在留資格や外国人材受入れ要件の変化に合わせ、学校・受入機関向けに来日前学習と日本語力確認の仕組みとして訴求できます。</p>
+  
+</article>
+
+
+<article class="cat-visa" data-category="ニュース（外国人・ビザ）" data-deadline="false" data-urgent="false" data-expired="false" data-expired-old="false" data-new="false" data-dead="false" data-text="lao động việt cần chú ý trước những thay đổi của thị trường nhật bản google news: vietnam: japanese language ベトナム ニュース（外国人・ビザ） 日本語概要: ベトナム発の日本就労・外国人材関連情報です。 / 原文抜粋: lao động việt cần chú ý trước những thay đổi của thị trường nhật bản lao động việt cần ch… 日本の労働市場の変化に対し、ベトナム人労働者が注意すべき点を伝えるベトナム発のニュースです。日本で就労するベトナム人材が対象です。 外国人材 nhật bản lao động ">
+  <p class="title"><a href="https://news.google.com/rss/articles/CBMitgFBVV95cUxPSjIzRlVKX21yZVlJa0UyakF2b0p5c29VeXphcV9vei0yWFZSeXNNQ21HVFVkYXMxUGdXcmVaNUphcEZjNVdESVA3T2FJVklmRURpRGZpMlVUZW82WmxCMi1BbmQyZnhnLVRJWkU0V1Y5NXpuOGlPakQ3N2lEWHFOTHo1eUFwd3ZjMml0M2RTTEY1cnlJaFozR2JuSUFvTldMV01YUTNCNlR3SG9RTjJ0SjBxT3ZkZw?oc=5" target="_blank" rel="noopener noreferrer">Lao động Việt cần chú ý trước những thay đổi của thị trường Nhật Bản</a></p>
+  <p class="ai-summary"><span class="ai-label">AI要約</span>日本の労働市場の変化に対し、ベトナム人労働者が注意すべき点を伝えるベトナム発のニュースです。日本で就労するベトナム人材が対象です。</p>
+  <div class="row">
+    
+    
+    <span class="badge cat-visa">ニュース（外国人・ビザ）</span>
+    <span class="badge country">ベトナム</span>
+    <span class="badge">スコア 7</span>
+    <span class="badge">締切未検出</span>
+    
+    <span class="badge rel-mid">AI関連度 中</span>
+  </div>
+  <p class="item-meta">出典: Google News: Vietnam: Japanese language / 公開日: 2026-10-28 / ページ反映日: 2026-11-03</p>
+  <div><span class="tag">外国人材</span><span class="tag">Nhật Bản</span><span class="tag">lao động</span></div>
+  <p class="summary">日本語概要: ベトナム発の日本就労・外国人材関連情報です。 / 原文抜粋: Lao động Việt cần chú ý trước những thay đổi của thị trường Nhật Bản Lao động Việt cần ch…</p>
+  
+  <p class="summary">次アクション: 制度変更が学校・受入機関の日本語教育ニーズに与える影響を確認</p>
+  <p class="angle">Nihongo Catch! 提案切り口: 在留資格や外国人材受入れ要件の変化に合わせ、学校・受入機関向けに来日前学習と日本語力確認の仕組みとして訴求できます。</p>
+  
+</article>
+
+
+<article class="cat-visa" data-category="ニュース（外国人・ビザ）" data-deadline="false" data-urgent="false" data-expired="false" data-expired-old="false" data-new="false" data-dead="false" data-text="usk gandeng bp3mi latih calon perawat lansia siap kerja di jepang google news: indonesia: japanese language インドネシア ニュース（外国人・ビザ） 日本語概要: インドネシア発の日本就労・外国人材関連情報です。 / 原文抜粋: usk gandeng bp3mi latih calon perawat lansia siap kerja di jepang usk gandeng bp3mi latih… インドネシアのシアクアラ大学（usk）がインドネシア移民労働者保護庁（bp3mi）と連携し、日本で働く高齢者介護職（介護人材）の候補者を育成する研修を行う。 外国人材 epa jepang ">
+  <p class="title"><a href="https://news.google.com/rss/articles/CBMimgFBVV95cUxNdlY4U0d4SlV1MmJac0NvM0tSRHF4QUQ5ZFplU2tEd1RtYzZaOERLamRDVERaX2xEMy1oOEtrVWs5U1hEV1VINnJhR0NBQmhUbWNvX1hJLW05TEdkTmZCTXBTR0JEU3hGWjVoazZtS1UyTl9iT0FJbEtKdndZNXdzUkc2VHltWHpGUGIyYzl6MkZzQWJTNF9PWXNB?oc=5" target="_blank" rel="noopener noreferrer">USK Gandeng BP3MI Latih Calon Perawat Lansia Siap Kerja di Jepang</a></p>
+  <p class="ai-summary"><span class="ai-label">AI要約</span>インドネシアのシアクアラ大学（USK）がインドネシア移民労働者保護庁（BP3MI）と連携し、日本で働く高齢者介護職（介護人材）の候補者を育成する研修を行う。</p>
+  <div class="row">
+    
+    
+    <span class="badge cat-visa">ニュース（外国人・ビザ）</span>
+    <span class="badge country">インドネシア</span>
+    <span class="badge">スコア 7</span>
+    <span class="badge">締切未検出</span>
+    
+    <span class="badge rel-mid">AI関連度 中</span>
+  </div>
+  <p class="item-meta">出典: Google News: Indonesia: Japanese language / 公開日: 2026-10-27 / ページ反映日: 2026-11-03</p>
+  <div><span class="tag">外国人材</span><span class="tag">EPA</span><span class="tag">Jepang</span></div>
+  <p class="summary">日本語概要: インドネシア発の日本就労・外国人材関連情報です。 / 原文抜粋: USK Gandeng BP3MI Latih Calon Perawat Lansia Siap Kerja di Jepang USK Gandeng BP3MI Latih…</p>
+  
+  <p class="summary">次アクション: 制度変更が学校・受入機関の日本語教育ニーズに与える影響を確認</p>
+  <p class="angle">Nihongo Catch! 提案切り口: 在留資格や外国人材受入れ要件の変化に合わせ、学校・受入機関向けに来日前学習と日本語力確認の仕組みとして訴求できます。</p>
+  
+</article>
+
+
+<article class="cat-visa" data-category="ニュース（外国人・ビザ）" data-deadline="false" data-urgent="false" data-expired="false" data-expired-old="false" data-new="false" data-dead="false" data-text="akan disiapkan kerja ke jepang, usk gandeng bp3mi latih calon perawat lansia google news: indonesia: japanese language インドネシア ニュース（外国人・ビザ） 日本語概要: インドネシア発の日本就労・外国人材関連情報です。 / 原文抜粋: akan disiapkan kerja ke jepang, usk gandeng bp3mi latih calon perawat lansia akan disiapk… インドネシアのシアクアラ大学（usk）が、同国の移住労働者保護機関bp3miと連携し、日本での就労を目指す介護（高齢者ケア）人材の候補者を育成する取り組みです。日本で働くインドネシア人介護人材の送り出しに関わる動きです。 外国人材 epa jepang ">
+  <p class="title"><a href="https://news.google.com/rss/articles/CBMivAFBVV95cUxQMW9rdUdPMU10eUtnZzZUWjc1UmtHRGRJTjVFQW5QR1lHRUFTVFdadkFlaXNtNGVHRFgxS004MG11U1k2TlZHR042ZHplSXJmb0daOFgyb21sUnpMZXRoVHROdVVZZTZyeWpnS0ZIRVhDSmNJWU81MVlVSkY2VmhWbDFLdkN2d1R2VktfSDlOUFpveUJkeXlzLWt1QUdzSldMZEFlSW1CSEV4aWhrRkczc25hTVY4U0ZBOWpuQw?oc=5" target="_blank" rel="noopener noreferrer">Akan Disiapkan Kerja ke Jepang, USK Gandeng BP3MI Latih Calon Perawat Lansia</a></p>
+  <p class="ai-summary"><span class="ai-label">AI要約</span>インドネシアのシアクアラ大学（USK）が、同国の移住労働者保護機関BP3MIと連携し、日本での就労を目指す介護（高齢者ケア）人材の候補者を育成する取り組みです。日本で働くインドネシア人介護人材の送り出しに関わる動きです。</p>
+  <div class="row">
+    
+    
+    <span class="badge cat-visa">ニュース（外国人・ビザ）</span>
+    <span class="badge country">インドネシア</span>
+    <span class="badge">スコア 7</span>
+    <span class="badge">締切未検出</span>
+    
+    <span class="badge rel-mid">AI関連度 中</span>
+  </div>
+  <p class="item-meta">出典: Google News: Indonesia: Japanese language / 公開日: 2026-10-27 / ページ反映日: 2026-11-10</p>
+  <div><span class="tag">外国人材</span><span class="tag">EPA</span><span class="tag">Jepang</span></div>
+  <p class="summary">日本語概要: インドネシア発の日本就労・外国人材関連情報です。 / 原文抜粋: Akan Disiapkan Kerja ke Jepang, USK Gandeng BP3MI Latih Calon Perawat Lansia Akan Disiapk…</p>
+  
+  <p class="summary">次アクション: 制度変更が学校・受入機関の日本語教育ニーズに与える影響を確認</p>
+  <p class="angle">Nihongo Catch! 提案切り口: 在留資格や外国人材受入れ要件の変化に合わせ、学校・受入機関向けに来日前学習と日本語力確認の仕組みとして訴求できます。</p>
+  
+</article>
+
+
+<article class="cat-visa" data-category="ニュース（外国人・ビザ）" data-deadline="false" data-urgent="false" data-expired="false" data-expired-old="false" data-new="false" data-dead="false" data-text="sistem magang ke jepang bakal berubah tahun depan, ini yang perlu disiapkan google news: indonesia: japan workers インドネシア ニュース（外国人・ビザ） 日本語概要: インドネシア発の日本就労・外国人材関連情報です。 / 原文抜粋: sistem magang ke jepang bakal berubah tahun depan, ini yang perlu disiapkan sistem magang… インドネシアから日本への技能実習（マグアン）制度が来年変わるとして、志願者が準備すべき点を伝える現地報道。育成就労制度への移行を念頭に、インドネシア人の送り出し希望者が対象。 外国人材 epa jepang ">
+  <p class="title"><a href="https://news.google.com/rss/articles/CBMiywFBVV95cUxPVHJYYktzRDl4SWFnRXpmQ1FqTVktS2lOOGhkaWlfWWZkSXNsb0hxekdLYXI4d3lKNVFtaWk2aUNBNUNIZkRfTTEwdTk0Mi1IY3o2ei1iYWhEWjJBQmNmcnpJMTAyWkJLb0lyaTNEWnJEc2VkRXJ2ZDdvclhTeDRfWldNNDRqTUs1Z2lKQkZyeVNvU2NBLWQzWHdPQ3FMaEtNZ3drVW9QeXZrMWlYV1pVbDV0dmxMZHRkTVdRbWFrNEZiQXNwTWU1U3FGTQ?oc=5" target="_blank" rel="noopener noreferrer">Sistem Magang ke Jepang Bakal Berubah Tahun Depan, Ini yang Perlu Disiapkan</a></p>
+  <p class="ai-summary"><span class="ai-label">AI要約</span>インドネシアから日本への技能実習（マグアン）制度が来年変わるとして、志願者が準備すべき点を伝える現地報道。育成就労制度への移行を念頭に、インドネシア人の送り出し希望者が対象。</p>
+  <div class="row">
+    
+    
+    <span class="badge cat-visa">ニュース（外国人・ビザ）</span>
+    <span class="badge country">インドネシア</span>
+    <span class="badge">スコア 7</span>
+    <span class="badge">締切未検出</span>
+    
+    <span class="badge rel-high">AI関連度 高</span>
+  </div>
+  <p class="item-meta">出典: Google News: Indonesia: Japan workers / 公開日: 2026-10-23 / ページ反映日: 2026-10-30</p>
+  <div><span class="tag">外国人材</span><span class="tag">EPA</span><span class="tag">Jepang</span></div>
+  <p class="summary">日本語概要: インドネシア発の日本就労・外国人材関連情報です。 / 原文抜粋: Sistem Magang ke Jepang Bakal Berubah Tahun Depan, Ini yang Perlu Disiapkan Sistem Magang…</p>
+  
+  <p class="summary">次アクション: 制度変更が学校・受入機関の日本語教育ニーズに与える影響を確認</p>
+  <p class="angle">Nihongo Catch! 提案切り口: 在留資格や外国人材受入れ要件の変化に合わせ、学校・受入機関向けに来日前学習と日本語力確認の仕組みとして訴求できます。</p>
+  
+</article>
+
+
+<article class="cat-visa" data-category="ニュース（外国人・ビザ）" data-deadline="false" data-urgent="false" data-expired="false" data-expired-old="false" data-new="false" data-dead="false" data-text="育成就労制度 約36%の機関が“日本語教員確保めど立たず” google news: 育成就労 日本語  ニュース（外国人・ビザ） 掲載元: nhkニュース 育成就労制度で日本語教育を担う機関のうち、約36%が日本語教員を確保できる見通しが立っていないとnhkが報じた。 育成就労 ">
+  <p class="title"><a href="https://news.google.com/rss/articles/CBMiX0FVX3lxTE15djFFd0FSOTZmcmpFZUFPUVhHdi02aGQ5OHdmTXFJN3cxNXFrYkRtS2ZoOTN1MHFIejcwc1V5RlpnX05fbnNRT0JMRWpjSmRjaWJjRUtRMDVDUGRKTE80?oc=5" target="_blank" rel="noopener noreferrer">育成就労制度 約36%の機関が“日本語教員確保めど立たず”</a></p>
+  <p class="ai-summary"><span class="ai-label">AI要約</span>育成就労制度で日本語教育を担う機関のうち、約36%が日本語教員を確保できる見通しが立っていないとNHKが報じた。</p>
+  <div class="row">
+    
+    
+    <span class="badge cat-visa">ニュース（外国人・ビザ）</span>
+    
+    <span class="badge">スコア 7</span>
+    <span class="badge">締切未検出</span>
+    
+    <span class="badge rel-high">AI関連度 高</span>
+  </div>
+  <p class="item-meta">出典: Google News: 育成就労 日本語 / 公開日: 2026-10-23 / ページ反映日: 2026-11-06</p>
+  <div><span class="tag">育成就労</span></div>
+  <p class="summary">掲載元: NHKニュース</p>
+  
+  <p class="summary">次アクション: 制度変更が学校・受入機関の日本語教育ニーズに与える影響を確認</p>
+  <p class="angle">Nihongo Catch! 提案切り口: 在留資格や外国人材受入れ要件の変化に合わせ、学校・受入機関向けに来日前学習と日本語力確認の仕組みとして訴求できます。</p>
+  
+</article>
+
+
+<article class="cat-visa" data-category="ニュース（外国人・ビザ）" data-deadline="false" data-urgent="false" data-expired="false" data-expired-old="false" data-new="false" data-dead="false" data-text="鴻池運輸、インドからドライバーの特定技能外国人材受け入れへ - logi-biz online google news: 特定技能 日本語教育 支援  ニュース（外国人・ビザ）  鴻池運輸が、インドからドライバー職の特定技能外国人材を受け入れる方針を打ち出した。物流分野での外国人ドライバー確保に向けた動きとして注目される。 外国人材 特定技能 ">
+  <p class="title"><a href="https://news.google.com/rss/articles/CBMiS0FVX3lxTFBPeDBMLWIzbGtXWllFTWRGTndvcUdjcEc5MFNHR0ItTEYweThkSkNMSGpHamhZbkZKR0ZNWFcydmE3RkJtZlhZakZkaw?oc=5" target="_blank" rel="noopener noreferrer">鴻池運輸、インドからドライバーの特定技能外国人材受け入れへ - LOGI-BIZ online</a></p>
+  <p class="ai-summary"><span class="ai-label">AI要約</span>鴻池運輸が、インドからドライバー職の特定技能外国人材を受け入れる方針を打ち出した。物流分野での外国人ドライバー確保に向けた動きとして注目される。</p>
+  <div class="row">
+    
+    
+    <span class="badge cat-visa">ニュース（外国人・ビザ）</span>
+    
+    <span class="badge">スコア 7</span>
+    <span class="badge">締切未検出</span>
+    
+    <span class="badge rel-mid">AI関連度 中</span>
+  </div>
+  <p class="item-meta">出典: Google News: 特定技能 日本語教育 支援 / 公開日: 2026-10-23 / ページ反映日: 2026-10-28</p>
+  <div><span class="tag">外国人材</span><span class="tag">特定技能</span></div>
+  
+  
+  <p class="summary">次アクション: 制度変更が学校・受入機関の日本語教育ニーズに与える影響を確認</p>
+  <p class="angle">Nihongo Catch! 提案切り口: 在留資格や外国人材受入れ要件の変化に合わせ、学校・受入機関向けに来日前学習と日本語力確認の仕組みとして訴求できます。</p>
+  
+</article>
+
+
+<article class="cat-visa" data-category="ニュース（外国人・ビザ）" data-deadline="false" data-urgent="false" data-expired="false" data-expired-old="false" data-new="false" data-dead="false" data-text="セイノースタッフサービス×学研ホールディングス 特定技能「物流倉庫分野」の開始を見据え、インドネシアで現地採用を実施し外国人材の活用を強化｜infoseekニュース google news: 特定技能 日本語教育 支援  ニュース（外国人・ビザ） 掲載元: infoseek セイノースタッフサービスと学研ホールディングスが、特定技能「物流倉庫分野」の開始を見据え、インドネシアで現地採用を実施し外国人材の活用を強化する。 外国人材 特定技能 ">
+  <p class="title"><a href="https://news.google.com/rss/articles/CBMickFVX3lxTE95eUVuVVRUVE42T2U3em5JeFp4QmpfdU1pVTcxS2VWbzdhcWRqSGxIbEN2aThZTFN6YUZQS1hFc0dWbGh6bHBDMllfWnpXUjlMWVVuak5wMW9tU0VMUC1YQ0xhYTZCanZ3aG1ONC1RVHJ5UQ?oc=5" target="_blank" rel="noopener noreferrer">セイノースタッフサービス×学研ホールディングス 特定技能「物流倉庫分野」の開始を見据え、インドネシアで現地採用を実施し外国人材の活用を強化｜Infoseekニュース</a></p>
+  <p class="ai-summary"><span class="ai-label">AI要約</span>セイノースタッフサービスと学研ホールディングスが、特定技能「物流倉庫分野」の開始を見据え、インドネシアで現地採用を実施し外国人材の活用を強化する。</p>
+  <div class="row">
+    
+    
+    <span class="badge cat-visa">ニュース（外国人・ビザ）</span>
+    
+    <span class="badge">スコア 7</span>
+    <span class="badge">締切未検出</span>
+    
+    <span class="badge rel-high">AI関連度 高</span>
+  </div>
+  <p class="item-meta">出典: Google News: 特定技能 日本語教育 支援 / 公開日: 2026-10-22 / ページ反映日: 2026-10-29</p>
+  <div><span class="tag">外国人材</span><span class="tag">特定技能</span></div>
+  <p class="summary">掲載元: Infoseek</p>
+  
+  <p class="summary">次アクション: 制度変更が学校・受入機関の日本語教育ニーズに与える影響を確認</p>
+  <p class="angle">Nihongo Catch! 提案切り口: 在留資格や外国人材受入れ要件の変化に合わせ、学校・受入機関向けに来日前学習と日本語力確認の仕組みとして訴求できます。</p>
+  
+</article>
+
+
+<article class="cat-visa" data-category="ニュース（外国人・ビザ）" data-deadline="false" data-urgent="false" data-expired="false" data-expired-old="false" data-new="false" data-dead="false" data-text="技能実習が廃止、育成就労で何が変わる？2027年4月からの新制度 google news: 育成就労 日本語  ニュース（外国人・ビザ） 掲載元: 選挙ドットコム 技能実習制度が廃止され、2027年4月から育成就労制度が始まることで何が変わるのかを解説する内容。対象は育成就労・特定技能で外国人を受け入れる企業や外国人材。 育成就労 技能実習 ">
+  <p class="title"><a href="https://news.google.com/rss/articles/CBMiX0FVX3lxTE9vSUs4MzlDTF9FZVhwSnRJZ3BUTHh2aS1nVWhpUk9hYVVWRGpmR3FycTNMN1JscHBFX0JyZGxMSTdkb2VSeUw0QU15WENKQk9uLWNaLU9QZ1NHSko5Z2lV?oc=5" target="_blank" rel="noopener noreferrer">技能実習が廃止、育成就労で何が変わる？2027年4月からの新制度</a></p>
+  <p class="ai-summary"><span class="ai-label">AI要約</span>技能実習制度が廃止され、2027年4月から育成就労制度が始まることで何が変わるのかを解説する内容。対象は育成就労・特定技能で外国人を受け入れる企業や外国人材。</p>
+  <div class="row">
+    
+    
+    <span class="badge cat-visa">ニュース（外国人・ビザ）</span>
+    
+    <span class="badge">スコア 7</span>
+    <span class="badge">締切未検出</span>
+    
+    <span class="badge rel-high">AI関連度 高</span>
+  </div>
+  <p class="item-meta">出典: Google News: 育成就労 日本語 / 公開日: 2026-10-21 / ページ反映日: 2026-11-04</p>
+  <div><span class="tag">育成就労</span><span class="tag">技能実習</span></div>
+  <p class="summary">掲載元: 選挙ドットコム</p>
+  
+  <p class="summary">次アクション: 制度変更が学校・受入機関の日本語教育ニーズに与える影響を確認</p>
+  <p class="angle">Nihongo Catch! 提案切り口: 在留資格や外国人材受入れ要件の変化に合わせ、学校・受入機関向けに来日前学習と日本語力確認の仕組みとして訴求できます。</p>
+  
+</article>
+
+
+<article class="cat-visa" data-category="ニュース（外国人・ビザ）" data-deadline="false" data-urgent="false" data-expired="false" data-expired-old="false" data-new="false" data-dead="false" data-text="2027年度新入外国人留学生の在留資格「留学」の更新について-news google news: 出入国在留管理庁 留学生 在留資格  ニュース（外国人・ビザ） 掲載元: 駿河台大学 駿河台大学が、2027年度に入学する新入外国人留学生向けに、在留資格「留学」の更新について案内している。 留学生 在留資格 ">
+  <p class="title"><a href="https://news.google.com/rss/articles/CBMiV0FVX3lxTE5hOXRrd0l4S3NwaHM3c21YZmhwV25NOFJiTDgtbnRsbWpTTU9VZDNlNGNQWmhHZV9hRExEQjZDVUJBM2dUSmFrZTBJc1FiWHJwX0V0Rmo2dw?oc=5" target="_blank" rel="noopener noreferrer">2027年度新入外国人留学生の在留資格「留学」の更新について-NEWS</a></p>
+  <p class="ai-summary"><span class="ai-label">AI要約</span>駿河台大学が、2027年度に入学する新入外国人留学生向けに、在留資格「留学」の更新について案内している。</p>
+  <div class="row">
+    
+    
+    <span class="badge cat-visa">ニュース（外国人・ビザ）</span>
+    
+    <span class="badge">スコア 7</span>
+    <span class="badge">締切未検出</span>
+    
+    <span class="badge rel-mid">AI関連度 中</span>
+  </div>
+  <p class="item-meta">出典: Google News: 出入国在留管理庁 留学生 在留資格 / 公開日: 2026-10-16 / ページ反映日: 2026-10-30</p>
+  <div><span class="tag">留学生</span><span class="tag">在留資格</span></div>
+  <p class="summary">掲載元: 駿河台大学</p>
+  
+  <p class="summary">次アクション: 制度変更が学校・受入機関の日本語教育ニーズに与える影響を確認</p>
+  <p class="angle">Nihongo Catch! 提案切り口: 在留資格や外国人材受入れ要件の変化に合わせ、学校・受入機関向けに来日前学習と日本語力確認の仕組みとして訴求できます。</p>
+  
+</article>
+
+
+<article class="cat-visa" data-category="ニュース（外国人・ビザ）" data-deadline="false" data-urgent="false" data-expired="false" data-expired-old="false" data-new="false" data-dead="false" data-text="chuyên gia nhật bản hướng dẫn kỹ năng phòng, chống đuối nước cho thanh thiếu nhi hà nội google news: vietnam: japan workers ベトナム ニュース（外国人・ビザ） 日本語概要: ベトナム発の日本就労・外国人材関連情報です。 / 原文抜粋: chuyên gia nhật bản hướng dẫn kỹ năng phòng, chống đuối nước cho thanh thiếu nhi hà nội c… 日本の専門家がハノイの子どもや若者向けに、水難事故（溺水）を防ぐための技能を指導した。 外国人材 nhật bản " data-ai-irrelevant="true" hidden>
+  <p class="title"><a href="https://news.google.com/rss/articles/CBMi2wFBVV95cUxOcUJlVHBuRUxuQlNaNlhVaGtRNjQyYWhnTUhiaGd0ck94RTFPRHZmdVpZZ1pmdFk5VzBGRzNpamRnYTJSZkVnTTdoTjI3UWNBQk80VC1qSkdLX0k3X0tURXhzQWdFY2RUYWt0aUktSkxKTEJKMk1aZnlvOVlVNVZFQUdKOTFGX1FhdmtacHp4czY2MGhxT1NxUTAweEZTU2ZlWkFCSDlYeGtGS2dNWF9rNmhKUDdCbTFVTVdsQlJXcVg5YWgxYUNzanBKSkVLbHVhVjl3Z0N1dWpLZmM?oc=5" target="_blank" rel="noopener noreferrer">Chuyên gia Nhật Bản hướng dẫn kỹ năng phòng, chống đuối nước cho thanh thiếu nhi Hà Nội</a></p>
+  <p class="ai-summary"><span class="ai-label">AI要約</span>日本の専門家がハノイの子どもや若者向けに、水難事故（溺水）を防ぐための技能を指導した。</p>
+  <div class="row">
+    
+    
+    <span class="badge cat-visa">ニュース（外国人・ビザ）</span>
+    <span class="badge country">ベトナム</span>
+    <span class="badge">スコア 4</span>
+    <span class="badge">締切未検出</span>
+    
+    <span class="badge rel-none">AI関連度 無関係</span>
+  </div>
+  <p class="item-meta">出典: Google News: Vietnam: Japan workers / 公開日: 2026-10-31 / ページ反映日: 2026-11-02</p>
+  <div><span class="tag">外国人材</span><span class="tag">Nhật Bản</span></div>
+  <p class="summary">日本語概要: ベトナム発の日本就労・外国人材関連情報です。 / 原文抜粋: Chuyên gia Nhật Bản hướng dẫn kỹ năng phòng, chống đuối nước cho thanh thiếu nhi Hà Nội C…</p>
+  
+  <p class="summary">次アクション: 制度変更が学校・受入機関の日本語教育ニーズに与える影響を確認</p>
+  <p class="angle">Nihongo Catch! 提案切り口: 在留資格や外国人材受入れ要件の変化に合わせ、学校・受入機関向けに来日前学習と日本語力確認の仕組みとして訴求できます。</p>
+  
+</article>
+
+
+<article class="cat-visa" data-category="ニュース（外国人・ビザ）" data-deadline="false" data-urgent="false" data-expired="false" data-expired-old="false" data-new="false" data-dead="false" data-text="gần 300 cán bộ, giáo viên và học sinh hà nội tập huấn kỹ năng phòng, chống đuối nước google news: vietnam: japan workers ベトナム ニュース（外国人・ビザ） 日本語概要: ベトナム発の日本就労・外国人材関連情報です。 / 原文抜粋: gần 300 cán bộ, giáo viên và học sinh hà nội tập huấn kỹ năng phòng, chống đuối nước gần … ハノイ市で、教職員と児童・生徒あわせて約300人が溺水の予防と対処に関する技能講習を受けた。 外国人材 " data-ai-irrelevant="true" hidden>
+  <p class="title"><a href="https://news.google.com/rss/articles/CBMiuAFBVV95cUxOazZnVHZYX3JTN0hhb1ZXdXZLRWJCeVlNdGZ5Y0V5Zm1DZXhJMXZjNmVlbE1KUVowSTNBbExEczBwakFQZHZHV2NkMFIxOVMwRmZKbVFxaTV6UmNwWDVYWlZXTlk5eklZN0pyLWtxcnBfQ2ZuZ1BYTElGVWUtTGhsZVUwRlZycG5EcXM1cEZDTVZkbVRyclJBZjcwbVlVcExadHNYa2VDVVpxS2QwSXZsTlJYeDNqTHNz?oc=5" target="_blank" rel="noopener noreferrer">Gần 300 cán bộ, giáo viên và học sinh Hà Nội tập huấn kỹ năng phòng, chống đuối nước</a></p>
+  <p class="ai-summary"><span class="ai-label">AI要約</span>ハノイ市で、教職員と児童・生徒あわせて約300人が溺水の予防と対処に関する技能講習を受けた。</p>
+  <div class="row">
+    
+    
+    <span class="badge cat-visa">ニュース（外国人・ビザ）</span>
+    <span class="badge country">ベトナム</span>
+    <span class="badge">スコア 3</span>
+    <span class="badge">締切未検出</span>
+    
+    <span class="badge rel-none">AI関連度 無関係</span>
+  </div>
+  <p class="item-meta">出典: Google News: Vietnam: Japan workers / 公開日: 2026-10-31 / ページ反映日: 2026-11-02</p>
+  <div><span class="tag">外国人材</span></div>
+  <p class="summary">日本語概要: ベトナム発の日本就労・外国人材関連情報です。 / 原文抜粋: Gần 300 cán bộ, giáo viên và học sinh Hà Nội tập huấn kỹ năng phòng, chống đuối nước Gần …</p>
+  
+  <p class="summary">次アクション: 制度変更が学校・受入機関の日本語教育ニーズに与える影響を確認</p>
+  <p class="angle">Nihongo Catch! 提案切り口: 在留資格や外国人材受入れ要件の変化に合わせ、学校・受入機関向けに来日前学習と日本語力確認の仕組みとして訴求できます。</p>
+  
+</article>
+
+
+<article class="cat-visa" data-category="ニュース（外国人・ビザ）" data-deadline="false" data-urgent="false" data-expired="false" data-expired-old="false" data-new="false" data-dead="false" data-text="eala in japan open 🇯🇵 japan open matches continue in tokyo on monday, october 26, despite the rainy weather. filipina tennis star alex eala is expected to compete against uk’s mika stojsavljevic in the indoor center court not before 4 p.m., manila tim google news: philippines: japan work フィリピン ニュース（外国人・ビザ） 日本語概要: フィリピン発の日本就労・外国人材関連情報です。 / 原文抜粋: eala in japan open 🇯🇵 japan open matches continue in tokyo on monday, october 26, despite… 東京で開催中のジャパン・オープン（テニス）で、フィリピンのアレックス・イーラ選手が10月26日（月）に英国のミカ・ストイサブリェビッチ選手と屋内センターコートで対戦する予定です。雨天の中も試合は続行されています。 外国人材 " data-ai-irrelevant="true" hidden>
+  <p class="title"><a href="https://news.google.com/rss/articles/CBMi2AFBVV95cUxPbVQ5bGhqZzlTMjVzMC1mbnh2d0ttUnZsTTB0RGQ5X1NzUFFJTGQ0Tk9uNHBYTjdxT09KOHVhSUVrcXhsZXR4Z0thSktpNWNLT2FFb3N4em8tQTZJeWFyemczUTNIOGJlM29lczVDSDdoLW1NSDBPbTI0cUZRelY1MFZWSVk3Y1RGQ1FSWTZtcHp3UkNGcF8wQ0poM2dFTkxEZFEyRjNnLUxBYTFBR2JTdm1tRmNFWjdXemkyenpmeG5sZGxHVmM0XzZQTDJ5NWhYNDRvQWt3dWc?oc=5" target="_blank" rel="noopener noreferrer">EALA IN JAPAN OPEN 🇯🇵 Japan Open matches continue in Tokyo on Monday, October 26, despite the rainy weather. Filipina tennis star Alex Eala is expected to compete against UK’s Mika Stojsavljevic in the indoor Center Court not before 4 p.m., Manila tim</a></p>
+  <p class="ai-summary"><span class="ai-label">AI要約</span>東京で開催中のジャパン・オープン（テニス）で、フィリピンのアレックス・イーラ選手が10月26日（月）に英国のミカ・ストイサブリェビッチ選手と屋内センターコートで対戦する予定です。雨天の中も試合は続行されています。</p>
+  <div class="row">
+    
+    
+    <span class="badge cat-visa">ニュース（外国人・ビザ）</span>
+    <span class="badge country">フィリピン</span>
+    <span class="badge">スコア 3</span>
+    <span class="badge">締切未検出</span>
+    
+    <span class="badge rel-none">AI関連度 無関係</span>
+  </div>
+  <p class="item-meta">出典: Google News: Philippines: Japan work / 公開日: 2026-10-26 / ページ反映日: 2026-11-01</p>
+  <div><span class="tag">外国人材</span></div>
+  <p class="summary">日本語概要: フィリピン発の日本就労・外国人材関連情報です。 / 原文抜粋: EALA IN JAPAN OPEN 🇯🇵 Japan Open matches continue in Tokyo on Monday, October 26, despite…</p>
+  
+  <p class="summary">次アクション: 制度変更が学校・受入機関の日本語教育ニーズに与える影響を確認</p>
+  <p class="angle">Nihongo Catch! 提案切り口: 在留資格や外国人材受入れ要件の変化に合わせ、学校・受入機関向けに来日前学習と日本語力確認の仕組みとして訴求できます。</p>
+  
+</article>
+
+
+<article class="cat-visa" data-category="ニュース（外国人・ビザ）" data-deadline="false" data-urgent="false" data-expired="false" data-expired-old="false" data-new="false" data-dead="false" data-text="abs-cbn news. . katya santos, gwen garci, and ella v of the viva hot babes recalled an incident in japan when a filipina insulted the group during a visit to a club. katya said their japanese friend, who knew the club&#x27;s owner, reported the incident, promptin google news: philippines: care workers フィリピン ニュース（外国人・ビザ） 日本語概要: フィリピン発の日本就労・外国人材関連情報です。 / 原文抜粋: abs-cbn news. . katya santos, gwen garci, and ella v of the viva hot babes recalled an in… フィリピンの芸能グループ「viva hot babes」のメンバーが、日本のクラブを訪れた際にフィリピン人女性から侮辱された出来事を振り返った芸能ニュースです。 外国人材 " data-ai-irrelevant="true" hidden>
+  <p class="title"><a href="https://news.google.com/rss/articles/CBMi2AFBVV95cUxOdVRtMXlidlN1blYtX0prSXRESTVaSk5TZFhudy10VGptejRfeDdFSlU0VGphX2JlZElTVVVfbnctc2w5T2s3bGNUanJSeDNRd0wtOEQ4UWlkSm9wc19wYW1FLXZUdFZhdVd1MHNCdEJGMEtCUUp3U1dSZ1NQNWpNcDlNdUpnN1JYQnhUM2xMS1RjeElvMTBXSUVSSkMyUHhJUTd4eUZZZm1HUV9hTjRKek1xdURTVWVzRjA0cEFVOFBlVUFDelNDX21JTGkyem5nXzA3MmJuZnk?oc=5" target="_blank" rel="noopener noreferrer">ABS-CBN News. . Katya Santos, Gwen Garci, and Ella V of the Viva Hot Babes recalled an incident in Japan when a Filipina insulted the group during a visit to a club. Katya said their Japanese friend, who knew the club&#x27;s owner, reported the incident, promptin</a></p>
+  <p class="ai-summary"><span class="ai-label">AI要約</span>フィリピンの芸能グループ「Viva Hot Babes」のメンバーが、日本のクラブを訪れた際にフィリピン人女性から侮辱された出来事を振り返った芸能ニュースです。</p>
+  <div class="row">
+    
+    
+    <span class="badge cat-visa">ニュース（外国人・ビザ）</span>
+    <span class="badge country">フィリピン</span>
+    <span class="badge">スコア 3</span>
+    <span class="badge">締切未検出</span>
+    
+    <span class="badge rel-none">AI関連度 無関係</span>
+  </div>
+  <p class="item-meta">出典: Google News: Philippines: care workers / 公開日: 2026-10-25 / ページ反映日: 2026-10-31</p>
+  <div><span class="tag">外国人材</span></div>
+  <p class="summary">日本語概要: フィリピン発の日本就労・外国人材関連情報です。 / 原文抜粋: ABS-CBN News. . Katya Santos, Gwen Garci, and Ella V of the Viva Hot Babes recalled an in…</p>
+  
+  <p class="summary">次アクション: 制度変更が学校・受入機関の日本語教育ニーズに与える影響を確認</p>
+  <p class="angle">Nihongo Catch! 提案切り口: 在留資格や外国人材受入れ要件の変化に合わせ、学校・受入機関向けに来日前学習と日本語力確認の仕組みとして訴求できます。</p>
+  
+</article>
+</div><div class="section-head"><h2 class="section-title"><span class="section-dot cat-other"></span>その他</h2><span class="count">4件</span></div>
+<div class="list">
+<article class="cat-other" data-category="その他" data-deadline="false" data-urgent="false" data-expired="false" data-expired-old="false" data-new="true" data-dead="false" data-text="「外国人の生活保護」誤情報またトレンド入り 名指しされた自治体が従う国の通知の歴史的経緯 google news: 外国人材 補助金 自治体  その他 掲載元: 東京新聞 「外国人が生活保護を不当に受けている」という誤情報がsnsで再びトレンド入りし、名指しされた自治体が従っている国の通知の歴史的経緯を解説する東京新聞の記事。外国人の生活保護をめぐる制度上の扱いと誤情報の背景を扱う。 自治体 ">
+  <p class="title"><a href="https://news.google.com/rss/articles/CBMiU0FVX3lxTE9wdTFFbDJCT0N0dm83d3pnMzRVM1FFT09VdlZldzJvRFpiUDQ0NVNBbkI5eXFYMm1LMHdDR2xDUWxtY3R6cUpZWVlGai1pWnZ0UldF?oc=5" target="_blank" rel="noopener noreferrer">「外国人の生活保護」誤情報またトレンド入り 名指しされた自治体が従う国の通知の歴史的経緯</a></p>
+  <p class="ai-summary"><span class="ai-label">AI要約</span>「外国人が生活保護を不当に受けている」という誤情報がSNSで再びトレンド入りし、名指しされた自治体が従っている国の通知の歴史的経緯を解説する東京新聞の記事。外国人の生活保護をめぐる制度上の扱いと誤情報の背景を扱う。</p>
+  <div class="row">
+    
+    <span class="badge new">新鮮ニュース</span>
+    <span class="badge cat-other">その他</span>
+    
+    <span class="badge">スコア 3</span>
+    <span class="badge">締切未検出</span>
+    
+    <span class="badge rel-low">AI関連度 低</span>
+  </div>
+  <p class="item-meta">出典: Google News: 外国人材 補助金 自治体 / 公開日: 2026-11-10 / ページ反映日: 2026-11-10</p>
+  <div><span class="tag">自治体</span></div>
+  <p class="summary">掲載元: 東京新聞</p>
+  
+  <p class="summary">次アクション: 営業先候補、担当部署、導入打診の切り口を確認</p>
+  <p class="angle">Nihongo Catch! 提案切り口: 自治体、国際交流協会、学校法人、受入機関へのヒアリング候補として記録し、個別提案や実証導入の打診先にできます。</p>
+  
+</article>
+
+
+<article class="cat-other" data-category="その他" data-deadline="false" data-urgent="false" data-expired="false" data-expired-old="false" data-new="false" data-dead="false" data-text="国内初※ 既存の固定電話をそのまま外国語対応へ 「kotobal」のai電話通訳サービスを2026年度内に提供開始 ～外国語対応が求められる宿泊施設・自治体・医療機関の電話応対を支援～ google news: 外国人材 補助金 自治体  その他 掲載元: 投資家・宿泊事業者向けインバウンド情報メディアhotelier 「kotobal」が、既存の固定電話をそのまま使って外国語対応にできるai電話通訳サービスを2026年度内に提供開始する。宿泊施設・自治体・医療機関の電話応対の支援が対象で、国内初をうたっている。 自治体 ">
+  <p class="title"><a href="https://news.google.com/rss/articles/CBMiWkFVX3lxTE0tQnF6eGZsTFlZYnJHMUtab3MtZ2ktdWNRTklyT0RSaDhTMVRBNVJNN3ZUSzBHTHlDeW5KQjVmRTlVRDlna2VpQVFud185WkNvX2RRS2lPbWpzZw?oc=5" target="_blank" rel="noopener noreferrer">国内初※ 既存の固定電話をそのまま外国語対応へ 「KOTOBAL」のAI電話通訳サービスを2026年度内に提供開始 ～外国語対応が求められる宿泊施設・自治体・医療機関の電話応対を支援～</a></p>
+  <p class="ai-summary"><span class="ai-label">AI要約</span>「KOTOBAL」が、既存の固定電話をそのまま使って外国語対応にできるAI電話通訳サービスを2026年度内に提供開始する。宿泊施設・自治体・医療機関の電話応対の支援が対象で、国内初をうたっている。</p>
+  <div class="row">
+    
+    
+    <span class="badge cat-other">その他</span>
+    
+    <span class="badge">スコア 3</span>
+    <span class="badge">締切未検出</span>
+    
+    <span class="badge rel-low">AI関連度 低</span>
+  </div>
+  <p class="item-meta">出典: Google News: 外国人材 補助金 自治体 / 公開日: 2026-11-04 / ページ反映日: 2026-11-06</p>
+  <div><span class="tag">自治体</span></div>
+  <p class="summary">掲載元: 投資家・宿泊事業者向けインバウンド情報メディアHOTELIER</p>
+  
+  <p class="summary">次アクション: 営業先候補、担当部署、導入打診の切り口を確認</p>
+  <p class="angle">Nihongo Catch! 提案切り口: 自治体、国際交流協会、学校法人、受入機関へのヒアリング候補として記録し、個別提案や実証導入の打診先にできます。</p>
+  
+</article>
+
+
+<article class="cat-other" data-category="その他" data-deadline="false" data-urgent="false" data-expired="false" data-expired-old="false" data-new="false" data-dead="false" data-text="政府、自治体の多文化家族優遇条例を全数点検へ…ソウル市は26事業を調査 : 政治 : 財経日報 google news: 外国人材 補助金 自治体  その他 掲載元: 재경일보 韓国政府が、自治体による多文化家族への優遇条例を全数点検する方針を示した。ソウル市は該当する26事業を調査する。 自治体 ">
+  <p class="title"><a href="https://news.google.com/rss/articles/CBMiY0FVX3lxTE9zUC1kdkJkb1Fvd1JKcXpSMDJfS0FRNHRkMGo1Nm55QXJTSVdicVdpU0hNbFlqTkg5LXhHakd0UkdVNUtfeVZpMXl0REJlalJ4Y2lLT1ZLQXBnUTJTekRPWlhlaw?oc=5" target="_blank" rel="noopener noreferrer">政府、自治体の多文化家族優遇条例を全数点検へ…ソウル市は26事業を調査 : 政治 : 財経日報</a></p>
+  <p class="ai-summary"><span class="ai-label">AI要約</span>韓国政府が、自治体による多文化家族への優遇条例を全数点検する方針を示した。ソウル市は該当する26事業を調査する。</p>
+  <div class="row">
+    
+    
+    <span class="badge cat-other">その他</span>
+    
+    <span class="badge">スコア 3</span>
+    <span class="badge">締切未検出</span>
+    
+    <span class="badge rel-low">AI関連度 低</span>
+  </div>
+  <p class="item-meta">出典: Google News: 外国人材 補助金 自治体 / 公開日: 2026-11-02 / ページ反映日: 2026-11-02</p>
+  <div><span class="tag">自治体</span></div>
+  <p class="summary">掲載元: 재경일보</p>
+  
+  <p class="summary">次アクション: 営業先候補、担当部署、導入打診の切り口を確認</p>
+  <p class="angle">Nihongo Catch! 提案切り口: 自治体、国際交流協会、学校法人、受入機関へのヒアリング候補として記録し、個別提案や実証導入の打診先にできます。</p>
+  
+</article>
+
+
+<article class="cat-other" data-category="その他" data-deadline="false" data-urgent="false" data-expired="false" data-expired-old="false" data-new="false" data-dead="false" data-text="韓国政府、多文化家族優遇策を再検討…自治体に実態調査指示 google news: 外国人材 補助金 自治体  その他 掲載元: 조선일보 韓国政府が、多文化家族に対する優遇策を見直す方針で、自治体に実態調査を指示した。対象は韓国国内の多文化家族向け支援策で、報道元は朝鮮日報。 自治体 ">
+  <p class="title"><a href="https://news.google.com/rss/articles/CBMijgFBVV95cUxOd3lMb2VQazhtV1dlbFZ5UGQtUF85TWxIcEp5V0c3b2FyWUVZQWZUaW1TanI5LXF6akl3M0V3MTl0eUo3UGw3OGZSZGtiRUtKQlBTTnNfSjlCVEh6QUlaSWhtVmF4UTRXX0Q5Q3JiOS1udEM0NHJtVTZ0b0FsdU0tUk9HcmR6a1d1ZDVNRkZB?oc=5" target="_blank" rel="noopener noreferrer">韓国政府、多文化家族優遇策を再検討…自治体に実態調査指示</a></p>
+  <p class="ai-summary"><span class="ai-label">AI要約</span>韓国政府が、多文化家族に対する優遇策を見直す方針で、自治体に実態調査を指示した。対象は韓国国内の多文化家族向け支援策で、報道元は朝鮮日報。</p>
+  <div class="row">
+    
+    
+    <span class="badge cat-other">その他</span>
+    
+    <span class="badge">スコア 3</span>
+    <span class="badge">締切未検出</span>
+    
+    <span class="badge rel-low">AI関連度 低</span>
+  </div>
+  <p class="item-meta">出典: Google News: 外国人材 補助金 自治体 / 公開日: 2026-11-02 / ページ反映日: 2026-11-02</p>
+  <div><span class="tag">自治体</span></div>
+  <p class="summary">掲載元: 조선일보</p>
+  
+  <p class="summary">次アクション: 営業先候補、担当部署、導入打診の切り口を確認</p>
+  <p class="angle">Nihongo Catch! 提案切り口: 自治体、国際交流協会、学校法人、受入機関へのヒアリング候補として記録し、個別提案や実証導入の打診先にできます。</p>
+  
+</article>
+</div>
+    <footer>
+      <p>収集ヘルス（2026-11-10 13:31）: 取得787件 / 収集エラー2件 / 取得0件の巡回ページ3件</p>
+<ul class="health-problems"><li>エラー: Page source failed: ベトナム DOLAB-JICA 特定技能情報: Failed to fetch https://vieclamngoainuoc.dolab.gov.vn/loai-hinh/SSW: timed out</li><li>エラー: Page source failed: 愛知県 日本語教育補助金: HTTP 403 while fetching https://www.pref.aichi.jp/soshiki/tabunka/nihongo-hojyo.html</li><li>取得0件: ベトナム DOLAB-JICA 特定技能情報（ページ構造変化・移転の可能性）</li><li>取得0件: 愛知県 日本語教育補助金（ページ構造変化・移転の可能性）</li><li>取得0件: 岐阜県 日本語教育（ページ構造変化・移転の可能性）</li></ul>
+      <p>収集は毎朝8時に自動実行。今すぐ収集し直したい場合は
+        <a href="https://github.com/hitomiusausa/nihongogogo/actions/workflows/daily-update.yml" target="_blank" rel="noopener noreferrer">GitHub Actionsのページ</a>
+        から「Run workflow」を実行してください（リポジトリ権限が必要）。</p>
+      <p>Semiosis株式会社 / Nihongo Catch! の販促・運用資金探索用に自動生成。</p>
+    </footer>
+  </main>
+  <script>
+    const search = document.querySelector("#search");
+    const filters = Array.from(document.querySelectorAll(".filter[data-filter]"));
+    const irrelevantToggle = document.querySelector("#show-irrelevant");
+    const cards = Array.from(document.querySelectorAll("article[data-text]"));
+    let activeFilter = "all";
+    let showIrrelevant = false;
+
+    function applyFilters() {
+      const query = search.value.trim().toLowerCase();
+      for (const card of cards) {
+        const textMatch = !query || card.dataset.text.includes(query);
+        const filterMatch =
+          activeFilter === "all" ||
+          card.dataset.category === activeFilter ||
+          (activeFilter === "new" && card.dataset.new === "true") ||
+          (activeFilter === "deadline" && card.dataset.deadline === "true") ||
+          (activeFilter === "urgent" && card.dataset.urgent === "true") ||
+          (activeFilter === "expired" && card.dataset.expired === "true");
+        const defaultHidden =
+          (card.dataset.expiredOld === "true" && activeFilter !== "expired") ||
+          (card.dataset.aiIrrelevant === "true" && !showIrrelevant);
+        card.hidden = !(textMatch && filterMatch) || defaultHidden;
+      }
+    }
+
+    // 手動更新: キャッシュを避けて最新の公開データを読み込み直す
+    document.querySelector("#reload").addEventListener("click", () => {
+      const url = new URL(location.href);
+      url.searchParams.set("refresh", Date.now().toString());
+      location.replace(url.toString());
+    });
+
+    search.addEventListener("input", applyFilters);
+    if (irrelevantToggle) {
+      irrelevantToggle.addEventListener("click", () => {
+        showIrrelevant = !showIrrelevant;
+        irrelevantToggle.classList.toggle("active", showIrrelevant);
+        irrelevantToggle.setAttribute("aria-pressed", String(showIrrelevant));
+        applyFilters();
+      });
+    }
+    for (const button of filters) {
+      button.addEventListener("click", () => {
+        activeFilter = button.dataset.filter;
+        filters.forEach((item) => item.classList.toggle("active", item === button));
+        applyFilters();
+      });
+    }
+  </script>
+</body>
+</html>
